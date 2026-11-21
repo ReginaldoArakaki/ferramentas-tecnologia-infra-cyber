@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="bauhaus">
+  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura (Dinâmicas 1 e 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces (Fundo branco claro) */
+      --background: #ffffff;
+      --surface-container-low: #f8fafc;
+      --surface-container: #f1f5f9;
+      --surface-container-high: #e2e8f0;
+
+      /* Ink */
+      --on-surface: #0f172a;
+      --on-surface-variant: #475569;
+
+      /* Lines & Shadows */
+      --outline: #0f172a;
+      --outline-variant: #cbd5e1;
+
+      /* Accents: Azul Corporativo Forte, Laranja Vibrante, Vermelho Vibrante */
+      --primary: #0f172a;
+      --on-primary: #ffffff;
+      --tertiary: #0044cc;
+      --tertiary-dark: #003399;
+      --on-tertiary: #ffffff;
+      --primary-container: #ff8c00;
+      --on-primary-container: #0f172a;
+      --orange-ink: #b84200;
+      --secondary: #dc2626;
+      --error: #b91c1c;
+      --on-error: #ffffff;
+
+      /* Semantic */
+      --positive: #15803d;
+      --on-positive: #ffffff;
+      --warning: #b45309;
+      --focus: #0044cc;
+
+      /* Data series */
+      --data-1: #0044cc;
+      --data-2: #ea580c;
+      --data-3: #dc2626;
+      --data-4: #0f172a;
+      --data-context: #94a3b8;
+
+      /* Sticky note tones */
+      --note-orange: #fff7ed;
+      --note-blue: #eff6ff;
+      --note-red: #fef2f2;
+
+      /* Fonts */
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-label: 'Space Grotesk', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      /* Shape */
+      --rounded: 0.125rem;
+      --rounded-lg: 0.25rem;
+
+      /* Style effects (Bauhaus thick borders & hard black offset shadows) */
+      --border-thick: 3px solid var(--outline);
+      --border-medium: 2px solid var(--outline);
+      --offset-shadow: 6px 6px 0 var(--outline);
+      --offset-shadow-sm: 3px 3px 0 var(--outline);
+      --rule-heavy: 5px solid var(--outline);
+
+      /* Type scale (Dashboard tight ratio) */
+      --display-size: clamp(1.75rem, 1.35rem + 1.4vw, 2.5rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.55rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+    }
+
+    /* Subtle Miro blueprint dot grid on background */
+    body {
+      background-image: radial-gradient(var(--outline-variant) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1380px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Bauhaus Block Primitive */
+    .block {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow);
+      background: var(--background);
+      padding: var(--space-lg);
+    }
+
+    .block-soft {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--surface-container-low);
+      padding: var(--space-md);
+    }
+
+    /* Header */
+    .masthead {
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow);
+      background: var(--background);
+      border-top: var(--space-sm) solid var(--tertiary);
+      padding: var(--space-lg);
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: end;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      background: var(--tertiary);
+      color: var(--on-tertiary);
+      padding: var(--space-xs) var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--display-size);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--on-surface);
+    }
+
+    .title mark {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      padding-inline: var(--space-xs);
+      box-decoration-break: clone;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+      font-size: var(--body-size);
+    }
+
+    .controls-cluster {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--border-medium);
+      padding: var(--space-md);
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: end;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      flex: 1 1 220px;
+    }
+
+    .field-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface);
+    }
+
+    select.bauhaus-select, input.bauhaus-input, textarea.bauhaus-textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--background);
+      color: var(--on-surface);
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      font-weight: 600;
+      transition: background-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    select.bauhaus-select {
+      padding-right: var(--space-xl);
+      cursor: pointer;
+    }
+
+    select.bauhaus-select:focus, input.bauhaus-input:focus, textarea.bauhaus-textarea:focus {
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--background);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--background);
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 var(--outline);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: var(--tertiary);
+      color: var(--on-tertiary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--tertiary-dark);
+    }
+
+    .btn-orange {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    .btn-guardian-active {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    /* Session Timer Strip (90 min) */
+    .timer-strip {
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow);
+      background: var(--background);
+      border-left: var(--space-sm) solid var(--primary-container);
+      padding: var(--space-md) var(--space-lg);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr) auto;
+      gap: var(--space-lg);
+      align-items: center;
+    }
+
+    .timer-readout-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .timer-digits {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: clamp(1.65rem, 1.3rem + 1vw, 2.25rem);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-xs) var(--space-md);
+      border: var(--border-medium);
+      min-width: 128px;
+      text-align: center;
+    }
+
+    .timer-meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .timer-block-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--subhead-size);
+      margin: 0;
+    }
+
+    .timer-status-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: var(--label-size);
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .timer-blocks-progress {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .block-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-xs);
+    }
+
+    .block-tab {
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-sm);
+      border: var(--border-medium);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .block-tab.is-active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .block-tab small {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.7rem;
+      opacity: 0.9;
+    }
+
+    .progress-bars-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .progress-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .progress-track-global {
+      display: grid;
+      grid-template-columns: 20fr 35fr 35fr;
+      gap: 2px;
+      height: 14px;
+      background: var(--outline);
+      border: var(--border-medium);
+      overflow: hidden;
+    }
+
+    .progress-seg {
+      background: var(--surface-container-high);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-seg-fill {
+      height: 100%;
+      width: 0%;
+      transition: width var(--dur-short) var(--ease-out);
+    }
+
+    .fill-b1 { background: var(--tertiary); }
+    .fill-b2 { background: var(--primary-container); }
+    .fill-b3 { background: var(--secondary); }
+
+    .timer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      align-items: center;
+    }
+
+    /* KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .kpi-card {
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--background);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      border-top-width: 6px;
+    }
+
+    .kpi-resistir { border-top-color: var(--tertiary); }
+    .kpi-detectar { border-top-color: var(--primary-container); }
+    .kpi-recuperar { border-top-color: var(--positive); }
+    .kpi-blast { border-top-color: var(--secondary); }
+
+    .kpi-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+    }
+
+    .kpi-value {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: clamp(1.85rem, 1.4rem + 1.2vw, 2.4rem);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+      color: var(--on-surface);
+    }
+
+    .kpi-caption {
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+
+    /* Main Workspace Grid */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .section-open {
+      border-top: 6px solid var(--accent-line, var(--tertiary));
+      padding-top: var(--space-md);
+      margin-bottom: var(--space-md);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-sm);
+    }
+
+    .section-open.accent-red { --accent-line: var(--secondary); }
+    .section-open.accent-orange { --accent-line: var(--primary-container); }
+
+    .section-kicker {
+      display: inline-block;
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-xs) var(--space-sm);
+      margin-bottom: var(--space-xs);
+    }
+
+    .section-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--headline-size);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    /* Scenario Context Banner */
+    .scenario-banner {
+      background: var(--surface-container-low);
+      border: var(--border-medium);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    .scenario-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-top: var(--space-xs);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px var(--space-sm);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      background: var(--background);
+      color: var(--on-surface);
+    }
+
+    .tag-blue { background: var(--tertiary); color: var(--on-tertiary); }
+    .tag-orange { background: var(--primary-container); color: var(--on-primary-container); }
+    .tag-red { background: var(--error); color: var(--on-error); }
+    .tag-green { background: var(--positive); color: var(--on-positive); }
+
+    /* 5-Layer Miro Flow Architecture */
+    .layers-pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .layer-node {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      background: var(--background);
+      padding: var(--space-sm);
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      min-height: 120px;
+      position: relative;
+      box-shadow: var(--offset-shadow-sm);
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .layer-node:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 var(--outline);
+    }
+
+    .layer-node.is-selected {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    .layer-node.is-breached {
+      border-color: var(--error);
+      background: var(--note-red);
+    }
+
+    .layer-node.is-selected.is-breached {
+      background: var(--primary-container);
+      box-shadow: 4px 4px 0 var(--error);
+    }
+
+    .layer-num {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .layer-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1.15;
+    }
+
+    .layer-score-bar {
+      margin-top: auto;
+      height: 8px;
+      background: var(--surface-container-high);
+      border: 1px solid var(--outline);
+      overflow: hidden;
+    }
+
+    .layer-score-fill {
+      height: 100%;
+      background: var(--tertiary);
+      transition: width var(--dur-short) var(--ease-out);
+    }
+
+    .layer-node.is-breached .layer-score-fill {
+      background: var(--secondary);
+    }
+
+    .layer-status-text {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    /* Layer Detail Inspector */
+    .layer-inspector {
+      border: var(--border-thick);
+      background: var(--surface-container-low);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .inspector-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      border-bottom: var(--border-thick);
+      padding-bottom: var(--space-sm);
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .info-box {
+      background: var(--background);
+      border: var(--border-medium);
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .info-box h4 {
+      margin: 0 0 var(--space-xs) 0;
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--tertiary);
+    }
+
+    .info-box.is-threat h4 {
+      color: var(--error);
+    }
+
+    .info-box ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.875rem;
+    }
+
+    .info-box li + li {
+      margin-top: 4px;
+    }
+
+    /* Security Tools Switchboard */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: var(--space-sm);
+    }
+
+    .tool-toggle {
+      border: var(--border-medium);
+      background: var(--background);
+      padding: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      cursor: pointer;
+      text-align: left;
+      min-height: 76px;
+      transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+    }
+
+    .tool-toggle:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .tool-toggle.is-enabled {
+      border-color: var(--outline);
+      background: var(--note-blue);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .tool-toggle.is-bypassed {
+      border-color: var(--error);
+      background: var(--note-red);
+    }
+
+    .tool-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .tool-state-pill {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border: 1px solid var(--outline);
+      font-weight: 700;
+    }
+
+    .tool-toggle.is-enabled .tool-state-pill {
+      background: var(--tertiary);
+      color: var(--on-tertiary);
+    }
+
+    .tool-toggle.is-bypassed .tool-state-pill {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    .tool-tactic {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* Miro Sticky Notes Board */
+    .sticky-composer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px auto;
+      gap: var(--space-sm);
+      align-items: end;
+      margin-top: var(--space-xs);
+    }
+
+    .sticky-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    .sticky-note {
+      border: var(--border-medium);
+      box-shadow: var(--offset-shadow-sm);
+      padding: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      font-size: 0.85rem;
+    }
+
+    .sticky-note.tactic-resistir { background: var(--note-blue); }
+    .sticky-note.tactic-detectar { background: var(--note-orange); }
+    .sticky-note.tactic-recuperar { background: var(--note-red); }
+
+    .sticky-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .sticky-del {
+      background: transparent;
+      border: 1px solid var(--outline);
+      color: var(--on-surface);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+
+    .sticky-del:hover {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    /* Dinâmica 2: Guardião Cibernético & Ciberterrorismo Intersetorial */
+    .guardian-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .guardian-status-bar {
+      padding: var(--space-sm) var(--space-md);
+      border: var(--border-medium);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      background: var(--surface-container);
+    }
+
+    .guardian-status-bar.is-active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    .scale-controls {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      background: var(--surface-container-low);
+      border: var(--border-medium);
+      padding: var(--space-md);
+    }
+
+    .scale-steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-xs);
+    }
+
+    .scale-btn {
+      min-height: 44px;
+      padding: var(--space-xs);
+      border: var(--border-medium);
+      background: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .scale-btn.is-active {
+      background: var(--error);
+      color: var(--on-error);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .svg-cascade-frame {
+      border: var(--border-thick);
+      background: var(--background);
+      padding: var(--space-sm);
+    }
+
+    .modesty-callout {
+      border-left: 6px solid var(--tertiary);
+      background: var(--surface-container-low);
+      border-top: var(--border-medium);
+      border-right: var(--border-medium);
+      border-bottom: var(--border-medium);
+      padding: var(--space-md);
+      font-size: 0.9rem;
+    }
+
+    .modesty-callout strong {
+      font-family: var(--font-headline);
+      color: var(--tertiary);
+    }
+
+    /* Charts Section */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .chart-card {
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow);
+      background: var(--background);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .chart-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--subhead-size);
+      margin: 0;
+      padding-bottom: var(--space-xs);
+      border-bottom: var(--border-thick);
+    }
+
+    .chart-caption {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      min-height: 290px;
+      height: 290px;
+    }
+
+    /* Comparison Table */
+    .table-wrap {
+      overflow-x: auto;
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow);
+      background: var(--background);
+    }
+
+    table.bauhaus-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    table.bauhaus-table th {
+      background: var(--surface-container-high);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: var(--border-thick);
+    }
+
+    table.bauhaus-table td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+      vertical-align: top;
+    }
+
+    table.bauhaus-table tr.is-current-row {
+      background: var(--note-orange);
+      font-weight: 600;
+    }
+
+    .num-col {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    /* Inline feedback toast */
+    .inline-feedback {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: var(--space-xs) var(--space-sm);
+      border: var(--border-medium);
+      background: var(--note-blue);
+      color: var(--on-surface);
+      display: none;
+    }
+
+    .inline-feedback.is-visible {
+      display: block;
+    }
+
+    .footer-sources {
+      border-top: var(--rule-heavy);
+      padding-top: var(--space-md);
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1100px) {
+      .masthead { grid-template-columns: 1fr; }
+      .timer-strip { grid-template-columns: 1fr; }
+      .workspace-grid { grid-template-columns: 1fr; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .layers-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid { padding: var(--space-sm); gap: var(--space-md); }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layers-pipeline { grid-template-columns: 1fr; }
+      .inspector-grid { grid-template-columns: 1fr; }
+      .sticky-composer { grid-template-columns: 1fr; }
+      .block-tabs { grid-template-columns: 1fr; }
+      .scale-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scenario-banner { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+    <!-- 1. MASTHEAD & URL PARAMETER CONTROLS -->
+    <header class="masthead">
+      <div>
+        <span class="kicker">Turma T35 · Semana 07 · Ferramentas e Tecnologia Cyber</span>
+        <h1 class="title">Quadro Interativo de <mark>Cibersegurança</mark> &amp; Arquitetura</h1>
+        <p class="subtitle">
+          Ambiente colaborativo para as Dinâmicas 1 (PBL em 5 Camadas) e 2 (Modéstia Cibernética, Escala &amp; Modo Guardião Cibernético), ancorado nas táticas de Bass et al. (Cap. 21), ISO 27001 e controles de redes distribuídas.
+        </p>
+      </div>
+
+      <div class="controls-cluster">
+        <div class="control-row">
+          <div class="field-group">
+            <label class="field-label" for="setorSelect">Estudo de Caso / Setor (?setor=)</label>
+            <select id="setorSelect" class="bauhaus-select" onchange="handleSetorChange(this.value)">
+              <option value="banking">EC 1 · Banking &amp; Sistema Financeiro (MC1)</option>
+              <option value="saude">EC 2 · Saúde &amp; Rede Hospitalar (MC2)</option>
+              <option value="logistica">EC 3 · Polícia &amp; Logística Operacional (MC3)</option>
+              <option value="energia">EC 4 · Energia &amp; Smart Grid (MC5)</option>
+              <option value="educacao">EC 5 · Transporte &amp; Mobilidade / Edu (MC4)</option>
+            </select>
+          </div>
+          <button type="button" id="btnGuardianMode" class="btn btn-orange" onclick="toggleGuardianMode()">
+            <i data-lucide="shield-alert" aria-hidden="true"></i>
+            <span id="guardianBtnText">Modo Guardião: OFF</span>
+          </button>
+        </div>
+        <div class="control-row">
+          <button type="button" class="btn btn-primary" onclick="simularSuplantamentoGlobal()">
+            <i data-lucide="zap" aria-hidden="true"></i>
+            Simular Suplantamento
+          </button>
+          <button type="button" class="btn" onclick="restaurarDefesasSetor()">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+            Restaurar Defesas
+          </button>
+          <button type="button" class="btn" onclick="exportarRelatorioCSV()">
+            <i data-lucide="download" aria-hidden="true"></i>
+            Exportar CSV
+          </button>
+        </div>
+        <div id="urlParamFeedback" class="inline-feedback" role="status" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <!-- 2. TIMER INTERATIVO DA AULA DE 90 MINUTOS -->
+    <section class="timer-strip" aria-label="Cronômetro da Aula de 90 Minutos">
+      <div class="timer-readout-wrap">
+        <div id="timerDisplay" class="timer-digits">20:00</div>
+        <div class="timer-meta">
+          <h2 id="timerBlockTitle" class="timer-block-title">Bloco 1 · Conceitos &amp; Táticas</h2>
+          <span id="timerStatusText" class="timer-status-badge">AULA 90 MIN · PARADO · TOTAL RESTANTE 90:00</span>
+        </div>
+      </div>
+
+      <div class="timer-blocks-progress">
+        <div class="block-tabs" role="tablist" aria-label="Blocos da Aula">
+          <button type="button" id="tabBloco1" class="block-tab is-active" onclick="selecionarBlocoTimer(1)">
+            <span>Bloco 1 · Conceitos</span>
+            <small>20 min (22%)</small>
+          </button>
+          <button type="button" id="tabBloco2" class="block-tab" onclick="selecionarBlocoTimer(2)">
+            <span>Bloco 2 · Dinâmica 1 PBL</span>
+            <small>35 min (39%)</small>
+          </button>
+          <button type="button" id="tabBloco3" class="block-tab" onclick="selecionarBlocoTimer(3)">
+            <span>Bloco 3 · Dinâmica 2 Escala</span>
+            <small>35 min (39%)</small>
+          </button>
+        </div>
+        <div class="progress-bars-stack">
+          <div class="progress-label-row">
+            <span id="blockProgressLabel">Progresso do Bloco Atual: 0%</span>
+            <span id="globalProgressLabel">Progresso Aula (90m): 0%</span>
+          </div>
+          <div class="progress-track-global" aria-label="Barra visual de progresso da aula de 90 minutos">
+            <div class="progress-seg"><div id="progSeg1" class="progress-seg-fill fill-b1"></div></div>
+            <div class="progress-seg"><div id="progSeg2" class="progress-seg-fill fill-b2"></div></div>
+            <div class="progress-seg"><div id="progSeg3" class="progress-seg-fill fill-b3"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-actions">
+        <button type="button" id="btnTimerStart" class="btn btn-primary" onclick="iniciarTimer()">
+          <i data-lucide="play" aria-hidden="true"></i>
+          Iniciar
+        </button>
+        <button type="button" id="btnTimerPause" class="btn" onclick="pausarTimer()" disabled>
+          <i data-lucide="pause" aria-hidden="true"></i>
+          Pausar
+        </button>
+        <button type="button" id="btnTimerReset" class="btn btn-danger" onclick="resetarTimer()">
+          <i data-lucide="refresh-cw" aria-hidden="true"></i>
+          Resetar
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. TOP-LINE KPIs (BASS ET AL. + BLAST RADIUS) -->
+    <section class="kpi-grid" aria-label="Indicadores de Eficácia e Raio de Impacto">
+      <article class="kpi-card kpi-resistir">
+        <div class="kpi-head">
+          <span>Resistir (Prevenção)</span>
+          <i data-lucide="shield" aria-hidden="true"></i>
+        </div>
+        <div id="kpiResistirVal" class="kpi-value">0%</div>
+        <p id="kpiResistirCap" class="kpi-caption">Firewall, criptografia e controle de acesso</p>
+      </article>
+
+      <article class="kpi-card kpi-detectar">
+        <div class="kpi-head">
+          <span>Detectar (Monitoração)</span>
+          <i data-lucide="radar" aria-hidden="true"></i>
+        </div>
+        <div id="kpiDetectarVal" class="kpi-value">0%</div>
+        <p id="kpiDetectarCap" class="kpi-caption">IDS/IPS, SIEM, antivírus e honeypot</p>
+      </article>
+
+      <article class="kpi-card kpi-recuperar">
+        <div class="kpi-head">
+          <span>Recuperar (Resiliência)</span>
+          <i data-lucide="hard-drive-download" aria-hidden="true"></i>
+        </div>
+        <div id="kpiRecuperarVal" class="kpi-value">0%</div>
+        <p id="kpiRecuperarCap" class="kpi-caption">Backup isolado, failover e plano de continuidade</p>
+      </article>
+
+      <article class="kpi-card kpi-blast">
+        <div class="kpi-head">
+          <span>Raio de Impacto (Blast Radius)</span>
+          <i data-lucide="flame" aria-hidden="true"></i>
+        </div>
+        <div id="kpiBlastVal" class="kpi-value">0%</div>
+        <p id="kpiBlastCap" class="kpi-caption">Severidade setorial e propagação</p>
+      </article>
+    </section>
+
+    <!-- 4. MAIN WORKSPACE: 5-LAYER MIRO BOARD (LEFT) + GUARDIÃO CIBERNÉTICO (RIGHT) -->
+    <div class="workspace-grid">
+      <!-- LEFT: DINÂMICA 1 - QUADRO DE 5 CAMADAS & PONTOS DE CONTROLE -->
+      <section class="block" aria-label="Dinâmica 1 — Mapeamento de 5 Camadas de Arquitetura">
+        <div class="section-open">
+          <div>
+            <span class="section-kicker">Dinâmica 1 · PBL Arquitetura (Autoestudos 1–4)</span>
+            <h2 class="section-title" id="cenarioTitulo">EC 1 · Banking &amp; Sistema Financeiro</h2>
+          </div>
+          <span id="cenarioBadge" class="tag tag-blue">ISO 27001 · Crítico</span>
+        </div>
+
+        <div class="scenario-banner">
+          <div>
+            <strong id="cenarioSubtitulo">Infraestrutura de pagamentos em tempo real, Internet Banking e Core Bancário</strong>
+            <div id="cenarioTags" class="scenario-tags"></div>
+          </div>
+          <div style="text-align: right;">
+            <span class="field-label" style="display:block;">Camadas Suplantadas</span>
+            <strong id="breachedCountBadge" style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--error);">0 / 5</strong>
+          </div>
+        </div>
+
+        <!-- 5 Camadas Pipeline -->
+        <div id="layersPipeline" class="layers-pipeline" role="group" aria-label="Cinco Camadas de Arquitetura"></div>
+
+        <!-- Layer Inspector -->
+        <div id="layerInspector" class="layer-inspector">
+          <div class="inspector-header">
+            <div>
+              <span id="inspLayerTag" class="tag tag-orange">Camada 1</span>
+              <h3 id="inspLayerTitle" style="margin: 4px 0 0 0; font-family: var(--font-headline); font-size: 1.2rem;">Frontend B/C</h3>
+            </div>
+            <div style="display:flex; gap: var(--space-xs); flex-wrap: wrap;">
+              <button type="button" id="btnToggleBreach" class="btn btn-danger" onclick="toggleBreachCamadaAtual()">
+                <i data-lucide="alert-triangle" aria-hidden="true"></i>
+                <span id="btnBreachLabel">Simular Suplantamento</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="inspector-grid">
+            <div class="info-box">
+              <h4>Pontos de Controle, Usuários &amp; Fluxo</h4>
+              <ul id="inspControlesList"></ul>
+            </div>
+            <div class="info-box is-threat">
+              <h4>Vulnerabilidades &amp; Vetores de Ataque</h4>
+              <ul id="inspAmeacasList"></ul>
+            </div>
+          </div>
+
+          <div>
+            <span class="field-label" style="display:block; margin-bottom: var(--space-xs);">
+              Ferramentas &amp; Tecnologias Cyber na Camada (clique para ativar/desativar)
+            </span>
+            <div id="toolsGrid" class="tools-grid"></div>
+          </div>
+
+          <!-- Miro Sticky Notes -->
+          <div style="border-top: var(--border-medium); padding-top: var(--space-sm);">
+            <span class="field-label" style="display:block;">Notas do Grupo (Estilo Miro) — Camada &amp; Setor Atual</span>
+            <div class="sticky-composer">
+              <div class="field-group">
+                <label class="field-label" for="stickyInput">Observação / Contramedida</label>
+                <input type="text" id="stickyInput" class="bauhaus-input" placeholder="Ex.: Habilitar MFA + Honeypot na VLAN interna..." onkeydown="if(event.key==='Enter'){adicionarNotaMiro();}">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="stickyTactic">Tática Bass et al.</label>
+                <select id="stickyTactic" class="bauhaus-select">
+                  <option value="resistir">Resistir</option>
+                  <option value="detectar">Detectar</option>
+                  <option value="recuperar">Recuperar</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-orange" onclick="adicionarNotaMiro()">
+                <i data-lucide="sticky-note" aria-hidden="true"></i>
+                Fixar Nota
+              </button>
+            </div>
+            <div id="stickyBoard" class="sticky-board"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: DINÂMICA 2 - GUARDIÃO CIBERNÉTICO, MODÉSTIA & ESCALA INTERSETORIAL -->
+      <aside class="block guardian-panel" aria-label="Dinâmica 2 — Modéstia Cibernética e Escala Intersetorial">
+        <div class="section-open accent-red">
+          <div>
+            <span class="section-kicker">Dinâmica 2 · Modéstia &amp; Escala</span>
+            <h2 class="section-title">Guardião Cibernético &amp; Efeito Cascata</h2>
+          </div>
+        </div>
+
+        <div id="guardianStatusBar" class="guardian-status-bar">
+          <div>
+            <strong id="guardianModeHeading" style="font-family: var(--font-headline); display:block;">Modo Padrão (Auditoria Local)</strong>
+            <span id="guardianModeDesc" style="font-size: 0.8rem; color: var(--on-surface-variant);">Ative o Modo Guardião para elevar resposta coordenada e contenção intersetorial.</span>
+          </div>
+          <span id="guardianPill" class="tag">Padrão</span>
+        </div>
+
+        <div class="scale-controls">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm);">
+            <label class="field-label" for="escalaRange">Escala Cibernética do Incidente (1–4)</label>
+            <span id="escalaReadout" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;">Nível 2 · Rede LAN</span>
+          </div>
+          <input type="range" id="escalaRange" min="1" max="4" step="1" value="2" oninput="atualizarEscalaSlider(this.value)" style="width:100%; accent-color: var(--error); min-height: 36px;">
+          <div class="scale-steps">
+            <button type="button" id="scaleBtn1" class="scale-btn" onclick="selecionarEscala(1)">1 · Local<br><small>Endpoint</small></button>
+            <button type="button" id="scaleBtn2" class="scale-btn is-active" onclick="selecionarEscala(2)">2 · Rede<br><small>LAN / IHC</small></button>
+            <button type="button" id="scaleBtn3" class="scale-btn" onclick="selecionarEscala(3)">3 · Setorial<br><small>BD / Core</small></button>
+            <button type="button" id="scaleBtn4" class="scale-btn" onclick="selecionarEscala(4)">4 · Terror<br><small>Cascata</small></button>
+          </div>
+        </div>
+
+        <!-- SVG Intersectoral Cascade Map -->
+        <div class="svg-cascade-frame">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-xs);">
+            <span class="field-label">Mapa de Ciberterrorismo Intersetorial</span>
+            <span id="cascadeSeverityTag" class="tag tag-orange">Propagação Moderada</span>
+          </div>
+          <svg id="cascadeSvg" viewBox="0 0 460 280" width="100%" height="260" role="img" aria-label="Grafo de propagação intersetorial entre os 5 estudos de caso">
+            <!-- Links between sectors -->
+            <line id="link-banking-energia" x1="230" y1="54" x2="380" y2="125" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-banking-saude" x1="230" y1="54" x2="80" y2="125" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-energia-saude" x1="380" y1="125" x2="80" y2="125" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-energia-educacao" x1="380" y1="125" x2="325" y2="230" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-saude-logistica" x1="80" y1="125" x2="135" y2="230" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-logistica-educacao" x1="135" y1="230" x2="325" y2="230" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line id="link-banking-logistica" x1="230" y1="54" x2="135" y2="230" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+            <line id="link-energia-logistica" x1="380" y1="125" x2="135" y2="230" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+
+            <!-- Blast Radius Ring around active origin -->
+            <circle id="svgBlastRing" cx="230" cy="54" r="46" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-dasharray="5 3" opacity="0.75"/>
+
+            <!-- Sector Nodes -->
+            <g id="node-banking" class="svg-sector-node" onclick="handleSetorChange('banking')" style="cursor:pointer;">
+              <rect x="165" y="24" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="230" y="45" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 1 · BANKING</text>
+              <text id="svgRisk-banking" x="230" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)">ORIGEM · 0%</text>
+            </g>
+
+            <g id="node-saude" class="svg-sector-node" onclick="handleSetorChange('saude')" style="cursor:pointer;">
+              <rect x="15" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="80" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 2 · SAÚDE</text>
+              <text id="svgRisk-saude" x="80" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)">RISCO · 0%</text>
+            </g>
+
+            <g id="node-energia" class="svg-sector-node" onclick="handleSetorChange('energia')" style="cursor:pointer;">
+              <rect x="315" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="380" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 4 · ENERGIA</text>
+              <text id="svgRisk-energia" x="380" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)">RISCO · 0%</text>
+            </g>
+
+            <g id="node-logistica" class="svg-sector-node" onclick="handleSetorChange('logistica')" style="cursor:pointer;">
+              <rect x="70" y="205" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="135" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 3 · POLÍCIA</text>
+              <text id="svgRisk-logistica" x="135" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)">RISCO · 0%</text>
+            </g>
+
+            <g id="node-educacao" class="svg-sector-node" onclick="handleSetorChange('educacao')" style="cursor:pointer;">
+              <rect x="260" y="205" width="135" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="327" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 5 · TRANSPORTE</text>
+              <text id="svgRisk-educacao" x="327" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)">RISCO · 0%</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Princípio da Modéstia Cibernética -->
+        <div class="modesty-callout">
+          <strong>Princípio da Modéstia Cibernética (Assume Breach):</strong>
+          <p id="modestyDiagnosis" style="margin: 6px 0 0 0;">
+            Nenhuma barreira de <em>Resistir</em> é 100% impenetrável contra adversários persistentes ou quebra de credenciais. Quando uma camada é suplantada, apenas <em>Detectar</em> (IDS + Honeypot) e <em>Recuperar</em> (Criptografia + Failover) evitam o colapso em cascata.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 5. DATA VISUALIZATIONS: RADAR, BARRAS POR CAMADA, BLAST RADIUS -->
+    <section aria-label="Visualizações Dinâmicas de Eficácia e Blast Radius">
+      <div class="section-open accent-orange">
+        <div>
+          <span class="section-kicker">Telemetria Arquitetural · Bass et al. (Cap. 21)</span>
+          <h2 class="section-title">Comparativo de Táticas, Camadas e Raio de Impacto</h2>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <article class="chart-card">
+          <h3 class="chart-title">1. Perfil de Táticas (Radar Bass et al.)</h3>
+          <p class="chart-caption">Compara a postura ativa do setor nas 5 dimensões arquiteturais contra a meta de referência Guardião Cibernético.</p>
+          <div class="chart-box">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <h3 class="chart-title">2. Eficácia por Camada Arquitetural</h3>
+          <p class="chart-caption">Distribuição de Resistir (azul), Detectar (laranja) e Recuperar (vermelho/verde) nas 5 camadas do sistema.</p>
+          <div class="chart-box">
+            <canvas id="layerBarChart"></canvas>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <h3 class="chart-title">3. Raio de Impacto (Blast Radius) por Setor</h3>
+          <p class="chart-caption">Exposição estimada (%) diante da Escala Cibernética atual considerando interdependências críticas.</p>
+          <div class="chart-box">
+            <canvas id="blastChart"></canvas>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 6. MATRIZ COMPARATIVA DOS 5 ESTUDOS DE CASO -->
+    <section class="block" aria-label="Matriz Comparativa dos 5 Estudos de Caso">
+      <div class="section-open">
+        <div>
+          <span class="section-kicker">Síntese Intersetorial · Turma T35</span>
+          <h2 class="section-title">Matriz dos 5 Estudos de Caso (EC 1 a EC 5)</h2>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="bauhaus-table">
+          <thead>
+            <tr>
+              <th>Estudo de Caso</th>
+              <th>Ativo Crítico &amp; Contexto</th>
+              <th>Vetor Crítico (Password / Rede / Infra)</th>
+              <th class="num-col">Resistir</th>
+              <th class="num-col">Detectar</th>
+              <th class="num-col">Recuperar</th>
+              <th class="num-col">Blast Radius</th>
+            </tr>
+          </thead>
+          <tbody id="matrizTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FOOTER SOURCES -->
+    <footer class="footer-sources">
+      <span><strong>Fontes Acadêmicas:</strong> Autoestudos 1–4 (Semana 07, Prof. Reginaldo Arakaki) · Bass, Clements &amp; Kazman, <em>Software Architecture in Practice</em> (Cap. 21, pp. 313–320, 2021) · Machado, <em>Segurança da Informação</em> (Cap. Criptografia e Password Cracking, 2014) · ISO/IEC 27001.</span>
+      <span>Turma T35 · 26/11/2026</span>
+    </footer>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    // =========================================================================
+    // 1. DADOS ESTRUTURADOS DOS 5 ESTUDOS DE CASO & 5 CAMADAS DE ARQUITETURA
+    // =========================================================================
+    const LAYER_META = [
+      { id: `frontend`, short: `Frontend B/C`, full: `1. Frontend B/C (Browser / Client)` },
+      { id: `telecom`, short: `Telecom Web`, full: `2. Telecom Web (Gateway / Roteamento)` },
+      { id: `ihc`, short: `IHC`, full: `3. IHC (Operadores, Gestores & Acesso)` },
+      { id: `lan`, short: `LAN`, full: `4. LAN (Rede Local Distribuída)` },
+      { id: `bd`, short: `Acesso BD`, full: `5. Acesso BD Interno/Externo` }
+    ];
+
+    const TOOLS_CATALOG = [
+      { id: `firewall`, name: `Firewall / WAF & Gateway`, tactic: `Resistir`, r: 22, d: 8, rec: 4 },
+      { id: `cripto`, name: `Criptografia Aplicada & TLS/Hash`, tactic: `Resistir + Recuperar`, r: 18, d: 4, rec: 18 },
+      { id: `antivirus`, name: `Antivírus / EDR Endpoints`, tactic: `Resistir + Detectar`, r: 14, d: 16, rec: 6 },
+      { id: `ids`, name: `IDS / IPS & Monitoração`, tactic: `Detectar`, r: 6, d: 26, rec: 8 },
+      { id: `honeypot`, name: `Honeypot (Armadilha) & Failover`, tactic: `Detectar + Recuperar`, r: 4, d: 22, rec: 24 }
+    ];
+
+    const CENARIOS_DATA = {
+      banking: {
+        key: `banking`,
+        codigo: `EC 1`,
+        nome: `EC 1 · Banking & Sistema Financeiro`,
+        subtitulo: `Pagamentos instantâneos, Internet Banking, APIs Open Finance e Core Bancário`,
+        badge: `ISO 27001 · Tier 1 Financeiro`,
+        tags: [`PIX / Core Bancário`, `Criptografia TLS 1.3`, `SIEM 24x7`, `Alta Dependência Energia`],
+        dependencias: { energia: 0.72, saude: 0.35, logistica: 0.45, educacao: 0.40 },
+        camadas: {
+          frontend: {
+            controles: [
+              `Clientes finais em apps mobile e navegadores (B/C)`,
+              `Validação de sessão, tokens efêmeros e proteção anti-bot`,
+              `Políticas de senha forte contra ataques de dicionário`
+            ],
+            ameacas: [
+              `Phishing, credential stuffing e password cracking em contas de clientes`,
+              `Injeção de scripts (XSS) e sequestro de sessão no browser`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: false, honeypot: false }
+          },
+          telecom: {
+            controles: [
+              `WAF, roteadores de borda redundantes e balanceadores HTTPS`,
+              `Terminação TLS mútua (mTLS) para integrações externas Open Finance`
+            ],
+            ameacas: [
+              `DDoS volumétrico na borda Telecom e bypass de regras WAF`,
+              `Interceptação de tráfego em gateways mal configurados`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: true, honeypot: false }
+          },
+          ihc: {
+            controles: [
+              `Portais de operadores de tesouraria, analistas de fraude e gestores`,
+              `RBAC (Controle de Acesso Baseado em Papéis) e aprovação em duas etapas`
+            ],
+            ameacas: [
+              `Escalada de privilégios e quebra de senhas administrativas (brute force)`,
+              `Erro humano ou engenharia social sobre operadores internos`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: true, honeypot: false }
+          },
+          lan: {
+            controles: [
+              `Segmentação em VLANs entre zona de atendimento e processamento`,
+              `Monitoração de tráfego leste-oeste e armadilhas Honeypot internas`
+            ],
+            ameacas: [
+              `Movimento lateral após comprometimento de estação corporativa`,
+              `Sniffing de protocolos internos sem criptografia`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: true }
+          },
+          bd: {
+            controles: [
+              `Bancos transacionais ACID, cofre de chaves HSM e backups imutáveis`,
+              `Auditoria de queries entre integrações internas e externas`
+            ],
+            ameacas: [
+              `SQL Injection via APIs externas e exfiltração de hashes de senhas`,
+              `Ransomware direcionado aos volumes de replicação do ledger`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: true, honeypot: true }
+          }
+        }
+      },
+
+      saude: {
+        key: `saude`,
+        codigo: `EC 2`,
+        nome: `EC 2 · Saúde & Rede Hospitalar`,
+        subtitulo: `Prontuário Eletrônico (PEP), equipamentos IoMT de UTI, laboratórios e telemedicina`,
+        badge: `Risco à Vida · LGPD Sensível`,
+        tags: [`Prontuário PEP`, `Dispositivos IoMT`, `Ransomware Crítico`, `Dependência Energia`],
+        dependencias: { energia: 0.85, banking: 0.30, logistica: 0.65, educacao: 0.25 },
+        camadas: {
+          frontend: {
+            controles: [
+              `Portal do paciente, totens de triagem e tablets clínicos`,
+              `Autenticação de médicos e enfermeiros com timeout de sessão`
+            ],
+            ameacas: [
+              `Credenciais fracas compartilhadas em postos de enfermagem`,
+              `Acesso indevido a laudos e dados clínicos sensíveis`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: false, honeypot: false }
+          },
+          telecom: {
+            controles: [
+              `VPN dedicada entre hospitais, laboratórios e operadoras de saúde`,
+              `Firewall perimetral filtrando protocolos HL7/FHIR`
+            ],
+            ameacas: [
+              `Exposição de serviços de telemedicina e VPNs sem patch`,
+              `Interrupção de link remoto impedindo consultas e exames`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: false }
+          },
+          ihc: {
+            controles: [
+              `Interfaces de controle de UTI, bombas de infusão e centro cirúrgico`,
+              `Gestão de perfis clínicos vs. operadores de TI hospitalar`
+            ],
+            ameacas: [
+              `Manipulação de dosagens ou bloqueio de interface clínica por malware`,
+              `Password cracking em contas legadas de manutenção biomédica`
+            ],
+            toolsDefault: { firewall: false, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          lan: {
+            controles: [
+              `Rede local isolando equipamentos IoMT legados da LAN administrativa`,
+              `Detecção de intrusão passiva para não impactar latência de monitores`
+            ],
+            ameacas: [
+              `Propagação rápida de ransomware em rede LAN plana`,
+              `Equipamentos médicos sem suporte a antivírus tradicional`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          bd: {
+            controles: [
+              `Repositório de prontuários, imagens DICOM e backup offline 3-2-1`,
+              `Criptografia em repouso para conformidade regulatória`
+            ],
+            ameacas: [
+              `Criptografia maliciosa (ransomware) bloqueando cirurgias e prontuários`,
+              `Vazamento em massa de dados de pacientes via integração externa`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: true }
+          }
+        }
+      },
+
+      logistica: {
+        key: `logistica`,
+        codigo: `EC 3`,
+        nome: `EC 3 · Polícia & Logística Operacional`,
+        subtitulo: `Centro de Comando e Controle (C2), despacho de viaturas, rastreamento e cadeia de custódia`,
+        badge: `Segurança Pública · Missão Crítica`,
+        tags: [`Despacho 190 / C2`, `Cadeia de Custódia`, `Rádio & Telecom`, `Telemetria Frota`],
+        dependencias: { energia: 0.65, educacao: 0.70, saude: 0.60, banking: 0.35 },
+        camadas: {
+          frontend: {
+            controles: [
+              `Terminais embarcados em viaturas, câmeras corporais e portal cidadão`,
+              `Certificados de dispositivo para envio de ocorrências em campo`
+            ],
+            ameacas: [
+              `Spoofing de telemetria GPS e captura de terminal em campo`,
+              `Ataques de força bruta em portais de boletim eletrônico`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: false, honeypot: false }
+          },
+          telecom: {
+            controles: [
+              `Gateways celulares redundantes, enlaces criptografados e rádio digital`,
+              `Roteamento resiliente para comunicação entre delegacias e viaturas`
+            ],
+            ameacas: [
+              `Jamming, interceptação de canal de despacho e DDoS no gateway C2`,
+              `Comprometimento de roteadores de borda em unidades regionais`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: true, honeypot: false }
+          },
+          ihc: {
+            controles: [
+              `Mesas de despacho de emergência, painéis de gestores e videomonitoramento`,
+              `Auditoria rigorosa de consultas por operadores autorizados`
+            ],
+            ameacas: [
+              `Uso indevido de credenciais internas para vazamento de investigações`,
+              `Paralisação da tela de despacho durante pico de ocorrências`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          lan: {
+            controles: [
+              `Rede local segregada entre câmeras LPR, servidores C2 e estações`,
+              `Honeypots simulando arquivos de evidência para detectar intrusos`
+            ],
+            ameacas: [
+              `Pivoteamento a partir de dispositivos IoT/câmeras externas para a LAN`,
+              `Ransomware desativando servidores locais de despacho`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: true }
+          },
+          bd: {
+            controles: [
+              `Banco de evidências digitais com hash criptográfico de integridade`,
+              `Integração externa controlada com tribunais e sistemas nacionais`
+            ],
+            ameacas: [
+              `Adulteração de cadeia de custódia e exfiltração de dados sigilosos`,
+              `Quebra de hashes fracos de usuários operacionais`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: true, honeypot: false }
+          }
+        }
+      },
+
+      energia: {
+        key: `energia`,
+        codigo: `EC 4`,
+        nome: `EC 4 · Energia & Infraestrutura Elétrica`,
+        subtitulo: `Subestações automatizadas, sistemas SCADA/ICS, geração distribuída e medidores inteligentes`,
+        badge: `Infraestrutura Crítica · Efeito Dominó`,
+        tags: [`SCADA / OT`, `Subestações Remotas`, `Risco Blackout`, `Cascata Universal`],
+        dependencias: { banking: 0.88, saude: 0.92, logistica: 0.82, educacao: 0.85 },
+        camadas: {
+          frontend: {
+            controles: [
+              `Medidores inteligentes (Smart Meters) e portal de concessionária`,
+              `Assinatura de firmware e validação de comandos de telemetria`
+            ],
+            ameacas: [
+              `Fraude e manipulação em massa de medidores remotos`,
+              `Acesso não autorizado via portal de clientes e fornecedores`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: false }
+          },
+          telecom: {
+            controles: [
+              `Gateways industriais, enlaces dedicados MPLS/satélite entre subestações`,
+              `Inspeção profunda de pacotes para protocolos industriais`
+            ],
+            ameacas: [
+              `Sequestro de gateway remoto entre centro de operação e subestação`,
+              `Protocolos legados Modbus/DNP3 trafegando sem criptografia`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: false, ids: true, honeypot: false }
+          },
+          ihc: {
+            controles: [
+              `IHM/SCADA dos operadores de carga e disjuntores de alta tensão`,
+              `Segregação física/lógica entre rede corporativa (IT) e operacional (OT)`
+            ],
+            ameacas: [
+              `Comandos maliciosos de abertura simultânea de disjuntores (blackout)`,
+              `Password cracking em estações de engenharia SCADA`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          lan: {
+            controles: [
+              `Zonas e conduítes na LAN industrial com honeypots ICS/SCADA`,
+              `Monitoração comportamental contínua de CLPs na rede local`
+            ],
+            ameacas: [
+              `Salto IT-para-OT via estação de manutenção infectada (USB/Phishing)`,
+              `Sabotagem persistente em controladores lógicos programáveis`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: false, ids: true, honeypot: true }
+          },
+          bd: {
+            controles: [
+              `Historiadores de telemetria, faturamento e planos de restauração black-start`,
+              `Criptografia e cópias frias de configurações de proteção`
+            ],
+            ameacas: [
+              `Destruição de dados históricos e perfis de relés de proteção`,
+              `Ataques pela cadeia de suprimentos em integrações externas`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: false }
+          }
+        }
+      },
+
+      educacao: {
+        key: `educacao`,
+        codigo: `EC 5`,
+        nome: `EC 5 · Transporte & Mobilidade / Campus`,
+        subtitulo: `Controle semafórico inteligente, bilhetagem eletrônica, logística urbana e redes de campus`,
+        badge: `Mobilidade & Serviços Urbanos`,
+        tags: [`Sinalização & CCO`, `Bilhetagem NFC`, `Campus / Educação`, `Alto Volume B/C`],
+        dependencias: { energia: 0.78, logistica: 0.74, banking: 0.55, saude: 0.42 },
+        camadas: {
+          frontend: {
+            controles: [
+              `Apps de passageiros/estudantes, validadores de embarque e painéis`,
+              `Proteção de APIs públicas e limitação de taxa (rate limiting)`
+            ],
+            ameacas: [
+              `Clonagem de cartões/tokens e credential stuffing no app de recarga`,
+              `Desfiguração e indisponibilidade de painéis de informação ao público`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: false, honeypot: false }
+          },
+          telecom: {
+            controles: [
+              `Redes sem fio urbanas, gateways 4G/5G de controladores semafóricos`,
+              `Túneis criptografados entre estações, terminais e Centro de Controle`
+            ],
+            ameacas: [
+              `Invasão de gateways celulares em cruzamentos e estações remotas`,
+              `Interrupção de roteamento causando congestionamento sistêmico`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: false }
+          },
+          ihc: {
+            controles: [
+              `Centro de Controle Operacional (CCO) de tráfego, trens e gestão acadêmica`,
+              `Perfis separados para operadores de tráfego e gestores administrativos`
+            ],
+            ameacas: [
+              `Alteração maliciosa de tempos semafóricos ou rotas operacionais`,
+              `Ataques de dicionário em senhas de painéis web de gestão`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          lan: {
+            controles: [
+              `LAN do CCO e redes distribuídas de campi/terminais segmentadas`,
+              `Antivírus, detecção de intrusão e armadilhas contra varredura`
+            ],
+            ameacas: [
+              `Comprometimento via Wi-Fi aberto de estações/campus migrando à LAN interna`,
+              `Ransomware paralisando catracas, despacho de frota e sistemas acadêmicos`
+            ],
+            toolsDefault: { firewall: true, cripto: false, antivirus: true, ids: true, honeypot: false }
+          },
+          bd: {
+            controles: [
+              `Base de bilhetagem, registros acadêmicos/passageiros e backups diários`,
+              `Integração segura com gateways bancários de pagamento`
+            ],
+            ameacas: [
+              `Vazamento de dados pessoais e histórico de deslocamento de cidadãos`,
+              `Fraude em saldos de bilhetagem via exploração de API de BD`
+            ],
+            toolsDefault: { firewall: true, cripto: true, antivirus: false, ids: false, honeypot: false }
+          }
+        }
+      }
+    };
+
+    // =========================================================================
+    // 2. ESTADO GLOBAL DA APLICAÇÃO
+    // =========================================================================
+    const BLOCOS_TIMER = {
+      1: { nome: `Bloco 1 · Conceitos & Táticas (Bass et al.)`, duracaoSeg: 20 * 60 },
+      2: { nome: `Bloco 2 · Dinâmica 1 (PBL 5 Camadas)`, duracaoSeg: 35 * 60 },
+      3: { nome: `Bloco 3 · Dinâmica 2 (Modéstia & Escala)`, duracaoSeg: 35 * 60 }
+    };
+
+    let appState = {
+      setorAtual: `banking`,
+      camadaAtual: `frontend`,
+      modoGuardiao: false,
+      escalaCibernetica: 2,
+      // Overrides por setor -> camada -> { tools: {...}, breached: boolean }
+      overrides: {},
+      // Notas Miro por setor
+      notas: [],
+      // Timer state
+      timer: {
+        blocoAtivo: 1,
+        restante: { 1: 20 * 60, 2: 35 * 60, 3: 35 * 60 },
+        rodando: false
+      }
+    };
+
+    let timerIntervalId = null;
+    let radarChartInstance = null;
+    let layerBarChartInstance = null;
+    let blastChartInstance = null;
+
+    // =========================================================================
+    // 3. MAPEAMENTO DE PARÂMETRO ?setor= NA URL
+    // =========================================================================
+    function mapearParametroSetor(rawParam) {
+      if (!rawParam) return null;
+      const norm = String(rawParam).trim().toLowerCase();
+      const mapa = {
+        'banking': `banking`,
+        'mc1': `banking`,
+        'ec1': `banking`,
+        'saude': `saude`,
+        'mc2': `saude`,
+        'ec2': `saude`,
+        'logistica': `logistica`,
+        'mc3': `logistica`,
+        'ec3': `logistica`,
+        'policia': `logistica`,
+        'educacao': `educacao`,
+        'mc4': `educacao`,
+        'ec5': `educacao`,
+        'transporte': `educacao`,
+        'energia': `energia`,
+        'mc5': `energia`,
+        'ec4': `energia`
+      };
+      return mapa[norm] || null;
+    }
+
+    // =========================================================================
+    // 4. UTILITÁRIOS DE CÁLCULO (BASS ET AL. + BLAST RADIUS)
+    // =========================================================================
+    function getLayerState(setorKey, layerId) {
+      const base = CENARIOS_DATA[setorKey].camadas[layerId];
+      const setorOv = appState.overrides[setorKey] || {};
+      const layerOv = setorOv[layerId] || {};
+      const tools = Object.assign({}, base.toolsDefault, layerOv.tools || {});
+      const breached = Boolean(layerOv.breached);
+      return { tools, breached };
+    }
+
+    function setLayerState(setorKey, layerId, updater) {
+      if (!appState.overrides[setorKey]) appState.overrides[setorKey] = {};
+      const current = getLayerState(setorKey, layerId);
+      const updated = updater(current);
+      appState.overrides[setorKey][layerId] = updated;
+    }
+
+    function calcularMetricasCamada(setorKey, layerId) {
+      const st = getLayerState(setorKey, layerId);
+      let r = 12, d = 10, rec = 12;
+      TOOLS_CATALOG.forEach(tool => {
+        if (st.tools[tool.id]) {
+          r += tool.r;
+          d += tool.d;
+          rec += tool.rec;
+        }
+      });
+
+      if (appState.modoGuardiao) {
+        r += 8;
+        d += 14;
+        rec += 14;
+      }
+
+      // Escala cibernética pressiona especialmente a resistência
+      const pressaoEscala = (appState.escalaCibernetica - 1) * 5;
+      r = Math.max(8, r - pressaoEscala);
+
+      // Se a camada foi suplantada, Resistir cai drasticamente; Detectar e Recuperar tornam-se vitais
+      if (st.breached) {
+        r = Math.round(r * 0.22);
+        d = st.tools.ids || st.tools.honeypot ? Math.min(98, d + 8) : Math.round(d * 0.65);
+        rec = st.tools.cripto || st.tools.honeypot ? Math.min(96, rec) : Math.round(rec * 0.7);
+      }
+
+      return {
+        resistir: Math.min(100, Math.max(5, r)),
+        detectar: Math.min(100, Math.max(5, d)),
+        recuperar: Math.min(100, Math.max(5, rec)),
+        breached: st.breached
+      };
+    }
+
+    function calcularMetricasSetor(setorKey) {
+      let sumR = 0, sumD = 0, sumRec = 0, breachedCount = 0;
+      const porCamada = {};
+
+      LAYER_META.forEach(l => {
+        const m = calcularMetricasCamada(setorKey, l.id);
+        porCamada[l.id] = m;
+        sumR += m.resistir;
+        sumD += m.detectar;
+        sumRec += m.recuperar;
+        if (m.breached) breachedCount++;
+      });
+
+      const resistir = Math.round(sumR / 5);
+      const detectar = Math.round(sumD / 5);
+      const recuperar = Math.round(sumRec / 5);
+
+      // Blast radius depende da escala, camadas suplantadas e inverso da proteção combinada
+      const defesaMedia = (resistir * 0.35 + detectar * 0.35 + recuperar * 0.30);
+      const fatorEscala = appState.escalaCibernetica * 18;
+      const penalidadeBreach = breachedCount * 11;
+      const reducaoGuardiao = appState.modoGuardiao ? 16 : 0;
+      let blast = Math.round(Math.max(8, Math.min(99, (100 - defesaMedia) * 0.55 + fatorEscala + penalidadeBreach - reducaoGuardiao)));
+
+      const reagir = Math.min(100, Math.round((detectar * 0.55 + recuperar * 0.45) + (appState.modoGuardiao ? 8 : 0)));
+      const bdInt = porCamada.bd ? Math.round((porCamada.bd.resistir + porCamada.bd.recuperar) / 2) : 50;
+
+      return {
+        resistir,
+        detectar,
+        recuperar,
+        reagir,
+        integridadeBD: bdInt,
+        blastRadius: blast,
+        breachedCount,
+        porCamada
+      };
+    }
+
+    // =========================================================================
+    // 5. ATUALIZAÇÃO DE CENÁRIO & RENDERIZAÇÃO PRINCIPAL
+    // =========================================================================
+    function atualizarCenario(setorMapeado) {
+      const valido = CENARIOS_DATA[setorMapeado] ? setorMapeado : `banking`;
+      appState.setorAtual = valido;
+
+      const selectEl = document.getElementById(`setorSelect`);
+      if (selectEl && selectEl.value !== valido) {
+        selectEl.value = valido;
+      }
+
+      renderTudo();
+      persistirEstado();
+    }
+
+    function handleSetorChange(valor) {
+      atualizarCenario(valor);
+    }
+
+    function renderTudo() {
+      const cenario = CENARIOS_DATA[appState.setorAtual];
+      const metricas = calcularMetricasSetor(appState.setorAtual);
+
+      // Header & Scenario Banner
+      setText(`cenarioTitulo`, cenario.nome);
+      setText(`cenarioSubtitulo`, cenario.subtitulo);
+      setText(`cenarioBadge`, cenario.badge);
+      setText(`breachedCountBadge`, `${metricas.breachedCount} / 5`);
+
+      const tagsWrap = document.getElementById(`cenarioTags`);
+      if (tagsWrap) {
+        tagsWrap.innerHTML = cenario.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(``);
+      }
+
+      // KPIs
+      setText(`kpiResistirVal`, `${metricas.resistir}%`);
+      setText(`kpiDetectarVal`, `${metricas.detectar}%`);
+      setText(`kpiRecuperarVal`, `${metricas.recuperar}%`);
+      setText(`kpiBlastVal`, `${metricas.blastRadius}%`);
+
+      let sevLabel = `Controlado (Contenção Local)`;
+      if (metricas.blastRadius >= 75) sevLabel = `Catastrófico (Cascata Intersetorial)`;
+      else if (metricas.blastRadius >= 55) sevLabel = `Crítico (Risco Sistêmico)`;
+      else if (metricas.blastRadius >= 35) sevLabel = `Elevado (Impacto Setorial)`;
+      setText(`kpiBlastCap`, sevLabel);
+
+      // 5 Layers Pipeline
+      renderPipeline(metricas);
+
+      // Layer Inspector
+      renderInspector();
+
+      // Sticky Notes
+      renderNotasMiro();
+
+      // Guardian & Cascade SVG
+      renderGuardianPanel(metricas);
+
+      // Charts
+      atualizarGraficos(metricas);
+
+      // Matrix Table
+      renderTabelaComparativa();
+
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function renderPipeline(metricas) {
+      const container = document.getElementById(`layersPipeline`);
+      if (!container) return;
+
+      container.innerHTML = LAYER_META.map((layer, idx) => {
+        const m = metricas.porCamada[layer.id];
+        const media = Math.round((m.resistir + m.detectar + m.recuperar) / 3);
+        const isSel = appState.camadaAtual === layer.id;
+        const classes = [
+          `layer-node`,
+          isSel ? `is-selected` : ``,
+          m.breached ? `is-breached` : ``
+        ].filter(Boolean).join(` `);
+
+        return `
+          <button type="button" class="${classes}" onclick="selecionarCamada('${layer.id}')">
+            <div class="layer-num">
+              <span>CAMADA 0${idx + 1}</span>
+              <span>${m.breached ? `SUPLANTADA` : `${media}%`}</span>
+            </div>
+            <div class="layer-name">${escapeHtml(layer.short)}</div>
+            <div class="layer-status-text">R:${m.resistir} · D:${m.detectar} · Rec:${m.recuperar}</div>
+            <div class="layer-score-bar">
+              <div class="layer-score-fill" style="width: ${media}%;"></div>
+            </div>
+          </button>
+        `;
+      }).join(``);
+    }
+
+    function renderInspector() {
+      const cenario = CENARIOS_DATA[appState.setorAtual];
+      const layerMeta = LAYER_META.find(l => l.id === appState.camadaAtual) || LAYER_META[0];
+      const layerData = cenario.camadas[layerMeta.id];
+      const layerState = getLayerState(appState.setorAtual, layerMeta.id);
+
+      setText(`inspLayerTag`, layerState.breached ? `CAMADA SUPLANTADA · MODO BREACH` : `ATIVA · ${cenario.codigo}`);
+      const tagEl = document.getElementById(`inspLayerTag`);
+      if (tagEl) {
+        tagEl.className = layerState.breached ? `tag tag-red` : `tag tag-orange`;
+      }
+      setText(`inspLayerTitle`, layerMeta.full);
+      setText(`btnBreachLabel`, layerState.breached ? `Restaurar Camada` : `Simular Suplantamento`);
+
+      const controlesUl = document.getElementById(`inspControlesList`);
+      if (controlesUl) {
+        controlesUl.innerHTML = layerData.controles.map(c => `<li>${escapeHtml(c)}</li>`).join(``);
+      }
+
+      const ameacasUl = document.getElementById(`inspAmeacasList`);
+      if (ameacasUl) {
+        ameacasUl.innerHTML = layerData.ameacas.map(a => `<li>${escapeHtml(a)}</li>`).join(``);
+      }
+
+      const toolsGrid = document.getElementById(`toolsGrid`);
+      if (toolsGrid) {
+        toolsGrid.innerHTML = TOOLS_CATALOG.map(tool => {
+          const enabled = Boolean(layerState.tools[tool.id]);
+          let stateClass = enabled ? `is-enabled` : ``;
+          let stateLabel = enabled ? `ATIVO` : `INATIVO`;
+          if (layerState.breached && enabled && tool.id === `firewall`) {
+            stateClass = `is-bypassed`;
+            stateLabel = `BYPASS`;
+          }
+          return `
+            <button type="button" class="tool-toggle ${stateClass}" onclick="toggleFerramenta('${tool.id}')">
+              <div class="tool-top">
+                <span>${escapeHtml(tool.name)}</span>
+                <span class="tool-state-pill">${stateLabel}</span>
+              </div>
+              <span class="tool-tactic">Tática: ${escapeHtml(tool.tactic)}</span>
+            </button>
+          `;
+        }).join(``);
+      }
+    }
+
+    // =========================================================================
+    // 6. INTERAÇÕES DE CAMADA, FERRAMENTAS & MODO GUARDIÃO
+    // =========================================================================
+    function selecionarCamada(layerId) {
+      appState.camadaAtual = layerId;
+      renderTudo();
+      persistirEstado();
+    }
+
+    function toggleFerramenta(toolId) {
+      setLayerState(appState.setorAtual, appState.camadaAtual, st => {
+        const nextTools = Object.assign({}, st.tools);
+        nextTools[toolId] = !nextTools[toolId];
+        return { tools: nextTools, breached: st.breached };
+      });
+      renderTudo();
+      persistirEstado();
+    }
+
+    function toggleBreachCamadaAtual() {
+      setLayerState(appState.setorAtual, appState.camadaAtual, st => ({
+        tools: st.tools,
+        breached: !st.breached
+      }));
+      renderTudo();
+      persistirEstado();
+    }
+
+    function simularSuplantamentoGlobal() {
+      // Simula invasão progressiva: suplanta Frontend e Telecom/LAN conforme escala
+      const alvos = appState.escalaCibernetica >= 3
+        ? [`frontend`, `telecom`, `lan`]
+        : [`frontend`, `ihc`];
+
+      alvos.forEach(layerId => {
+        setLayerState(appState.setorAtual, layerId, st => ({
+          tools: st.tools,
+          breached: true
+        }));
+      });
+      mostrarFeedback(`Suplantamento simulado em ${alvos.length} camadas de ${CENARIOS_DATA[appState.setorAtual].codigo}. Observe o impacto em Detectar e Recuperar!`);
+      renderTudo();
+      persistirEstado();
+    }
+
+    function restaurarDefesasSetor() {
+      delete appState.overrides[appState.setorAtual];
+      mostrarFeedback(`Controles padrão restaurados para ${CENARIOS_DATA[appState.setorAtual].codigo}.`);
+      renderTudo();
+      persistirEstado();
+    }
+
+    function toggleGuardianMode() {
+      appState.modoGuardiao = !appState.modoGuardiao;
+      renderTudo();
+      persistirEstado();
+    }
+
+    function atualizarEscalaSlider(val) {
+      selecionarEscala(Number(val));
+    }
+
+    function selecionarEscala(nivel) {
+      const clamped = Math.max(1, Math.min(4, Number(nivel) || 1));
+      appState.escalaCibernetica = clamped;
+      const slider = document.getElementById(`escalaRange`);
+      if (slider) slider.value = String(clamped);
+      renderTudo();
+      persistirEstado();
+    }
+
+    function renderGuardianPanel(metricas) {
+      const btn = document.getElementById(`btnGuardianMode`);
+      const btnTxt = document.getElementById(`guardianBtnText`);
+      const statusBar = document.getElementById(`guardianStatusBar`);
+      const pill = document.getElementById(`guardianPill`);
+
+      if (btn && btnTxt) {
+        if (appState.modoGuardiao) {
+          btn.classList.add(`btn-guardian-active`);
+          btn.classList.remove(`btn-orange`);
+          btnTxt.textContent = `Modo Guardião: ATIVO`;
+        } else {
+          btn.classList.remove(`btn-guardian-active`);
+          btn.classList.add(`btn-orange`);
+          btnTxt.textContent = `Modo Guardião: OFF`;
+        }
+      }
+
+      if (statusBar && pill) {
+        if (appState.modoGuardiao) {
+          statusBar.classList.add(`is-active`);
+          setText(`guardianModeHeading`, `Modo Guardião Cibernético ATIVO`);
+          setText(`guardianModeDesc`, `Resposta coordenada CSIRT + Redundância intersetorial ativada (+14% Detectar/Recuperar, -16% Blast).`);
+          pill.className = `tag tag-green`;
+          pill.textContent = `Guardião ON`;
+        } else {
+          statusBar.classList.remove(`is-active`);
+          setText(`guardianModeHeading`, `Modo Padrão (Auditoria Local)`);
+          setText(`guardianModeDesc`, `Ative o Modo Guardião para simular contenção coordenada e defesa em profundidade.`);
+          pill.className = `tag`;
+          pill.textContent = `Padrão`;
+        }
+      }
+
+      // Escala buttons & readout
+      const labelsEscala = {
+        1: `Nível 1 · Incidente Local (Endpoint)`,
+        2: `Nível 2 · Rede LAN / IHC`,
+        3: `Nível 3 · Crise Setorial (Core BD)`,
+        4: `Nível 4 · Ciberterrorismo Intersetorial`
+      };
+      setText(`escalaReadout`, labelsEscala[appState.escalaCibernetica]);
+      for (let i = 1; i <= 4; i++) {
+        const b = document.getElementById(`scaleBtn${i}`);
+        if (b) {
+          b.classList.toggle(`is-active`, i === appState.escalaCibernetica);
+        }
+      }
+
+      // Modéstia Cibernética diagnóstico
+      const modestyEl = document.getElementById(`modestyDiagnosis`);
+      if (modestyEl) {
+        if (metricas.breachedCount > 0) {
+          modestyEl.innerHTML = `<strong>Alerta Assume Breach (${metricas.breachedCount} camada(s) suplantada(s)):</strong> A resistência isolada caiu para <strong>${metricas.resistir}%</strong>. A sobrevivência operacional agora depende de <strong>Detectar (${metricas.detectar}%)</strong> via IDS/Honeypot e <strong>Recuperar (${metricas.recuperar}%)</strong> com backups imutáveis.`;
+        } else {
+          modestyEl.innerHTML = `Nenhuma barreira de <em>Resistir</em> (${metricas.resistir}%) é infalível contra quebra de senhas ou zero-days. Mantenha <em>Detectar</em> (${metricas.detectar}%) e <em>Recuperar</em> (${metricas.recuperar}%) ativos antes de simular suplantamento.`;
+        }
+      }
+
+      // Update SVG Intersectoral Cascade Map
+      const origemKey = appState.setorAtual;
+      const deps = CENARIOS_DATA[origemKey].dependencias;
+      const coords = {
+        banking: { x: 230, y: 48 },
+        saude: { x: 80, y: 124 },
+        energia: { x: 380, y: 124 },
+        logistica: { x: 135, y: 229 },
+        educacao: { x: 327, y: 229 }
+      };
+
+      const ring = document.getElementById(`svgBlastRing`);
+      if (ring && coords[origemKey]) {
+        ring.setAttribute(`cx`, String(coords[origemKey].x));
+        ring.setAttribute(`cy`, String(coords[origemKey].y));
+        ring.setAttribute(`r`, String(36 + Math.round(metricas.blastRadius * 0.7)));
+      }
+
+      Object.keys(CENARIOS_DATA).forEach(k => {
+        const node = document.getElementById(`node-${k}`);
+        const txt = document.getElementById(`svgRisk-${k}`);
+        if (!node || !txt) return;
+        const rect = node.querySelector(`rect`);
+        if (k === origemKey) {
+          if (rect) {
+            rect.setAttribute(`fill`, `var(--primary-container)`);
+            rect.setAttribute(`stroke`, `var(--error)`);
+          }
+          txt.textContent = `ORIGEM · ${metricas.blastRadius}%`;
+        } else {
+          const depWeight = deps[k] || 0.35;
+          const cascata = Math.min(98, Math.round(metricas.blastRadius * depWeight * (appState.escalaCibernetica >= 3 ? 1.05 : 0.72)));
+          if (rect) {
+            rect.setAttribute(`fill`, cascata >= 55 ? `var(--note-red)` : cascata >= 35 ? `var(--note-orange)` : `var(--background)`);
+            rect.setAttribute(`stroke`, cascata >= 55 ? `var(--error)` : `var(--outline)`);
+          }
+          txt.textContent = `CASCATA · ${cascata}%`;
+        }
+      });
+
+      const sevTag = document.getElementById(`cascadeSeverityTag`);
+      if (sevTag) {
+        if (appState.escalaCibernetica === 4 || metricas.blastRadius >= 70) {
+          sevTag.className = `tag tag-red`;
+          sevTag.textContent = `Ciberterrorismo Sistêmico`;
+        } else if (metricas.blastRadius >= 45) {
+          sevTag.className = `tag tag-orange`;
+          sevTag.textContent = `Efeito Cascata Elevado`;
+        } else {
+          sevTag.className = `tag tag-blue`;
+          sevTag.textContent = `Contenção Regional`;
+        }
+      }
+    }
+
+    // =========================================================================
+    // 7. STICKY NOTES MIRO-STYLE
+    // =========================================================================
+    function adicionarNotaMiro() {
+      const input = document.getElementById(`stickyInput`);
+      const tacticEl = document.getElementById(`stickyTactic`);
+      if (!input || !tacticEl) return;
+      const texto = input.value.trim();
+      if (!texto) {
+        mostrarFeedback(`Digite uma observação ou contramedida antes de fixar a nota.`);
+        return;
+      }
+
+      const nota = {
+        id: `n_${Date.now()}`,
+        setor: appState.setorAtual,
+        camada: appState.camadaAtual,
+        tatica: tacticEl.value,
+        texto
+      };
+      appState.notas.unshift(nota);
+      input.value = ``;
+      renderNotasMiro();
+      persistirEstado();
+    }
+
+    function removerNotaMiro(notaId) {
+      appState.notas = appState.notas.filter(n => n.id !== notaId);
+      renderNotasMiro();
+      persistirEstado();
+    }
+
+    function renderNotasMiro() {
+      const board = document.getElementById(`stickyBoard`);
+      if (!board) return;
+      const filtradas = appState.notas.filter(n => n.setor === appState.setorAtual);
+      if (filtradas.length === 0) {
+        board.innerHTML = `<div style="grid-column: 1 / -1; padding: var(--space-sm); border: 1px dashed var(--outline); font-size: 0.85rem; color: var(--on-surface-variant);">Nenhuma nota registrada ainda para ${escapeHtml(CENARIOS_DATA[appState.setorAtual].codigo)}. Use o campo acima para registrar vulnerabilidades ou táticas do grupo.</div>`;
+        return;
+      }
+
+      board.innerHTML = filtradas.map(n => {
+        const layerObj = LAYER_META.find(l => l.id === n.camada);
+        const layerShort = layerObj ? layerObj.short : n.camada;
+        return `
+          <article class="sticky-note tactic-${escapeHtml(n.tatica)}">
+            <div class="sticky-meta">
+              <span>${escapeHtml(layerShort.toUpperCase())} · ${escapeHtml(n.tatica.toUpperCase())}</span>
+              <button type="button" class="sticky-del" onclick="removerNotaMiro('${n.id}')" aria-label="Remover nota">✕</button>
+            </div>
+            <div>${escapeHtml(n.texto)}</div>
+          </article>
+        `;
+      }).join(``);
+    }
+
+    // =========================================================================
+    // 8. GRÁFICOS CHART.JS (RADAR, BARRAS POR CAMADA, BLAST RADIUS)
+    // =========================================================================
+    function getTokenColor(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function atualizarGraficos(metricas) {
+      if (typeof Chart === `undefined`) return;
+
+      const cBlue = getTokenColor(`--data-1`);
+      const cOrange = getTokenColor(`--data-2`);
+      const cRed = getTokenColor(`--data-3`);
+      const cInk = getTokenColor(`--data-4`);
+      const cCtx = getTokenColor(`--data-context`);
+      const cPos = getTokenColor(`--positive`);
+
+      // 1. Radar Chart: Bass et al.
+      const radarCtx = document.getElementById(`radarChart`);
+      if (radarCtx) {
+        const radarData = [
+          metricas.resistir,
+          metricas.detectar,
+          metricas.reagir,
+          metricas.recuperar,
+          metricas.integridadeBD
+        ];
+        const metaGuardiao = [85, 90, 88, 90, 92];
+
+        if (!radarChartInstance) {
+          radarChartInstance = new Chart(radarCtx, {
+            type: `radar`,
+            data: {
+              labels: [`Resistir`, `Detectar`, `Reagir/Conter`, `Recuperar`, `Integridade BD`],
+              datasets: [
+                {
+                  label: `Postura Atual`,
+                  data: radarData,
+                  borderColor: cBlue,
+                  backgroundColor: `rgba(0, 68, 204, 0.18)`,
+                  borderWidth: 3,
+                  pointBackgroundColor: cBlue
+                },
+                {
+                  label: `Meta Guardião`,
+                  data: metaGuardiao,
+                  borderColor: cOrange,
+                  backgroundColor: `rgba(234, 88, 12, 0.08)`,
+                  borderWidth: 2,
+                  borderDash: [5, 4],
+                  pointBackgroundColor: cOrange
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  min: 0,
+                  max: 100,
+                  ticks: { stepSize: 25, backdropColor: `transparent`, color: cInk },
+                  grid: { color: cCtx },
+                  angleLines: { color: cCtx },
+                  pointLabels: { color: cInk, font: { family: `Space Grotesk`, weight: `700`, size: 11 } }
+                }
+              },
+              plugins: {
+                legend: { position: `bottom`, labels: { color: cInk, font: { family: `Space Grotesk`, weight: `600` } } }
+              }
+            }
+          });
+        } else {
+          radarChartInstance.data.datasets[0].data = radarData;
+          radarChartInstance.update();
+        }
+      }
+
+      // 2. Bar Chart: 5 Camadas x Resistir / Detectar / Recuperar
+      const barCtx = document.getElementById(`layerBarChart`);
+      if (barCtx) {
+        const labels = LAYER_META.map(l => l.short);
+        const rArr = LAYER_META.map(l => metricas.porCamada[l.id].resistir);
+        const dArr = LAYER_META.map(l => metricas.porCamada[l.id].detectar);
+        const recArr = LAYER_META.map(l => metricas.porCamada[l.id].recuperar);
+
+        if (!layerBarChartInstance) {
+          layerBarChartInstance = new Chart(barCtx, {
+            type: `bar`,
+            data: {
+              labels,
+              datasets: [
+                { label: `Resistir`, data: rArr, backgroundColor: cBlue, borderColor: cInk, borderWidth: 1.5 },
+                { label: `Detectar`, data: dArr, backgroundColor: cOrange, borderColor: cInk, borderWidth: 1.5 },
+                { label: `Recuperar`, data: recArr, backgroundColor: cPos, borderColor: cInk, borderWidth: 1.5 }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { min: 0, max: 100, ticks: { color: cInk }, grid: { color: cCtx } },
+                x: { ticks: { color: cInk, font: { family: `Space Grotesk`, weight: `700`, size: 10 } }, grid: { display: false } }
+              },
+              plugins: {
+                legend: { position: `bottom`, labels: { color: cInk, font: { family: `Space Grotesk`, weight: `600` } } }
+              }
+            }
+          });
+        } else {
+          layerBarChartInstance.data.datasets[0].data = rArr;
+          layerBarChartInstance.data.datasets[1].data = dArr;
+          layerBarChartInstance.data.datasets[2].data = recArr;
+          layerBarChartInstance.update();
+        }
+      }
+
+      // 3. Blast Radius por Setor
+      const blastCtx = document.getElementById(`blastChart`);
+      if (blastCtx) {
+        const setoresKeys = Object.keys(CENARIOS_DATA);
+        const labelsBlast = setoresKeys.map(k => CENARIOS_DATA[k].codigo + ` ` + CENARIOS_DATA[k].nome.split(`·`)[1].trim().split(` `)[0]);
+        const valuesBlast = setoresKeys.map(k => calcularMetricasSetor(k).blastRadius);
+        const bgColors = setoresKeys.map(k => k === appState.setorAtual ? cRed : cBlue);
+
+        if (!blastChartInstance) {
+          blastChartInstance = new Chart(blastCtx, {
+            type: `bar`,
+            data: {
+              labels: labelsBlast,
+              datasets: [
+                {
+                  label: `Raio de Impacto (%)`,
+                  data: valuesBlast,
+                  backgroundColor: bgColors,
+                  borderColor: cInk,
+                  borderWidth: 2
+                }
+              ]
+            },
+            options: {
+              indexAxis: `y`,
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { min: 0, max: 100, ticks: { color: cInk }, grid: { color: cCtx } },
+                y: { ticks: { color: cInk, font: { family: `Space Grotesk`, weight: `700`, size: 11 } }, grid: { display: false } }
+              },
+              plugins: {
+                legend: { display: false }
+              }
+            }
+          });
+        } else {
+          blastChartInstance.data.datasets[0].data = valuesBlast;
+          blastChartInstance.data.datasets[0].backgroundColor = bgColors;
+          blastChartInstance.update();
+        }
+      }
+    }
+
+    function renderTabelaComparativa() {
+      const tbody = document.getElementById(`matrizTableBody`);
+      if (!tbody) return;
+      const vetoresResumo = {
+        banking: `Credential stuffing, Bypass WAF, SQLi / Exfiltração BD`,
+        saude: `Ransomware em LAN plana, IoMT sem AV, Senha compartilhada`,
+        logistica: `Spoofing GPS, Jamming Telecom, Adulteração cadeia custódia`,
+        energia: `Salto IT-OT, Protocolos legados sem TLS, Blackout SCADA`,
+        educacao: `DDoS/Clonagem NFC, Wi-Fi aberto migrando à LAN, Fraude API`
+      };
+
+      tbody.innerHTML = Object.keys(CENARIOS_DATA).map(k => {
+        const c = CENARIOS_DATA[k];
+        const m = calcularMetricasSetor(k);
+        const isCurrent = k === appState.setorAtual;
+        return `
+          <tr class="${isCurrent ? `is-current-row` : ``}" onclick="handleSetorChange('${k}')" style="cursor:pointer;">
+            <td><strong>${escapeHtml(c.nome)}</strong></td>
+            <td>${escapeHtml(c.subtitulo)}</td>
+            <td>${escapeHtml(vetoresResumo[k])}</td>
+            <td class="num-col">${m.resistir}%</td>
+            <td class="num-col">${m.detectar}%</td>
+            <td class="num-col">${m.recuperar}%</td>
+            <td class="num-col"><strong>${m.blastRadius}%</strong></td>
+          </tr>
+        `;
+      }).join(``);
+    }
+
+    // =========================================================================
+    // 9. CRONÔMETRO INTERATIVO DA AULA DE 90 MINUTOS (BLOCOS 1, 2, 3)
+    // =========================================================================
+    function formatarMMSS(seg) {
+      const s = Math.max(0, Math.floor(seg));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, `0`)}:${String(r).padStart(2, `0`)}`;
+    }
+
+    function atualizarUITimer() {
+      const b = appState.timer.blocoAtivo;
+      const restAtual = appState.timer.restante[b];
+      const durAtual = BLOCOS_TIMER[b].duracaoSeg;
+      const totalRestante = appState.timer.restante[1] + appState.timer.restante[2] + appState.timer.restante[3];
+      const totalAula = 90 * 60;
+
+      setText(`timerDisplay`, formatarMMSS(restAtual));
+      setText(`timerBlockTitle`, BLOCOS_TIMER[b].nome);
+      setText(`timerStatusText`, `AULA 90 MIN · ${appState.timer.rodando ? `EM ANDAMENTO` : `PAUSADO`} · TOTAL RESTANTE ${formatarMMSS(totalRestante)}`);
+
+      const pctBloco = Math.round(((durAtual - restAtual) / durAtual) * 100);
+      const pctGlobal = Math.round(((totalAula - totalRestante) / totalAula) * 100);
+      setText(`blockProgressLabel`, `Progresso do Bloco ${b}: ${pctBloco}%`);
+      setText(`globalProgressLabel`, `Progresso Aula (90m): ${pctGlobal}%`);
+
+      for (let i = 1; i <= 3; i++) {
+        const tab = document.getElementById(`tabBloco${i}`);
+        if (tab) tab.classList.toggle(`is-active`, i === b);
+
+        const segEl = document.getElementById(`progSeg${i}`);
+        if (segEl) {
+          const pct = Math.min(100, Math.max(0, ((BLOCOS_TIMER[i].duracaoSeg - appState.timer.restante[i]) / BLOCOS_TIMER[i].duracaoSeg) * 100));
+          segEl.style.width = `${pct}%`;
+        }
+      }
+
+      const btnStart = document.getElementById(`btnTimerStart`);
+      const btnPause = document.getElementById(`btnTimerPause`);
+      if (btnStart) btnStart.disabled = appState.timer.rodando;
+      if (btnPause) btnPause.disabled = !appState.timer.rodando;
+    }
+
+    function selecionarBlocoTimer(numBloco) {
+      appState.timer.blocoAtivo = numBloco;
+      atualizarUITimer();
+      persistirEstado();
+    }
+
+    function iniciarTimer() {
+      if (appState.timer.rodando) return;
+      appState.timer.rodando = true;
+      atualizarUITimer();
+
+      if (timerIntervalId) clearInterval(timerIntervalId);
+      timerIntervalId = setInterval(() => {
+        const b = appState.timer.blocoAtivo;
+        if (appState.timer.restante[b] > 0) {
+          appState.timer.restante[b]--;
+        } else if (b < 3) {
+          appState.timer.blocoAtivo = b + 1;
+          mostrarFeedback(`Tempo do Bloco ${b} concluído! Avançando para o Bloco ${b + 1}.`);
+        } else {
+          pausarTimer();
+          mostrarFeedback(`Aula de 90 minutos concluída!`);
+        }
+        atualizarUITimer();
+      }, 1000);
+    }
+
+    function pausarTimer() {
+      appState.timer.rodando = false;
+      if (timerIntervalId) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+      }
+      atualizarUITimer();
+      persistirEstado();
+    }
+
+    function resetarTimer() {
+      pausarTimer();
+      appState.timer.blocoAtivo = 1;
+      appState.timer.restante = {
+        1: BLOCOS_TIMER[1].duracaoSeg,
+        2: BLOCOS_TIMER[2].duracaoSeg,
+        3: BLOCOS_TIMER[3].duracaoSeg
+      };
+      atualizarUITimer();
+      persistirEstado();
+    }
+
+    // =========================================================================
+    // 10. PERSISTÊNCIA (NOTEBOOK APP API) & EXPORTAÇÃO CSV
+    // =========================================================================
+    async function persistirEstado() {
+      if (!window.notebookAppApi || typeof window.notebookAppApi.setAppState !== `function`) return;
+      try {
+        await window.notebookAppApi.setAppState({
+          setorAtual: appState.setorAtual,
+          camadaAtual: appState.camadaAtual,
+          modoGuardiao: appState.modoGuardiao,
+          escalaCibernetica: appState.escalaCibernetica,
+          overrides: appState.overrides,
+          notas: appState.notas,
+          timer: {
+            blocoAtivo: appState.timer.blocoAtivo,
+            restante: appState.timer.restante
+          }
+        });
+      } catch (err) {
+        // Silencioso em ambiente sem host
+      }
+    }
+
+    function exportarRelatorioCSV() {
+      const c = CENARIOS_DATA[appState.setorAtual];
+      const m = calcularMetricasSetor(appState.setorAtual);
+      const linhas = [
+        [`Setor`, `Camada`, `Resistir (%)`, `Detectar (%)`, `Recuperar (%)`, `Suplantada`].join(`,`)
+      ];
+      LAYER_META.forEach(l => {
+        const cm = m.porCamada[l.id];
+        linhas.push([`"${c.nome}"`, `"${l.short}"`, cm.resistir, cm.detectar, cm.recuperar, cm.breached ? `SIM` : `NAO`].join(`,`));
+      });
+      linhas.push([`"${c.nome}"`, `"RESUMO BLAST RADIUS"`, m.resistir, m.detectar, m.recuperar, `${m.blastRadius}%`].join(`,`));
+
+      const csvContent = linhas.join(`\n`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: csvContent,
+          contentType: `text/csv`,
+          encoding: `UTF-8`,
+          filename: `t35_cyber_${appState.setorAtual}.csv`
+        });
+        mostrarFeedback(`Relatório CSV de ${c.codigo} exportado.`);
+      }
+    }
+
+    // =========================================================================
+    // 11. HELPERS & INICIALIZAÇÃO (DOMContentLoaded)
+    // =========================================================================
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`)
+        .replace(/'/g, `&#39;`);
+    }
+
+    function mostrarFeedback(msg) {
+      const el = document.getElementById(`urlParamFeedback`);
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add(`is-visible`);
+    }
+
+    document.addEventListener(`DOMContentLoaded`, async function () {
+      // 1. Capturar parâmetro ?setor= da URL
+      const params = new URLSearchParams(window.location.search);
+      const rawSetor = params.get(`setor`);
+      const setorMapeadoDaUrl = mapearParametroSetor(rawSetor);
+
+      // 2. Restaurar estado salvo via notebookAppApi
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved) {
+            if (saved.setorAtual && CENARIOS_DATA[saved.setorAtual]) appState.setorAtual = saved.setorAtual;
+            if (saved.camadaAtual) appState.camadaAtual = saved.camadaAtual;
+            if (typeof saved.modoGuardiao === `boolean`) appState.modoGuardiao = saved.modoGuardiao;
+            if (saved.escalaCibernetica) appState.escalaCibernetica = saved.escalaCibernetica;
+            if (saved.overrides) appState.overrides = saved.overrides;
+            if (Array.isArray(saved.notas)) appState.notas = saved.notas;
+            if (saved.timer && saved.timer.restante) {
+              appState.timer.blocoAtivo = saved.timer.blocoAtivo || 1;
+              appState.timer.restante = Object.assign(appState.timer.restante, saved.timer.restante);
+            }
+          }
+        } catch (err) {
+          // Prosseguir com estado padrão
+        }
+      }
+
+      // 3. Associar ao <select id="setorSelect"> e executar atualizarCenario(setorMapeado)
+      const setorFinal = setorMapeadoDaUrl || appState.setorAtual || `banking`;
+      const setorSelect = document.getElementById(`setorSelect`);
+      if (setorSelect) {
+        setorSelect.value = setorFinal;
+      }
+      const sliderEscala = document.getElementById(`escalaRange`);
+      if (sliderEscala) {
+        sliderEscala.value = String(appState.escalaCibernetica);
+      }
+
+      if (setorMapeadoDaUrl) {
+        mostrarFeedback(`Parâmetro ?setor=${rawSetor} detectado e mapeado para "${setorMapeadoDaUrl}".`);
+      }
+
+      atualizarUITimer();
+      atualizarCenario(setorFinal);
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    });
+  </script>
+</body>
+</html>
