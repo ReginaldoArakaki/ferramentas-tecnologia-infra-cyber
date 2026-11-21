@@ -1,0 +1,2628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="bauhaus">
+  <title>Quadro Visual T35 — Ferramentas e Tecnologia Cyber (Dinâmicas 1 e 2)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Bauhaus surfaces */
+      --background: #f5f0e8;
+      --surface-container-low: #f2ede5;
+      --surface-container: #eee9e0;
+      --surface-container-high: #e8e3da;
+
+      /* Bauhaus ink */
+      --on-surface: #1a1a1a;
+      --on-surface-variant: #4a4a4a;
+
+      /* Bauhaus lines */
+      --outline: #1a1a1a;
+      --outline-variant: #d0cbc3;
+
+      /* Bauhaus accents */
+      --primary: #1a1a1a;
+      --on-primary: #ffffff;
+      --primary-container: #ffcc00;
+      --on-primary-container: #1a1a1a;
+      --secondary: #e63b2e;
+      --tertiary: #0055ff;
+      --error: #cc0000;
+      --on-error: #ffffff;
+
+      /* Semantic tokens harmonized with Bauhaus */
+      --positive: #0f6b3a;
+      --on-positive: #ffffff;
+      --warning: #9a7300;
+      --focus: #0055ff;
+
+      /* Data series */
+      --data-1: #e63b2e;
+      --data-2: #0055ff;
+      --data-3: #1a1a1a;
+      --data-4: #9a7300;
+      --data-context: #b5afa5;
+
+      /* Fonts */
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-label: 'Space Grotesk', sans-serif;
+
+      /* Shape */
+      --rounded: 0.125rem;
+      --rounded-lg: 0.25rem;
+      --rounded-full: 0.75rem;
+
+      /* Style effects */
+      --border-thick: 3px solid var(--outline);
+      --border-medium: 2px solid var(--outline);
+      --offset-shadow: 5px 5px 0 var(--outline);
+      --offset-shadow-sm: 3px 3px 0 var(--outline);
+      --rule-heavy: 6px solid var(--outline);
+
+      /* Type scale (Focused Tool) */
+      --display-size: clamp(1.85rem, 1.3rem + 2vw, 2.85rem);
+      --headline-size: clamp(1.25rem, 1.05rem + 0.65vw, 1.6rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.55;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1380px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Bauhaus Title & Masthead */
+    .masthead {
+      border-top: var(--rule-heavy);
+      border-bottom: var(--border-thick);
+      padding-block: var(--space-lg);
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: end;
+    }
+
+    .kicker {
+      display: inline-block;
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-xs) var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--display-size);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--on-surface);
+    }
+    .title mark {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      padding-inline: var(--space-xs);
+      box-decoration-break: clone;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 65ch;
+      color: var(--on-surface-variant);
+      font-size: var(--body-size);
+    }
+
+    .masthead-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    /* Bauhaus Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: transform var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out),
+                  color var(--dur-micro) var(--ease-out);
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--primary);
+      color: var(--on-primary);
+      transform: translate(-1px, -1px);
+    }
+    .btn:active:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: none;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-blue {
+      background: var(--tertiary);
+      color: var(--on-primary);
+    }
+    .btn-blue:hover:not(:disabled) {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-danger {
+      background: var(--error);
+      color: var(--on-error);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-sm {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    /* Controls Bar: Verticals & Dinâmica */
+    .control-deck {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .block {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow);
+      background: var(--surface-container-low);
+      padding: var(--space-md);
+    }
+
+    .block-accent-blue {
+      border-top: var(--space-sm) solid var(--tertiary);
+    }
+    .block-accent-yellow {
+      border-top: var(--space-sm) solid var(--primary-container);
+    }
+    .block-accent-red {
+      border-top: var(--space-sm) solid var(--secondary);
+    }
+
+    .section-label {
+      display: block;
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--space-sm);
+    }
+
+    .vertical-tabs, .mode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      background: var(--background);
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  transform var(--dur-micro) var(--ease-out);
+    }
+    .tab-btn:hover {
+      background: var(--surface-container-high);
+    }
+    .tab-btn.is-active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      box-shadow: var(--offset-shadow-sm);
+    }
+    .tab-btn.is-active-blue {
+      background: var(--tertiary);
+      color: var(--on-primary);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .tab-count {
+      display: inline-block;
+      padding: 2px var(--space-xs);
+      border: var(--border-medium);
+      background: var(--background);
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.7rem;
+      line-height: 1;
+    }
+
+    /* KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .kpi-card {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--surface-container-low);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .kpi-card.is-highlight {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .kpi-card.is-blue {
+      background: var(--tertiary);
+      color: var(--on-primary);
+    }
+    .kpi-card.is-blue .section-label,
+    .kpi-card.is-blue .kpi-sub {
+      color: var(--on-primary);
+    }
+    .kpi-value {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-sub {
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+
+    /* Main Miro Workspace */
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .toolbox {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    /* Tool Palette Cards */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+    .filter-chip {
+      min-height: 34px;
+      padding: var(--space-xs) var(--space-sm);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      border: var(--border-medium);
+      background: var(--background);
+      color: var(--on-surface);
+      cursor: pointer;
+    }
+    .filter-chip.is-active {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      max-height: 560px;
+      overflow-y: auto;
+      padding-right: var(--space-xs);
+    }
+
+    .tool-item {
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      background: var(--background);
+      padding: var(--space-sm) var(--space-md);
+      cursor: grab;
+      transition: transform var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .tool-item:hover {
+      background: var(--surface-container-high);
+      transform: translate(-1px, -1px);
+      box-shadow: var(--offset-shadow-sm);
+    }
+    .tool-item.is-selected {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border: var(--border-thick);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .tool-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .tool-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px var(--space-xs);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      background: var(--surface-container);
+      color: var(--on-surface);
+      white-space: nowrap;
+    }
+    .badge-blue {
+      background: var(--tertiary);
+      color: var(--on-primary);
+    }
+    .badge-yellow {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .badge-black {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .badge-error {
+      background: var(--error);
+      color: var(--on-error);
+    }
+    .badge-positive {
+      background: var(--positive);
+      color: var(--on-positive);
+    }
+
+    .tool-desc {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      line-height: 1.4;
+    }
+    .tool-item.is-selected .tool-desc {
+      color: var(--on-primary-container);
+    }
+
+    .tool-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      align-items: center;
+      margin-top: var(--space-xs);
+    }
+
+    /* Form Controls */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+    .field-label {
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface);
+    }
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      padding: var(--space-sm) var(--space-sm);
+      border: none;
+      border-bottom: var(--border-thick);
+      background: var(--background);
+      color: var(--on-surface);
+      font-size: 0.9rem;
+      border-radius: 0;
+    }
+    .field-select {
+      padding-right: var(--space-lg);
+    }
+    .field-textarea {
+      min-height: 68px;
+      resize: vertical;
+    }
+
+    /* Miro Canvas Container */
+    .miro-board {
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow);
+      background-color: var(--background);
+      background-image: radial-gradient(var(--outline-variant) 1.5px, transparent 1.5px);
+      background-size: 20px 20px;
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .board-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--border-thick);
+      background: var(--background);
+      padding: var(--space-md);
+      border: var(--border-medium);
+    }
+
+    .board-title-group h2 {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--headline-size);
+      letter-spacing: -0.02em;
+      margin: 0 0 var(--space-xs) 0;
+    }
+    .board-title-group p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+    }
+
+    .view-switch {
+      display: flex;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+    }
+
+    /* Status Notice Strip */
+    .status-banner {
+      padding: var(--space-sm) var(--space-md);
+      border: var(--border-medium);
+      background: var(--surface-container);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .status-banner.is-alert {
+      border-left: 8px solid var(--secondary);
+      background: var(--surface-container-low);
+    }
+    .status-banner.is-success {
+      border-left: 8px solid var(--positive);
+      background: var(--surface-container-low);
+    }
+
+    /* 5 Architecture Layers Swimlanes */
+    .layers-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .layer-connector {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+    }
+    .layer-connector.is-breach-path {
+      color: var(--error);
+    }
+
+    .layer-lane {
+      container-type: inline-size;
+      border: var(--border-thick);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+      box-shadow: var(--offset-shadow-sm);
+      padding: var(--space-md);
+      transition: background-color var(--dur-short) var(--ease-out),
+                  transform var(--dur-micro) var(--ease-out);
+      position: relative;
+    }
+    .layer-lane.is-drag-over {
+      background: var(--primary-container);
+      transform: translate(-2px, -2px);
+    }
+    .layer-lane.is-compromised {
+      border-top: 8px solid var(--secondary);
+    }
+    .layer-lane.is-resilient {
+      border-top: 8px solid var(--positive);
+    }
+
+    .layer-inner {
+      display: grid;
+      grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+      gap: var(--space-md);
+      align-items: start;
+    }
+
+    @container (max-width: 640px) {
+      .layer-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .layer-meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      border-right: var(--border-medium);
+      padding-right: var(--space-md);
+    }
+    @container (max-width: 640px) {
+      .layer-meta {
+        border-right: none;
+        border-bottom: var(--border-medium);
+        padding-right: 0;
+        padding-bottom: var(--space-sm);
+      }
+    }
+
+    .layer-num {
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--on-surface-variant);
+    }
+    .layer-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.125rem;
+      margin: 0;
+      line-height: 1.15;
+    }
+    .layer-vertical-ctx {
+      margin: var(--space-xs) 0 0 0;
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--background);
+      border: var(--border-medium);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+
+    .layer-canvas-zone {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .layer-zone-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .sticky-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+
+    /* Miro Sticky Note / Tool Card */
+    .sticky-card {
+      border: var(--border-medium);
+      border-radius: var(--rounded);
+      box-shadow: var(--offset-shadow-sm);
+      background: var(--background);
+      padding: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .sticky-card.is-custom-note {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .sticky-card.is-bypassed {
+      border: var(--border-thick);
+      background: var(--surface-container-high);
+    }
+
+    .sticky-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-xs);
+    }
+    .sticky-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.875rem;
+      line-height: 1.2;
+    }
+    .sticky-body {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      margin: 0;
+      color: var(--on-surface-variant);
+    }
+    .sticky-card.is-custom-note .sticky-body {
+      color: var(--on-primary-container);
+    }
+
+    .sticky-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-top: auto;
+      padding-top: var(--space-xs);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .mini-btn {
+      min-height: 28px;
+      padding: 2px var(--space-xs);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: var(--border-medium);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      cursor: pointer;
+    }
+    .mini-btn:hover {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .mini-btn-danger:hover {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    .empty-drop-hint {
+      border: 2px dashed var(--outline);
+      padding: var(--space-md);
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      background: var(--background);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Dinâmica 2: Modesty & Bass Tactics inside Layer */
+    .modesty-layer-box {
+      margin-top: var(--space-xs);
+      padding: var(--space-sm);
+      border: var(--border-medium);
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .breach-callout {
+      padding: var(--space-xs) var(--space-sm);
+      border-left: 6px solid var(--secondary);
+      background: var(--surface-container);
+      font-size: 0.8125rem;
+    }
+    .breach-callout strong {
+      color: var(--error);
+    }
+
+    .tactics-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      align-items: center;
+    }
+
+    .tactic-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 3px var(--space-sm);
+      border: var(--border-medium);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--surface-container-low);
+    }
+    .tactic-pill.tactic-resist {
+      background: var(--tertiary);
+      color: var(--on-primary);
+    }
+    .tactic-pill.tactic-detect {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .tactic-pill.tactic-recover {
+      background: var(--positive);
+      color: var(--on-positive);
+    }
+
+    /* 5x5 Class Matrix View */
+    .matrix-wrap {
+      overflow-x: auto;
+      border: var(--border-thick);
+      background: var(--background);
+    }
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+    }
+    .matrix-table th, .matrix-table td {
+      border: var(--border-medium);
+      padding: var(--space-sm);
+      text-align: left;
+      vertical-align: top;
+    }
+    .matrix-table thead th {
+      background: var(--surface-container-high);
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: var(--border-thick);
+    }
+    .matrix-cell-btn {
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      padding: var(--space-xs);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .matrix-cell-btn:hover {
+      background: var(--primary-container);
+    }
+
+    /* Attack Scenario Card in Dinâmica 2 Toolbox */
+    .scenario-card {
+      border: var(--border-medium);
+      background: var(--background);
+      padding: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+    .scenario-card.is-active-attack {
+      border: var(--border-thick);
+      border-left: 8px solid var(--secondary);
+      box-shadow: var(--offset-shadow-sm);
+    }
+
+    .tactic-group {
+      border-top: var(--border-medium);
+      padding-top: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    /* Reference Footer Section */
+    .divider {
+      border-top: var(--rule-heavy);
+      margin-block: var(--space-lg) var(--space-md);
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .study-card {
+      border: var(--border-thick);
+      background: var(--surface-container-low);
+      box-shadow: var(--offset-shadow-sm);
+      padding: var(--space-md);
+    }
+    .study-card h3 {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1rem;
+      margin: var(--space-xs) 0;
+    }
+    .study-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+    }
+
+    .sources-footer {
+      border-top: var(--border-thick);
+      padding-top: var(--space-md);
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    .inline-feedback {
+      font-family: var(--font-label);
+      font-weight: 700;
+      font-size: var(--label-size);
+      padding: var(--space-xs) var(--space-sm);
+      border: var(--border-medium);
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1040px) {
+      .masthead {
+        grid-template-columns: 1fr;
+      }
+      .control-deck {
+        grid-template-columns: 1fr;
+      }
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid {
+        padding: var(--space-sm);
+        gap: var(--space-md);
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .miro-board {
+        padding: var(--space-sm);
+      }
+      .btn, .tab-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+    <!-- Cabeçalho da Oficina -->
+    <header class="masthead">
+      <div>
+        <span class="kicker">Aula T35 · Semana 07 · Ferramentas e Tecnologia Cyber</span>
+        <h1 class="title">Quadro Visual <mark>T35 Cyber</mark> — Dinâmicas 1 e 2</h1>
+        <p class="lede">
+          Workspace colaborativo para mapear ferramentas de segurança (Autoestudos 1 a 4) nas 5 Camadas de Arquitetura e conduzir o Exercício da Modéstia com as táticas de Resistir, Detectar e Recuperar de Len Bass nos 5 Verticais de PBL.
+        </p>
+      </div>
+      <div class="masthead-actions">
+        <button type="button" class="btn btn-primary" id="btn-load-example" onclick="loadExamplePreset()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Carregar Exemplo da Vertical
+        </button>
+        <button type="button" class="btn" id="btn-export" onclick="exportBoardReport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar Roteiro (.txt)
+        </button>
+        <button type="button" class="btn btn-danger" id="btn-reset-board" onclick="handleResetClick(this)">
+          Limpar Vertical
+        </button>
+      </div>
+    </header>
+
+    <!-- Barra de Seleção de Vertical PBL & Dinâmica -->
+    <section class="control-deck" aria-label="Controles de Vertical e Dinâmica">
+      <div class="block block-accent-yellow">
+        <span class="section-label">1. Selecione a Vertical de PBL (5 Cenários da Turma)</span>
+        <div class="vertical-tabs" id="vertical-tabs" role="tablist" aria-label="Verticais de PBL"></div>
+      </div>
+      <div class="block block-accent-blue">
+        <span class="section-label">2. Escolha a Dinâmica de Sala</span>
+        <div class="mode-tabs" role="tablist" aria-label="Modo da Dinâmica">
+          <button type="button" class="tab-btn is-active" id="mode-btn-d1" onclick="setMode('d1')">
+            Dinâmica 1 · Mapear Ferramentas
+          </button>
+          <button type="button" class="tab-btn" id="mode-btn-d2" onclick="setMode('d2')">
+            Dinâmica 2 · Exercício da Modéstia
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Termômetro de Progresso & Resiliência -->
+    <section class="kpi-grid" aria-label="Indicadores do Quadro">
+      <div class="kpi-card is-highlight">
+        <span class="section-label">Vertical Ativa</span>
+        <div class="kpi-value" id="kpi-vertical-name">Banking</div>
+        <p class="kpi-sub" id="kpi-vertical-sub">Setor Financeiro &amp; Pagamentos</p>
+      </div>
+      <div class="kpi-card">
+        <span class="section-label">Cobertura das 5 Camadas</span>
+        <div class="kpi-value" id="kpi-layers-covered">0 / 5</div>
+        <p class="kpi-sub" id="kpi-layers-sub">Camadas com controles mapeados</p>
+      </div>
+      <div class="kpi-card">
+        <span class="section-label">Post-its &amp; Controles (D1)</span>
+        <div class="kpi-value" id="kpi-tools-count">0</div>
+        <p class="kpi-sub" id="kpi-global-count">0 controles no quadro total</p>
+      </div>
+      <div class="kpi-card is-blue">
+        <span class="section-label">Resiliência Len Bass (D2)</span>
+        <div class="kpi-value" id="kpi-bass-score">0%</div>
+        <p class="kpi-sub" id="kpi-bass-status">Aguardando simulação de ataque</p>
+      </div>
+    </section>
+
+    <!-- Workspace Estilo Miro -->
+    <main class="workspace">
+      <!-- Painel Esquerdo: Toolbox Contextual (D1 ou D2) -->
+      <aside class="toolbox" id="toolbox-panel">
+        <!-- Renderizado dinamicamente conforme Dinâmica 1 ou Dinâmica 2 -->
+      </aside>
+
+      <!-- Canvas Direito: Quadro das 5 Camadas ou Matriz 5x5 -->
+      <section class="miro-board" aria-label="Quadro Visual de Arquitetura">
+        <div class="board-toolbar">
+          <div class="board-title-group">
+            <h2 id="board-heading">Quadro de Arquitetura — Banking</h2>
+            <p id="board-subtitle">
+              Arraste ferramentas ou selecione um controle na paleta e clique na camada correspondente para construir a defesa em profundidade.
+            </p>
+          </div>
+          <div class="view-switch">
+            <button type="button" class="btn btn-sm btn-primary" id="view-btn-canvas" onclick="setBoardView('canvas')">
+              Quadro 5 Camadas
+            </button>
+            <button type="button" class="btn btn-sm" id="view-btn-matrix" onclick="setBoardView('matrix')">
+              Matriz 5×5 da Turma
+            </button>
+          </div>
+        </div>
+
+        <div id="board-feedback" class="status-banner" aria-live="polite">
+          <span id="board-feedback-text">Pronto para iniciar a Dinâmica 1. Selecione uma ferramenta à esquerda ou arraste-a para uma das 5 camadas.</span>
+          <span class="badge badge-black" id="board-mode-badge">MODO: DINÂMICA 1</span>
+        </div>
+
+        <div id="board-content">
+          <!-- Renderizado dinamicamente: 5 Camadas ou Matriz 5x5 -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Guia dos Autoestudos 1 a 4 & Referências -->
+    <section aria-label="Fundamentação dos Autoestudos">
+      <div class="divider"></div>
+      <span class="kicker">Base Teórica · Semana 07</span>
+      <h2 class="title" style="font-size: var(--headline-size); margin-bottom: var(--space-md);">
+        Conexão com os Autoestudos 1 a 4 e Táticas de Len Bass
+      </h2>
+      <div class="study-grid">
+        <article class="study-card">
+          <span class="badge badge-black">Autoestudo 1</span>
+          <h3>Redes Distribuídas &amp; Fronteiras</h3>
+          <p>Redes locais (LAN) e remotas; dispositivos de conexão, roteamento e gateway envolvidos na segurança; avaliação de pontos de controle e vulnerabilidades alinhados à ISO 27001.</p>
+        </article>
+        <article class="study-card">
+          <span class="badge badge-blue">Autoestudo 2</span>
+          <h3>Criptografia &amp; Password Cracking</h3>
+          <p>Proteção de dados em trânsito e repouso, funções de hash, resistência à quebra de senhas e autenticação multifator (MFA) contra ataques de dicionário e força bruta (Machado, 2014).</p>
+        </article>
+        <article class="study-card">
+          <span class="badge badge-yellow">Autoestudo 3</span>
+          <h3>Controle de Redes Distribuídas</h3>
+          <p>Sistemas básicos de controle: protocolos seguros, antivírus/EDR, monitoração contínua, detecção e prevenção de intrusão (IDS/IPS), WAF e armadilhas (honeypots).</p>
+        </article>
+        <article class="study-card">
+          <span class="badge badge-error">Autoestudo 4</span>
+          <h3>Vulnerabilidade por Infraestrutura</h3>
+          <p>Revisão sistêmica considerando processos, usuários, operadores, gestores, aplicações, integrações internas/externas e redes. Táticas de Resistir, Detectar e Recuperar (Bass et al., Cap. 21).</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="sources-footer">
+      <span>
+        Fontes: Material de Instrução T35 — Prof. Reginaldo Arakaki (Semana 07); Machado, F. N. R. (2014), <em>Segurança da Informação</em>; Bass, L., Clements, P. &amp; Kazman, R. (2021), <em>Software Architecture in Practice</em>, Cap. 21.
+      </span>
+      <span id="persistence-indicator">Estado salvo automaticamente no caderno</span>
+    </footer>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    /* =====================================================================
+       DADOS DO DOMÍNIO (T35 — 5 Camadas, 5 Verticais PBL, Autoestudos 1–4,
+       Cenários do Exercício da Modéstia e Táticas de Len Bass)
+       ===================================================================== */
+
+    const LAYERS = [
+      {
+        id: `frontend`,
+        num: `Camada 01`,
+        name: `Frontend B/C`,
+        subtitle: `Business / Consumer`,
+        role: `Ponto de contato com clientes finais, cidadãos ou parceiros externos.`
+      },
+      {
+        id: `telecom`,
+        num: `Camada 02`,
+        name: `Telecom Web`,
+        subtitle: `Borda, Links & APIs`,
+        role: `Canais públicos, DNS, roteamento externo, APIs expostas e acessos remotos.`
+      },
+      {
+        id: `ihc`,
+        num: `Camada 03`,
+        name: `IHC`,
+        subtitle: `Interface Humano-Computador`,
+        role: `Operadores, usuários internos, gestores e estações de trabalho (Autoestudo 4).`
+      },
+      {
+        id: `lan`,
+        num: `Camada 04`,
+        name: `LAN`,
+        subtitle: `Rede Local & Serviços`,
+        role: `Switches, roteadores internos, gateways, microserviços e integrações internas.`
+      },
+      {
+        id: `bd`,
+        num: `Camada 05`,
+        name: `BD Interno / Externo`,
+        subtitle: `Dados & Integrações Externas`,
+        role: `Bancos transacionais, storages, backups e conexões com bases de terceiros.`
+      }
+    ];
+
+    const VERTICALS = [
+      {
+        id: `banking`,
+        name: `Banking`,
+        domain: `Setor Financeiro & Pagamentos`,
+        layerCtx: {
+          frontend: `App Mobile Banking, Internet Banking B2C e Portal Corporate PJ`,
+          telecom: `Gateways Open Finance, enlaces TLS externos e rede de mensageria PIX`,
+          ihc: `Mesa de Operações, gerentes de agência e analistas de prevenção à fraude`,
+          lan: `Barramento de transações, motor de autorização e gateways internos`,
+          bd: `Ledger contábil interno, cofre de chaves e birôs de crédito externos`
+        },
+        attacks: [
+          {
+            id: `atk-bank-1`,
+            title: `Zero-Day em API PIX + Bypass de WAF & Credential Stuffing`,
+            summary: `Payload JSON malformado contorna assinaturas do WAF na Telecom Web enquanto credenciais vazadas sem MFA robusto permitem pivoteamento na LAN.`,
+            affectedLayers: [`frontend`, `telecom`, `lan`],
+            bypassExplanation: {
+              frontend: `Tokens de sessão capturados em dispositivo cliente comprometido tornam o login legítimo aos olhos do app.`,
+              telecom: `O WAF bloqueia ataques conhecidos (SQLi/XSS), mas não reconhece abuso lógico em novo endpoint da API.`,
+              lan: `Uma vez dentro da rede de aplicações, falta microssegmentação entre APIs e serviços internos.`
+            },
+            modestyLesson: `Confiar apenas em WAF na borda e senha simples gera falsa segurança: ataques lógicos e credenciais reutilizadas atravessam o perímetro.`
+          },
+          {
+            id: `atk-bank-2`,
+            title: `Phishing no Backoffice (IHC) + Exfiltração Silenciosa no BD`,
+            summary: `Operador com privilégio amplo cai em engenharia social; invasor usa ferramentas administrativas nativas na LAN para extrair dados do BD.`,
+            affectedLayers: [`ihc`, `lan`, `bd`],
+            bypassExplanation: {
+              ihc: `Antivírus de assinatura não bloqueia acesso legítimo iniciado por operador enganado (fator humano / AE4).`,
+              lan: `Tráfego interno sem monitoramento comportamental permite consultas em massa fora do horário padrão.`,
+              bd: `Banco interno sem criptografia em nível de campo e sem auditoria imutável expõe registros de clientes.`
+            },
+            modestyLesson: `Infraestrutura técnica impecável falha quando processos, operadores e gestores (Autoestudo 4) possuem privilégios excessivos.`
+          }
+        ]
+      },
+      {
+        id: `hospital`,
+        name: `Hospital`,
+        domain: `Saúde Digital & Equipamentos Clínicos`,
+        layerCtx: {
+          frontend: `Portal do Paciente, Telemedicina e Totens de Auto-atendimento`,
+          telecom: `Enlaces entre unidades, VPN de corpo clínico e troca HL7/FHIR`,
+          ihc: `Estações de enfermagem compartilhadas, médicos plantonistas e recepção`,
+          lan: `Rede clínica interna, servidores PACS de imagem e dispositivos médicos IoT`,
+          bd: `Prontuário Eletrônico (PEP) interno + laboratórios e operadoras externas`
+        },
+        attacks: [
+          {
+            id: `atk-hosp-1`,
+            title: `Ransomware via Estação de Enfermagem (IHC) na LAN Clínica`,
+            summary: `Estação compartilhada em plantão executa artefato malicioso que se propaga lateralmente pela LAN plana e paralisa o Prontuário Eletrônico.`,
+            affectedLayers: [`ihc`, `lan`, `bd`],
+            bypassExplanation: {
+              ihc: `Sessões compartilhadas sem bloqueio rápido e USB liberado contornam políticas de perímetro.`,
+              lan: `Falta de VLANs separando estações administrativas de equipamentos médicos e servidores PACS.`,
+              bd: `Backups conectados à mesma rede são criptografados junto com o Prontuário Eletrônico.`
+            },
+            modestyLesson: `Em ambiente hospitalar, disponibilidade é vida: um firewall de borda não impede um incidente iniciado dentro da própria estação clínica.`
+          },
+          {
+            id: `atk-hosp-2`,
+            title: `Quebra de Senha Legada em Integração Externa (Laboratório)`,
+            summary: `Serviço de integração laboratorial na Telecom Web sofre password cracking (AE2) e injeta resultados adulterados no BD.`,
+            affectedLayers: [`telecom`, `bd`],
+            bypassExplanation: {
+              telecom: `Porta de API legada aceita múltiplas tentativas sem bloqueio progressivo nem MFA de máquina.`,
+              bd: `Integração externa grava direto em tabelas de laudos sem validação de integridade ou quarentena.`
+            },
+            modestyLesson: `Integrações externas (Autoestudo 4) são extensões da sua superfície de ataque; senhas fracas em sistemas legados anulam controles modernos.`
+          }
+        ]
+      },
+      {
+        id: `policia`,
+        name: `Polícia`,
+        domain: `Segurança Pública & Evidências Digitais`,
+        layerCtx: {
+          frontend: `Delegacia Eletrônica Web e Canal de Denúncias Anônimas`,
+          telecom: `Links criptografados de viaturas, Rádio IP e rede interinstitucional`,
+          ihc: `Terminais de despacho (COPOM), escrivães e peritos forenses`,
+          lan: `Servidores de inquéritos, cofre de evidências digitais e videomonitoramento`,
+          bd: `Base de boletins/mandados interna + sistemas nacionais e Judiciário`
+        },
+        attacks: [
+          {
+            id: `atk-pol-1`,
+            title: `Comprometimento de Gateway de Viatura + Alvo em Evidências (BD)`,
+            summary: `Gateway remoto com credencial padrão é explorado via Telecom Web; invasor tenta alcançar a LAN e adulterar cadeia de custódia.`,
+            affectedLayers: [`telecom`, `lan`, `bd`],
+            bypassExplanation: {
+              telecom: `Gateway remoto de campo exposto sem rotação de certificados nem inspeção de anomalia.`,
+              lan: `Rede de viaturas compartilha rota direta com servidores de arquivo de delegacia.`,
+              bd: `Ausência de trilha imutável e assinatura criptográfica em laudos ameaça a validade jurídica.`
+            },
+            modestyLesson: `Dispositivos remotos distribuídos (Autoestudo 1) exigem isolamento estrito para que uma brecha em campo não comprometa a custódia central.`
+          },
+          {
+            id: `atk-pol-2`,
+            title: `DDoS na Delegacia Eletrônica + Sequestro de Sessão IHC`,
+            summary: `Inundação de tráfego no portal público mascara ataque direcionado a sessões abertas no centro de despacho.`,
+            affectedLayers: [`frontend`, `telecom`, `ihc`],
+            bypassExplanation: {
+              frontend: `Portal sem absorção de tráfego ou cache estático fica indisponível ao cidadão.`,
+              telecom: `Enlace saturado atrasa alertas de monitoramento e reduz visibilidade do SOC.`,
+              ihc: `Operadores em contingência recorrem a acessos alternativos sem verificação adicional.`
+            },
+            modestyLesson: `Ataques combinados usam ruído volumétrico na borda para explorar pressa e falhas operacionais na camada humana (IHC).`
+          }
+        ]
+      },
+      {
+        id: `energia`,
+        name: `Energia`,
+        domain: `Smart Grid, Subestações & Distribuição`,
+        layerCtx: {
+          frontend: `Agência Virtual do Consumidor e Painel de Geração Distribuída`,
+          telecom: `Links satélite/celular de subestações e telemetria de medidores`,
+          ihc: `Centro de Operação do Sistema (COS) e engenheiros de manutenção`,
+          lan: `Rede OT/SCADA, CLPs de subestação e ponte com rede corporativa IT`,
+          bd: `Historiador de carga e faturamento + integração com Operador Nacional`
+        },
+        attacks: [
+          {
+            id: `atk-ener-1`,
+            title: `Travessia IT/OT via Acesso de Manutenção + Comando Falso SCADA`,
+            summary: `VPN de fornecedor na Telecom Web é reutilizada sem MFA; invasor atravessa gateway mal segmentado até a LAN SCADA e atua no COS.`,
+            affectedLayers: [`telecom`, `ihc`, `lan`],
+            bypassExplanation: {
+              telecom: `Túnel VPN de terceirizado termina diretamente próximo à zona de controle sem bastion host.`,
+              ihc: `Tela do operador no COS exibe estado forjado enquanto comandos não autorizados são disparados.`,
+              lan: `Protocolos industriais legados na LAN OT não possuem autenticação nativa de comandos.`
+            },
+            modestyLesson: `Em infraestrutura crítica, "air-gap" teórico raramente existe na prática; acessos remotos de terceiros são o atalho mais comum.`
+          },
+          {
+            id: `atk-ener-2`,
+            title: `Spoofing de Medidores + Corrupção do Historiador (BD)`,
+            summary: `Dispositivos embarcados clonados injetam leituras falsas em massa pela Telecom Web, saturando e distorcendo o BD de despacho.`,
+            affectedLayers: [`frontend`, `telecom`, `bd`],
+            bypassExplanation: {
+              frontend: `Chaves simétricas compartilhadas em medidores de campo (AE2 — embarcados) são extraídas.`,
+              telecom: `Volume anômalo de pacotes válidos em formato passa pelo firewall tradicional.`,
+              bd: `Historiador aceita séries temporais sem verificação de coerência física ou assinatura por dispositivo.`
+            },
+            modestyLesson: `Criptografia sem gestão individual de chaves por dispositivo embarcado colapsa quando uma única unidade é capturada fisicamente.`
+          }
+        ]
+      },
+      {
+        id: `transporte`,
+        name: `Transporte`,
+        domain: `Mobilidade, Bilhetagem & Controle Viário`,
+        layerCtx: {
+          frontend: `App de Bilhetagem/Rotas do Passageiro e Painéis de Estação`,
+          telecom: `Rede 4G/Fibra de validadores embarcadose controladores semafóricos`,
+          ihc: `Centro de Controle Operacional (CCO) e despachantes de frota`,
+          lan: `Servidores de compensação tarifária, pátios e rede de sinalização`,
+          bd: `Base de cartões/tarifação interna + câmara de compensação externa`
+        },
+        attacks: [
+          {
+            id: `atk-tran-1`,
+            title: `Clonagem em Validador Embarcado + Fraude na Sincronização (BD)`,
+            summary: `Validador de pátio comprometido envia lotes adulterados durante a sincronização noturna da LAN para o BD de tarifação.`,
+            affectedLayers: [`telecom`, `lan`, `bd`],
+            bypassExplanation: {
+              telecom: `Canal de sincronização aceita pacotes offline sem atestado criptográfico do hardware.`,
+              lan: `Servidor de pátio confia cegamente nos arquivos enviados pelos ônibus ao entrar na garagem.`,
+              bd: `Câmara de compensação processa créditos sem detecção de discrepância estatística.`
+            },
+            modestyLesson: `Sistemas distribuídos com operação offline exigem validação criptográfica e reconciliação de anomalias antes de consolidar o BD.`
+          },
+          {
+            id: `atk-tran-2`,
+            title: `Exploração no Painel CCO (IHC) + Paralisação Semafórica`,
+            summary: `Vulnerabilidade na interface web de monitoramento afeta operadores do CCO e força controladores da LAN a entrarem em modo degradado.`,
+            affectedLayers: [`frontend`, `ihc`, `lan`],
+            bypassExplanation: {
+              frontend: `Serviço de telemetria pública compartilha servidor ou biblioteca vulnerável com painel interno.`,
+              ihc: `Operadores perdem visibilidade em tempo real dos corredores e semáforos críticos.`,
+              lan: `Falta isolamento entre rede de painéis informativos e rede de controle viário.`
+            },
+            modestyLesson: `Quando o ataque atinge a visibilidade do operador (IHC), o plano de recuperação manual precisa existir independente da rede.`
+          }
+        ]
+      }
+    ];
+
+    const TOOLS = [
+      {
+        id: `firewall`,
+        name: `Firewall / NGFW`,
+        study: `AE1`,
+        studyLabel: `AE1 · Redes`,
+        desc: `Filtragem de pacotes, zonas DMZ/LAN e bloqueio de portas entre segmentos locais e remotos.`,
+        suggestedLayer: `telecom`,
+        defaultNote: `Segmenta tráfego entre borda externa e zonas internas com regras least-privilege.`
+      },
+      {
+        id: `waf`,
+        name: `WAF (Web App Firewall)`,
+        study: `AE3`,
+        studyLabel: `AE3 · Controle`,
+        desc: `Inspeção de camada HTTP/HTTPS contra SQL Injection, XSS e abusos em APIs.`,
+        suggestedLayer: `telecom`,
+        defaultNote: `Filtra requisições maliciosas antes que atinjam aplicações e endpoints expostos.`
+      },
+      {
+        id: `ids_ips`,
+        name: `IDS / IPS`,
+        study: `AE3`,
+        studyLabel: `AE3 · Controle`,
+        desc: `Detecção e prevenção de intrusão por assinaturas e anomalias no tráfego de rede.`,
+        suggestedLayer: `lan`,
+        defaultNote: `Monitora tráfego leste-oeste na LAN para detectar varreduras e movimentação lateral.`
+      },
+      {
+        id: `criptografia`,
+        name: `Criptografia (TLS / AES / KMS)`,
+        study: `AE2`,
+        studyLabel: `AE2 · Cripto`,
+        desc: `Confidencialidade e integridade em trânsito (TLS) e em repouso (AES + gestão de chaves).`,
+        suggestedLayer: `bd`,
+        defaultNote: `Protege dados sensíveis em repouso no BD e canais cifrados entre camadas.`
+      },
+      {
+        id: `mfa`,
+        name: `MFA & Política de Senhas`,
+        study: `AE2`,
+        studyLabel: `AE2 · Cripto`,
+        desc: `Autenticação multifator e hashing robusto contra password cracking e credential stuffing.`,
+        suggestedLayer: `ihc`,
+        defaultNote: `Exige segundo fator para operadores, gestores e acessos administrativos críticos.`
+      },
+      {
+        id: `honeypot`,
+        name: `Honeypot / Armadilhas`,
+        study: `AE3`,
+        studyLabel: `AE3 · Controle`,
+        desc: `Serviços e credenciais isca para atrair invasores e sinalizar presença hostil interna.`,
+        suggestedLayer: `lan`,
+        defaultNote: `Isca posicionada na LAN para revelar atacantes que contornaram a defesa de borda.`
+      },
+      {
+        id: `iso27001`,
+        name: `Política ISO 27001`,
+        study: `AE4`,
+        studyLabel: `AE4 · Infra/Gov`,
+        desc: `Governança de segurança, gestão de riscos, processos de operadores, gestores e terceiros.`,
+        suggestedLayer: `ihc`,
+        defaultNote: `Define papéis, revisão de acessos, treinamento de operadores e resposta a incidentes.`
+      },
+      {
+        id: `antivirus_edr`,
+        name: `Antivírus / EDR`,
+        study: `AE3`,
+        studyLabel: `AE3 · Controle`,
+        desc: `Detecção e resposta comportamental em endpoints de usuários e servidores.`,
+        suggestedLayer: `ihc`,
+        defaultNote: `Protege estações de trabalho contra execução de ransomware e artefatos maliciosos.`
+      },
+      {
+        id: `gateway_vpn`,
+        name: `Gateway, Roteamento & VPN`,
+        study: `AE1`,
+        studyLabel: `AE1 · Redes`,
+        desc: `Controle de acesso remoto, túneis criptografados e isolamento de sub-redes distribuídas.`,
+        suggestedLayer: `telecom`,
+        defaultNote: `Encapsula acessos remotos e impõe roteamento restrito por zona de confiança.`
+      },
+      {
+        id: `siem_monit`,
+        name: `Monitoração & Logs (SIEM)`,
+        study: `AE3`,
+        studyLabel: `AE3 · Controle`,
+        desc: `Coleta centralizada, correlação de eventos e alertas entre todas as camadas.`,
+        suggestedLayer: `bd`,
+        defaultNote: `Correlaciona eventos de acesso ao BD, LAN e Telecom para rastreabilidade completa.`
+      }
+    ];
+
+    const BASS_TACTICS = {
+      resist: {
+        label: `Resistir`,
+        badgeClass: `tactic-resist`,
+        items: [
+          { id: `res_auth`, name: `Autenticar & Autorizar (Zero-Trust)`, desc: `Validar identidade e menor privilégio em cada chamada interna.` },
+          { id: `res_expose`, name: `Limitar Exposição & Microssegmentar`, desc: `Isolar VLANs, redes IT/OT e bloquear caminhos laterais.` },
+          { id: `res_validate`, name: `Validar Entradas & Rate Limiting`, desc: `Rejeitar payloads anômalos e conter enxurradas de requisições.` },
+          { id: `res_encrypt`, name: `Criptografar Dados & Rotacionar Chaves`, desc: `Inviabilizar leitura de dados mesmo em caso de extração.` }
+        ]
+      },
+      detect: {
+        label: `Detectar`,
+        badgeClass: `tactic-detect`,
+        items: [
+          { id: `det_intrusion`, name: `Detectar Intrusão & Anomalias`, desc: `Alertar desvios de comportamento em operadores, APIs e BD.` },
+          { id: `det_honeypot`, name: `Armadilhas Internas (Honeytokens)`, desc: `Capturar movimento lateral após suplantação do perímetro.` },
+          { id: `det_integrity`, name: `Verificar Integridade (Hashes/Assinatura)`, desc: `Identificar adulteração de comandos, laudos ou registros.` },
+          { id: `det_dos`, name: `Monitorar Degradação / DoS`, desc: `Detectar saturação de enlaces e filas de processamento.` }
+        ]
+      },
+      recover: {
+        label: `Recuperar`,
+        badgeClass: `tactic-recover`,
+        items: [
+          { id: `rec_restore`, name: `Restaurar Estado (Backup Imutável)`, desc: `Cópias offline/air-gapped testadas com RTO e RPO claros.` },
+          { id: `rec_audit`, name: `Manter Trilha de Auditoria Imutável`, desc: `Logs append-only protegidos fora do alcance do atacante.` },
+          { id: `rec_isolate`, name: `Isolar & Degradar Componente`, desc: `Contenção automática (circuit breaker) preservando núcleo crítico.` },
+          { id: `rec_revoke`, name: `Revogar Credenciais & Playbook ISO`, desc: `Invalidação imediata de tokens e acionamento de contingência.` }
+        ]
+      }
+    };
+
+    /* =====================================================================
+       ESTADO DA APLICAÇÃO
+       ===================================================================== */
+
+    function createEmptyVerticalState() {
+      const layers = {};
+      LAYERS.forEach(function (l) {
+        layers[l.id] = {
+          items: [],     // { uid, kind: 'tool'|'note', toolId?, title, studyLabel?, note }
+          tactics: []    // { uid, category: 'resist'|'detect'|'recover', tacticId, name }
+        };
+      });
+      return {
+        layers: layers,
+        activeAttackId: null,
+        attackSimulated: false
+      };
+    }
+
+    function createInitialState() {
+      const verticals = {};
+      VERTICALS.forEach(function (v) {
+        verticals[v.id] = createEmptyVerticalState();
+      });
+      return {
+        activeVertical: `banking`,
+        mode: `d1`,         // 'd1' | 'd2'
+        boardView: `canvas`, // 'canvas' | 'matrix'
+        studyFilter: `ALL`,
+        selectedToolId: null,
+        verticals: verticals
+      };
+    }
+
+    let appState = createInitialState();
+    let editingUid = null;
+    let selectedTacticLayerId = `telecom`;
+
+    function uid(prefix) {
+      return prefix + `_` + Math.random().toString(36).slice(2, 8) + `_` + Date.now().toString(36).slice(-4);
+    }
+
+    async function persistState() {
+      const ind = document.getElementById(`persistence-indicator`);
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+          await window.notebookAppApi.setAppState(appState);
+          if (ind) ind.textContent = `Estado sincronizado no caderno`;
+        }
+      } catch (err) {
+        if (ind) ind.textContent = `Modo local de sessão (sem persistência externa)`;
+      }
+    }
+
+    function getVerticalObj(vId) {
+      return VERTICALS.find(function (v) { return v.id === vId; }) || VERTICALS[0];
+    }
+
+    function getCurrentVState() {
+      if (!appState.verticals[appState.activeVertical]) {
+        appState.verticals[appState.activeVertical] = createEmptyVerticalState();
+      }
+      return appState.verticals[appState.activeVertical];
+    }
+
+    function getActiveAttack() {
+      const vObj = getVerticalObj(appState.activeVertical);
+      const vState = getCurrentVState();
+      if (!vState.activeAttackId) return vObj.attacks[0];
+      return vObj.attacks.find(function (a) { return a.id === vState.activeAttackId; }) || vObj.attacks[0];
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`)
+        .replace(/'/g, `&#39;`);
+    }
+
+    /* =====================================================================
+       AÇÕES DE INTERAÇÃO (HOISTED FUNCTIONS)
+       ===================================================================== */
+
+    function setVertical(vId) {
+      appState.activeVertical = vId;
+      editingUid = null;
+      const atk = getActiveAttack();
+      if (atk && atk.affectedLayers.length > 0) {
+        selectedTacticLayerId = atk.affectedLayers[0];
+      }
+      renderAll();
+      persistState();
+    }
+
+    function setMode(mode) {
+      appState.mode = mode;
+      appState.boardView = `canvas`;
+      editingUid = null;
+      if (mode === `d2`) {
+        const vState = getCurrentVState();
+        if (!vState.activeAttackId) {
+          vState.activeAttackId = getVerticalObj(appState.activeVertical).attacks[0].id;
+        }
+        const atk = getActiveAttack();
+        if (atk && atk.affectedLayers.length > 0) {
+          selectedTacticLayerId = atk.affectedLayers[0];
+        }
+      }
+      renderAll();
+      persistState();
+    }
+
+    function setBoardView(view) {
+      appState.boardView = view;
+      renderAll();
+      persistState();
+    }
+
+    function setStudyFilter(filter) {
+      appState.studyFilter = filter;
+      renderToolbox();
+      persistState();
+    }
+
+    function selectTool(toolId) {
+      appState.selectedToolId = appState.selectedToolId === toolId ? null : toolId;
+      renderToolbox();
+      renderBoard();
+    }
+
+    function addToolToLayer(toolId, layerId) {
+      const tool = TOOLS.find(function (t) { return t.id === toolId; });
+      if (!tool) return;
+      const vState = getCurrentVState();
+      if (!vState.layers[layerId]) return;
+
+      const exists = vState.layers[layerId].items.some(function (item) {
+        return item.kind === `tool` && item.toolId === toolId;
+      });
+      if (exists) {
+        setFeedback(`"${tool.name}" já está fixada nesta camada. Você pode editar a nota ou escolher outra camada.`, `default`);
+        return;
+      }
+
+      vState.layers[layerId].items.push({
+        uid: uid(`item`),
+        kind: `tool`,
+        toolId: tool.id,
+        title: tool.name,
+        studyLabel: tool.studyLabel,
+        note: tool.defaultNote
+      });
+
+      appState.selectedToolId = null;
+      setFeedback(`Ferramenta "${tool.name}" fixada em ${LAYERS.find(function (l) { return l.id === layerId; }).name}.`, `success`);
+      renderAll();
+      persistState();
+    }
+
+    function addCustomNote(e) {
+      if (e) e.preventDefault();
+      const layerEl = document.getElementById(`custom-note-layer`);
+      const titleEl = document.getElementById(`custom-note-title`);
+      const bodyEl = document.getElementById(`custom-note-body`);
+      const msgEl = document.getElementById(`custom-note-msg`);
+      if (!layerEl || !titleEl || !bodyEl) return;
+
+      const title = titleEl.value.trim();
+      const body = bodyEl.value.trim();
+      const layerId = layerEl.value;
+
+      if (title.length < 3) {
+        if (msgEl) msgEl.textContent = `Informe um título curto (mínimo 3 caracteres) para o post-it.`;
+        return;
+      }
+
+      const vState = getCurrentVState();
+      vState.layers[layerId].items.push({
+        uid: uid(`note`),
+        kind: `note`,
+        title: title,
+        studyLabel: `Nota do Grupo`,
+        note: body || `Observação de arquitetura registrada durante a dinâmica.`
+      });
+
+      titleEl.value = ``;
+      bodyEl.value = ``;
+      if (msgEl) msgEl.textContent = ``;
+      setFeedback(`Post-it "${title}" fixado no quadro.`, `success`);
+      renderAll();
+      persistState();
+    }
+
+    function removeLayerItem(layerId, itemUid) {
+      const vState = getCurrentVState();
+      if (!vState.layers[layerId]) return;
+      vState.layers[layerId].items = vState.layers[layerId].items.filter(function (it) {
+        return it.uid !== itemUid;
+      });
+      if (editingUid === itemUid) editingUid = null;
+      renderAll();
+      persistState();
+    }
+
+    function startEditNote(itemUid) {
+      editingUid = editingUid === itemUid ? null : itemUid;
+      renderBoard();
+    }
+
+    function saveEditedNote(layerId, itemUid) {
+      const input = document.getElementById(`edit-note-input-` + itemUid);
+      if (!input) return;
+      const vState = getCurrentVState();
+      const item = vState.layers[layerId].items.find(function (it) { return it.uid === itemUid; });
+      if (item) {
+        item.note = input.value.trim() || item.note;
+      }
+      editingUid = null;
+      renderAll();
+      persistState();
+    }
+
+    function selectAttackScenario(attackId) {
+      const vState = getCurrentVState();
+      vState.activeAttackId = attackId;
+      const atk = getActiveAttack();
+      if (atk && atk.affectedLayers.length > 0) {
+        selectedTacticLayerId = atk.affectedLayers[0];
+      }
+      renderAll();
+      persistState();
+    }
+
+    function triggerAttackSimulation() {
+      const vState = getCurrentVState();
+      if (!vState.activeAttackId) {
+        vState.activeAttackId = getVerticalObj(appState.activeVertical).attacks[0].id;
+      }
+      vState.attackSimulated = true;
+      const atk = getActiveAttack();
+      if (atk && atk.affectedLayers.length > 0) {
+        selectedTacticLayerId = atk.affectedLayers[0];
+      }
+      setFeedback(`Simulação ativa: "${atk.title}" suplantou ${atk.affectedLayers.length} camadas! Aplique as táticas de Resistir, Detectar e Recuperar.`, `alert`);
+      renderAll();
+      persistState();
+    }
+
+    function stopAttackSimulation() {
+      const vState = getCurrentVState();
+      vState.attackSimulated = false;
+      setFeedback(`Simulação pausada. Revise as táticas ou escolha outro cenário.`, `default`);
+      renderAll();
+      persistState();
+    }
+
+    function setTacticTargetLayer(layerId) {
+      selectedTacticLayerId = layerId;
+      renderToolbox();
+    }
+
+    function applyBassTactic(category, tacticId) {
+      const vState = getCurrentVState();
+      const layerState = vState.layers[selectedTacticLayerId];
+      if (!layerState) return;
+
+      const group = BASS_TACTICS[category];
+      if (!group) return;
+      const tactic = group.items.find(function (t) { return t.id === tacticId; });
+      if (!tactic) return;
+
+      const exists = layerState.tactics.some(function (t) { return t.tacticId === tacticId; });
+      if (exists) {
+        setFeedback(`A tática "${tactic.name}" já está aplicada nesta camada.`, `default`);
+        return;
+      }
+
+      layerState.tactics.push({
+        uid: uid(`tac`),
+        category: category,
+        tacticId: tactic.id,
+        name: tactic.name
+      });
+
+      const layerObj = LAYERS.find(function (l) { return l.id === selectedTacticLayerId; });
+      setFeedback(`Tática [${group.label.toUpperCase()}] "${tactic.name}" aplicada em ${layerObj ? layerObj.name : selectedTacticLayerId}.`, `success`);
+      renderAll();
+      persistState();
+    }
+
+    function removeBassTactic(layerId, tacticUid) {
+      const vState = getCurrentVState();
+      if (!vState.layers[layerId]) return;
+      vState.layers[layerId].tactics = vState.layers[layerId].tactics.filter(function (t) {
+        return t.uid !== tacticUid;
+      });
+      renderAll();
+      persistState();
+    }
+
+    function loadExamplePreset() {
+      const vId = appState.activeVertical;
+      const vState = createEmptyVerticalState();
+      const vObj = getVerticalObj(vId);
+
+      // Mapeamento exemplo realista para a Dinâmica 1
+      vState.layers.frontend.items.push({
+        uid: uid(`ex`),
+        kind: `tool`,
+        toolId: `criptografia`,
+        title: `Criptografia (TLS / AES / KMS)`,
+        studyLabel: `AE2 · Cripto`,
+        note: `TLS 1.3 obrigatório e certificate pinning nos canais ${vObj.name}.`
+      });
+      vState.layers.telecom.items.push(
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `waf`,
+          title: `WAF (Web App Firewall)`,
+          studyLabel: `AE3 · Controle`,
+          note: `Proteção OWASP Top 10 nas APIs públicas de ${vObj.name}.`
+        },
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `firewall`,
+          title: `Firewall / NGFW`,
+          studyLabel: `AE1 · Redes`,
+          note: `Filtragem de borda e isolamento de DMZ.`
+        }
+      );
+      vState.layers.ihc.items.push(
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `mfa`,
+          title: `MFA & Política de Senhas`,
+          studyLabel: `AE2 · Cripto`,
+          note: `Bloqueio contra password cracking e phishing em operadores.`
+        },
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `iso27001`,
+          title: `Política ISO 27001`,
+          studyLabel: `AE4 · Infra/Gov`,
+          note: `Segregação de funções para operadores e gestores.`
+        }
+      );
+      vState.layers.lan.items.push(
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `ids_ips`,
+          title: `IDS / IPS`,
+          studyLabel: `AE3 · Controle`,
+          note: `Inspeção de tráfego interno e contenção lateral.`
+        },
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `honeypot`,
+          title: `Honeypot / Armadilhas`,
+          studyLabel: `AE3 · Controle`,
+          note: `Serviço isca interno para alerta imediato.`
+        }
+      );
+      vState.layers.bd.items.push(
+        {
+          uid: uid(`ex`),
+          kind: `tool`,
+          toolId: `siem_monit`,
+          title: `Monitoração & Logs (SIEM)`,
+          studyLabel: `AE3 · Controle`,
+          note: `Auditoria de consultas e integrações externas.`
+        },
+        {
+          uid: uid(`ex`),
+          kind: `note`,
+          title: `Ponto de Atenção — Integração Externa`,
+          studyLabel: `Nota do Grupo`,
+          note: `Revisar contrato de SLA e validação de integridade com parceiros externos.`
+        }
+      );
+
+      vState.activeAttackId = vObj.attacks[0].id;
+      vState.attackSimulated = appState.mode === `d2`;
+
+      appState.verticals[vId] = vState;
+      setFeedback(`Exemplo pedagógico carregado para ${vObj.name}. Teste agora alternar para a Dinâmica 2 para ver como o ataque suplanta a infraestrutura!`, `success`);
+      renderAll();
+      persistState();
+    }
+
+    function handleResetClick(btn) {
+      if (!btn) return;
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `Confirmar Limpeza`;
+        setTimeout(function () {
+          if (btn.dataset.armed === `true`) {
+            btn.dataset.armed = `false`;
+            btn.textContent = `Limpar Vertical`;
+          }
+        }, 4000);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.textContent = `Limpar Vertical`;
+      appState.verticals[appState.activeVertical] = createEmptyVerticalState();
+      setFeedback(`Quadro da vertical ${getVerticalObj(appState.activeVertical).name} limpo.`, `default`);
+      renderAll();
+      persistState();
+    }
+
+    function exportBoardReport() {
+      const vObj = getVerticalObj(appState.activeVertical);
+      const vState = getCurrentVState();
+      const atk = getActiveAttack();
+      const lines = [];
+
+      lines.push(`============================================================`);
+      lines.push(`QUADRO VISUAL T35 — FERRAMENTAS E TECNOLOGIA CYBER`);
+      lines.push(`Vertical PBL: ${vObj.name} (${vObj.domain})`);
+      lines.push(`Data da Exportação: ${new Date().toLocaleString('pt-BR')}`);
+      lines.push(`============================================================\n`);
+
+      lines.push(`--- DINÂMICA 1: FERRAMENTAS DOS AUTOESTUDOS 1 A 4 ---`);
+      LAYERS.forEach(function (l) {
+        const items = vState.layers[l.id].items;
+        lines.push(`\n[${l.num} - ${l.name}] (${vObj.layerCtx[l.id]})`);
+        if (items.length === 0) {
+          lines.push(`  (Nenhum controle mapeado)`);
+        } else {
+          items.forEach(function (it) {
+            lines.push(`  • ${it.title} [${it.studyLabel}] — ${it.note}`);
+          });
+        }
+      });
+
+      lines.push(`\n--- DINÂMICA 2: EXERCÍCIO DA MODÉSTIA & TÁTICAS DE LEN BASS ---`);
+      lines.push(`Cenário Selecionado: ${atk.title}`);
+      lines.push(`Lição da Modéstia: ${atk.modestyLesson}`);
+      lines.push(`Camadas Suplantadas: ${atk.affectedLayers.join(', ').toUpperCase()}`);
+      LAYERS.forEach(function (l) {
+        const tacs = vState.layers[l.id].tactics;
+        if (tacs.length > 0) {
+          lines.push(`\n  Táticas em ${l.name}:`);
+          tacs.forEach(function (t) {
+            lines.push(`    - [${BASS_TACTICS[t.category].label.toUpperCase()}] ${t.name}`);
+          });
+        }
+      });
+
+      const content = lines.join(`\n`);
+      const filename = `quadro-t35-${vObj.id}.txt`;
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: content,
+          contentType: `text/plain`,
+          encoding: `UTF-8`,
+          filename: filename
+        });
+        setFeedback(`Arquivo "${filename}" exportado.`, `success`);
+      } else {
+        const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        setFeedback(`Arquivo "${filename}" baixado.`, `success`);
+      }
+    }
+
+    function setFeedback(text, variant) {
+      const banner = document.getElementById(`board-feedback`);
+      const textEl = document.getElementById(`board-feedback-text`);
+      if (textEl) textEl.textContent = text;
+      if (banner) {
+        banner.classList.remove(`is-alert`, `is-success`);
+        if (variant === `alert`) banner.classList.add(`is-alert`);
+        if (variant === `success`) banner.classList.add(`is-success`);
+      }
+    }
+
+    /* Drag and Drop handlers */
+    function handleDragStart(e, toolId) {
+      if (e.dataTransfer) {
+        e.dataTransfer.setData(`text/plain`, toolId);
+        e.dataTransfer.effectAllowed = `copy`;
+      }
+      appState.selectedToolId = toolId;
+    }
+
+    function handleDragOver(e, layerEl) {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = `copy`;
+      if (layerEl) layerEl.classList.add(`is-drag-over`);
+    }
+
+    function handleDragLeave(layerEl) {
+      if (layerEl) layerEl.classList.remove(`is-drag-over`);
+    }
+
+    function handleDrop(e, layerId, layerEl) {
+      e.preventDefault();
+      if (layerEl) layerEl.classList.remove(`is-drag-over`);
+      let toolId = appState.selectedToolId;
+      if (e.dataTransfer) {
+        const dropped = e.dataTransfer.getData(`text/plain`);
+        if (dropped) toolId = dropped;
+      }
+      if (toolId) {
+        addToolToLayer(toolId, layerId);
+      }
+    }
+
+    /* =====================================================================
+       CÁLCULO DE MÉTRICAS (KPIs)
+       ===================================================================== */
+
+    function computeMetrics() {
+      const vState = getCurrentVState();
+      let coveredLayers = 0;
+      let verticalToolsCount = 0;
+      LAYERS.forEach(function (l) {
+        const len = vState.layers[l.id].items.length;
+        if (len > 0) coveredLayers += 1;
+        verticalToolsCount += len;
+      });
+
+      let globalCount = 0;
+      VERTICALS.forEach(function (v) {
+        const vs = appState.verticals[v.id];
+        if (!vs) return;
+        LAYERS.forEach(function (l) {
+          globalCount += vs.layers[l.id].items.length;
+        });
+      });
+
+      // Resiliência Len Bass: pontua cobertura das 3 táticas (resist, detect, recover) nas camadas afetadas pelo ataque
+      const atk = getActiveAttack();
+      const targetLayers = atk ? atk.affectedLayers : LAYERS.map(function (l) { return l.id; });
+      const maxPoints = targetLayers.length * 3;
+      let earnedPoints = 0;
+
+      targetLayers.forEach(function (lid) {
+        const tacs = vState.layers[lid].tactics;
+        const cats = {};
+        tacs.forEach(function (t) { cats[t.category] = true; });
+        if (cats.resist) earnedPoints += 1;
+        if (cats.detect) earnedPoints += 1;
+        if (cats.recover) earnedPoints += 1;
+      });
+
+      const bassPct = maxPoints > 0 ? Math.round((earnedPoints / maxPoints) * 100) : 0;
+
+      return {
+        coveredLayers: coveredLayers,
+        verticalToolsCount: verticalToolsCount,
+        globalCount: globalCount,
+        bassPct: bassPct,
+        targetLayersCount: targetLayers.length,
+        attackSimulated: vState.attackSimulated
+      };
+    }
+
+    /* =====================================================================
+       RENDERIZAÇÃO
+       ===================================================================== */
+
+    function renderVerticalTabs() {
+      const container = document.getElementById(`vertical-tabs`);
+      if (!container) return;
+
+      container.innerHTML = VERTICALS.map(function (v) {
+        const vs = appState.verticals[v.id];
+        let count = 0;
+        if (vs) {
+          LAYERS.forEach(function (l) { count += vs.layers[l.id].items.length; });
+        }
+        const activeClass = appState.activeVertical === v.id ? `is-active` : ``;
+        return `
+          <button type="button" class="tab-btn ${activeClass}" onclick="setVertical('${v.id}')">
+            <span>${escapeHtml(v.name)}</span>
+            <span class="tab-count">${count}</span>
+          </button>
+        `;
+      }).join(``);
+
+      const d1Btn = document.getElementById(`mode-btn-d1`);
+      const d2Btn = document.getElementById(`mode-btn-d2`);
+      if (d1Btn && d2Btn) {
+        d1Btn.className = `tab-btn ` + (appState.mode === `d1` ? `is-active` : ``);
+        d2Btn.className = `tab-btn ` + (appState.mode === `d2` ? `is-active-blue` : ``);
+      }
+
+      const modeBadge = document.getElementById(`board-mode-badge`);
+      if (modeBadge) {
+        modeBadge.textContent = appState.mode === `d1` ? `MODO: DINÂMICA 1` : `MODO: DINÂMICA 2 (MODÉSTIA)`;
+        modeBadge.className = appState.mode === `d1` ? `badge badge-yellow` : `badge badge-blue`;
+      }
+    }
+
+    function renderKpis() {
+      const vObj = getVerticalObj(appState.activeVertical);
+      const m = computeMetrics();
+
+      const vNameEl = document.getElementById(`kpi-vertical-name`);
+      const vSubEl = document.getElementById(`kpi-vertical-sub`);
+      const lCovEl = document.getElementById(`kpi-layers-covered`);
+      const tCntEl = document.getElementById(`kpi-tools-count`);
+      const gCntEl = document.getElementById(`kpi-global-count`);
+      const bScrEl = document.getElementById(`kpi-bass-score`);
+      const bStEl = document.getElementById(`kpi-bass-status`);
+
+      if (vNameEl) vNameEl.textContent = vObj.name;
+      if (vSubEl) vSubEl.textContent = vObj.domain;
+      if (lCovEl) lCovEl.textContent = `${m.coveredLayers} / 5`;
+      if (tCntEl) tCntEl.textContent = String(m.verticalToolsCount);
+      if (gCntEl) gCntEl.textContent = `${m.globalCount} controles em todas as verticais`;
+      if (bScrEl) bScrEl.textContent = `${m.bassPct}%`;
+      if (bStEl) {
+        if (!m.attackSimulated) {
+          bStEl.textContent = `Simule um ataque na Dinâmica 2`;
+        } else if (m.bassPct === 100) {
+          bStEl.textContent = `Todas as camadas afetadas revisadas (R+D+R)`;
+        } else {
+          bStEl.textContent = `Aplique Resistir, Detectar e Recuperar`;
+        }
+      }
+    }
+
+    function renderToolbox() {
+      const panel = document.getElementById(`toolbox-panel`);
+      if (!panel) return;
+
+      if (appState.mode === `d1`) {
+        const filteredTools = TOOLS.filter(function (t) {
+          return appState.studyFilter === `ALL` || t.study === appState.studyFilter;
+        });
+
+        const filterButtons = [
+          { id: `ALL`, label: `Todos (10)` },
+          { id: `AE1`, label: `AE1 Redes` },
+          { id: `AE2`, label: `AE2 Cripto` },
+          { id: `AE3`, label: `AE3 Controle` },
+          { id: `AE4`, label: `AE4 Infra` }
+        ].map(function (f) {
+          const active = appState.studyFilter === f.id ? `is-active` : ``;
+          return `<button type="button" class="filter-chip ${active}" onclick="setStudyFilter('${f.id}')">${f.label}</button>`;
+        }).join(``);
+
+        const toolsHtml = filteredTools.map(function (t) {
+          const isSelected = appState.selectedToolId === t.id;
+          const suggestedName = LAYERS.find(function (l) { return l.id === t.suggestedLayer; }).name;
+          return `
+            <div class="tool-item ${isSelected ? `is-selected` : ``}"
+                 draggable="true"
+                 ondragstart="handleDragStart(event, '${t.id}')"
+                 onclick="selectTool('${t.id}')">
+              <div class="tool-item-head">
+                <span class="tool-name">${escapeHtml(t.name)}</span>
+                <span class="badge ${isSelected ? `badge-black` : `badge-blue`}">${escapeHtml(t.studyLabel)}</span>
+              </div>
+              <p class="tool-desc">${escapeHtml(t.desc)}</p>
+              <div class="tool-item-actions" onclick="event.stopPropagation()">
+                <button type="button" class="mini-btn" onclick="addToolToLayer('${t.id}', '${t.suggestedLayer}')">
+                  + Fixar em ${escapeHtml(suggestedName)}
+                </button>
+                <button type="button" class="mini-btn" onclick="selectTool('${t.id}')">
+                  ${isSelected ? `Selecionada` : `Escolher Camada`}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join(``);
+
+        const layerOptions = LAYERS.map(function (l) {
+          return `<option value="${l.id}">${escapeHtml(l.num)} · ${escapeHtml(l.name)}</option>`;
+        }).join(``);
+
+        panel.innerHTML = `
+          <div class="block block-accent-yellow">
+            <span class="section-label">Paleta Dinâmica 1 · Autoestudos 1 a 4</span>
+            <p style="margin: 0 0 var(--space-sm) 0; font-size: 0.85rem; color: var(--on-surface-variant);">
+              Arraste um bloco para o quadro ou clique para selecionar e fixar em qualquer camada.
+            </p>
+            <div class="filter-row">${filterButtons}</div>
+            <div class="tool-list">${toolsHtml}</div>
+          </div>
+
+          <form class="block" onsubmit="addCustomNote(event)">
+            <span class="section-label">Criar Post-it do Grupo (Miro)</span>
+            <div class="field-group">
+              <label class="field-label" for="custom-note-layer">Camada de Destino</label>
+              <select class="field-select" id="custom-note-layer">${layerOptions}</select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="custom-note-title">Título do Post-it / Controle</label>
+              <input class="field-input" id="custom-note-title" type="text" placeholder="Ex.: Segmentação VLAN PACS">
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="custom-note-body">Justificativa / Risco Observado</label>
+              <textarea class="field-textarea" id="custom-note-body" placeholder="Descreva como este ponto protege ou expõe a vertical..."></textarea>
+            </div>
+            <div id="custom-note-msg" style="font-size: 0.8rem; color: var(--error); margin-bottom: var(--space-xs);"></div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+              + Fixar Post-it Amarelo
+            </button>
+          </form>
+        `;
+      } else {
+        // Dinâmica 2: Exercício da Modéstia & Táticas de Len Bass
+        const vObj = getVerticalObj(appState.activeVertical);
+        const vState = getCurrentVState();
+        const activeAtk = getActiveAttack();
+
+        const scenariosHtml = vObj.attacks.map(function (atk) {
+          const isCurrent = activeAtk && activeAtk.id === atk.id;
+          return `
+            <div class="scenario-card ${isCurrent ? `is-active-attack` : ``}">
+              <div style="display:flex; justify-content:space-between; gap: var(--space-xs); align-items:flex-start;">
+                <strong style="font-family: var(--font-headline); font-size: 0.92rem;">${escapeHtml(atk.title)}</strong>
+                ${isCurrent ? `<span class="badge badge-error">Ativo</span>` : ``}
+              </div>
+              <p style="margin:0; font-size:0.8125rem; color: var(--on-surface-variant);">${escapeHtml(atk.summary)}</p>
+              <div style="display:flex; flex-wrap:wrap; gap: var(--space-xs); margin-top: var(--space-xs);">
+                <button type="button" class="mini-btn" onclick="selectAttackScenario('${atk.id}')">
+                  ${isCurrent ? `Cenário Selecionado` : `Selecionar Cenário`}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join(``);
+
+        const layerOpts = LAYERS.map(function (l) {
+          const isAffected = activeAtk && activeAtk.affectedLayers.indexOf(l.id) !== -1;
+          return `<option value="${l.id}" ${selectedTacticLayerId === l.id ? `selected` : ``}>
+            ${escapeHtml(l.num)} · ${escapeHtml(l.name)}${isAffected ? ` (ROMPIDA)` : ``}
+          </option>`;
+        }).join(``);
+
+        const bassGroupsHtml = Object.keys(BASS_TACTICS).map(function (catKey) {
+          const grp = BASS_TACTICS[catKey];
+          const btns = grp.items.map(function (tac) {
+            return `
+              <button type="button" class="mini-btn" style="text-align:left; width:100%; padding: var(--space-xs) var(--space-sm); margin-bottom: var(--space-xs);"
+                      onclick="applyBassTactic('${catKey}', '${tac.id}')">
+                <strong>+ ${escapeHtml(tac.name)}</strong><br>
+                <span style="font-family: var(--font-body); font-weight: 400; text-transform: none; letter-spacing: 0;">${escapeHtml(tac.desc)}</span>
+              </button>
+            `;
+          }).join(``);
+
+          return `
+            <div class="tactic-group">
+              <span class="tactic-pill ${grp.badgeClass}" style="margin-bottom: var(--space-xs);">${escapeHtml(grp.label)}</span>
+              ${btns}
+            </div>
+          `;
+        }).join(``);
+
+        panel.innerHTML = `
+          <div class="block block-accent-red">
+            <span class="section-label">Dinâmica 2 · Exercício da Modéstia</span>
+            <p style="margin: 0 0 var(--space-sm) 0; font-size: 0.85rem; color: var(--on-surface-variant);">
+              Simule um ataque que suplanta as defesas da Dinâmica 1 para revelar pontos cegos de processos, operadores e integrações (AE4).
+            </p>
+            ${scenariosHtml}
+            <div style="display:flex; flex-wrap:wrap; gap: var(--space-sm); margin-top: var(--space-sm);">
+              <button type="button" class="btn btn-danger" style="flex:1; justify-content:center;" onclick="triggerAttackSimulation()">
+                ${vState.attackSimulated ? `Ataque em Curso` : `Simular Ataque no Quadro`}
+              </button>
+              ${vState.attackSimulated ? `<button type="button" class="btn btn-sm" onclick="stopAttackSimulation()">Pausar</button>` : ``}
+            </div>
+          </div>
+
+          <div class="block block-accent-blue">
+            <span class="section-label">Táticas Arquiteturais de Len Bass (Cap. 21)</span>
+            <div class="field-group">
+              <label class="field-label" for="tactic-target-layer">Aplicar Tática na Camada</label>
+              <select class="field-select" id="tactic-target-layer" onchange="setTacticTargetLayer(this.value)">
+                ${layerOpts}
+              </select>
+            </div>
+            ${bassGroupsHtml}
+          </div>
+        `;
+      }
+    }
+
+    function renderBoard() {
+      const vObj = getVerticalObj(appState.activeVertical);
+      const vState = getCurrentVState();
+      const activeAtk = getActiveAttack();
+
+      const headingEl = document.getElementById(`board-heading`);
+      const subtitleEl = document.getElementById(`board-subtitle`);
+      const btnCanvas = document.getElementById(`view-btn-canvas`);
+      const btnMatrix = document.getElementById(`view-btn-matrix`);
+
+      if (btnCanvas && btnMatrix) {
+        btnCanvas.className = `btn btn-sm ` + (appState.boardView === `canvas` ? `btn-primary` : ``);
+        btnMatrix.className = `btn btn-sm ` + (appState.boardView === `matrix` ? `btn-primary` : ``);
+      }
+
+      if (appState.boardView === `matrix`) {
+        if (headingEl) headingEl.textContent = `Matriz 5×5 da Turma — Camadas × Verticais PBL`;
+        if (subtitleEl) subtitleEl.textContent = `Visão consolidada do quadro Miro para comparar controles da Dinâmica 1 e táticas de Len Bass entre as 5 verticais. Clique em qualquer célula para abrir a vertical.`;
+        renderMatrixView();
+        return;
+      }
+
+      if (headingEl) {
+        headingEl.textContent = appState.mode === `d1`
+          ? `Quadro Miro · Dinâmica 1 — ${vObj.name}`
+          : `Quadro Miro · Dinâmica 2 (Modéstia) — ${vObj.name}`;
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent = appState.mode === `d1`
+          ? `Distribua as ferramentas dos Autoestudos 1 a 4 nas 5 camadas de arquitetura considerando os processos e integrações de ${vObj.name}.`
+          : `Cenário ativo: "${activeAtk.title}". Veja as camadas suplantadas e responda com táticas de Resistir, Detectar e Recuperar.`;
+      }
+
+      const contentEl = document.getElementById(`board-content`);
+      if (!contentEl) return;
+
+      let attackSummaryHtml = ``;
+      if (appState.mode === `d2` && vState.attackSimulated && activeAtk) {
+        attackSummaryHtml = `
+          <div class="block block-accent-red" style="margin-bottom: var(--space-md);">
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap: var(--space-sm); margin-bottom: var(--space-xs);">
+              <span class="badge badge-error">SIMULAÇÃO DE SUPERAÇÃO DE INFRAESTRUTURA</span>
+              <span class="badge badge-black">Autoestudo 4 · Len Bass Cap. 21</span>
+            </div>
+            <h3 style="font-family: var(--font-headline); margin: 0 0 var(--space-xs) 0;">${escapeHtml(activeAtk.title)}</h3>
+            <p style="margin:0; font-size: 0.9rem;"><strong>Lição da Modéstia:</strong> ${escapeHtml(activeAtk.modestyLesson)}</p>
+          </div>
+        `;
+      }
+
+      const layersHtml = LAYERS.map(function (l, idx) {
+        const lState = vState.layers[l.id];
+        const isAffected = vState.attackSimulated && activeAtk && activeAtk.affectedLayers.indexOf(l.id) !== -1;
+
+        // Verifica se possui ao menos 1 de cada tática (Resistir, Detectar, Recuperar)
+        const cats = {};
+        lState.tactics.forEach(function (t) { cats[t.category] = true; });
+        const isResilient = isAffected && cats.resist && cats.detect && cats.recover;
+
+        let laneStatusClass = ``;
+        let statusBadge = `<span class="badge">${lState.items.length} controle(s)</span>`;
+        if (isResilient) {
+          laneStatusClass = `is-resilient`;
+          statusBadge = `<span class="badge badge-positive">Resiliente (R+D+R)</span>`;
+        } else if (isAffected) {
+          laneStatusClass = `is-compromised`;
+          statusBadge = `<span class="badge badge-error">Suplantada pelo Ataque</span>`;
+        }
+
+        const stickiesHtml = lState.items.map(function (it) {
+          const isNote = it.kind === `note`;
+          const isBypassed = isAffected && !isNote;
+          const cardClasses = [
+            `sticky-card`,
+            isNote ? `is-custom-note` : ``,
+            isBypassed ? `is-bypassed` : ``
+          ].join(` `);
+
+          const editBlock = editingUid === it.uid ? `
+            <div style="margin-top: var(--space-xs);">
+              <label class="field-label" for="edit-note-input-${it.uid}">Editar Justificativa</label>
+              <textarea class="field-textarea" id="edit-note-input-${it.uid}">${escapeHtml(it.note)}</textarea>
+              <div style="display:flex; gap: var(--space-xs); margin-top: var(--space-xs);">
+                <button type="button" class="mini-btn" onclick="saveEditedNote('${l.id}', '${it.uid}')">Salvar</button>
+                <button type="button" class="mini-btn" onclick="startEditNote('${it.uid}')">Cancelar</button>
+              </div>
+            </div>
+          ` : `<p class="sticky-body">${escapeHtml(it.note)}</p>`;
+
+          return `
+            <div class="${cardClasses}">
+              <div class="sticky-head">
+                <span class="sticky-title">${escapeHtml(it.title)}</span>
+                <span class="badge ${isNote ? `badge-black` : `badge-blue`}">${escapeHtml(it.studyLabel)}</span>
+              </div>
+              ${editBlock}
+              <div class="sticky-actions">
+                <button type="button" class="mini-btn" onclick="startEditNote('${it.uid}')">Editar Nota</button>
+                <button type="button" class="mini-btn mini-btn-danger" onclick="removeLayerItem('${l.id}', '${it.uid}')">Remover</button>
+              </div>
+            </div>
+          `;
+        }).join(``);
+
+        const quickAssignBtn = appState.selectedToolId ? `
+          <button type="button" class="btn btn-sm btn-primary" onclick="addToolToLayer('${appState.selectedToolId}', '${l.id}')">
+            + Fixar Ferramenta Selecionada Aqui
+          </button>
+        ` : ``;
+
+        const emptyHint = lState.items.length === 0 ? `
+          <div class="empty-drop-hint">
+            <span>Nenhuma ferramenta fixada em <strong>${escapeHtml(l.name)}</strong> ainda. Arraste um card da paleta ou selecione uma ferramenta para fixar.</span>
+            ${quickAssignBtn}
+          </div>
+        ` : ``;
+
+        let modestySectionHtml = ``;
+        if (appState.mode === `d2` || lState.tactics.length > 0) {
+          const breachReason = isAffected && activeAtk && activeAtk.bypassExplanation[l.id]
+            ? `<div class="breach-callout"><strong>Por que a infraestrutura foi suplantada:</strong> ${escapeHtml(activeAtk.bypassExplanation[l.id])}</div>`
+            : ``;
+
+          const tacticsPills = lState.tactics.map(function (t) {
+            const grp = BASS_TACTICS[t.category];
+            return `
+              <span class="tactic-pill ${grp.badgeClass}">
+                ${escapeHtml(grp.label)}: ${escapeHtml(t.name)}
+                <button type="button" aria-label="Remover tática" onclick="removeBassTactic('${l.id}', '${t.uid}')"
+                        style="background:transparent; border:none; color:inherit; font-weight:700; cursor:pointer; padding:0 2px;">×</button>
+              </span>
+            `;
+          }).join(``);
+
+          if (breachReason || tacticsPills || appState.mode === `d2`) {
+            modestySectionHtml = `
+              <div class="modesty-layer-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: var(--space-xs);">
+                  <span class="section-label" style="margin:0;">Táticas de Len Bass nesta Camada (Resistir · Detectar · Recuperar)</span>
+                  ${appState.mode === `d2` ? `
+                    <button type="button" class="mini-btn" onclick="setTacticTargetLayer('${l.id}')">
+                      ${selectedTacticLayerId === l.id ? `Alvo Ativo na Paleta` : `Selecionar para Táticas`}
+                    </button>
+                  ` : ``}
+                </div>
+                ${breachReason}
+                <div class="tactics-row">
+                  ${tacticsPills || `<span style="font-size:0.8rem; color: var(--on-surface-variant);">Nenhuma tática arquitetural aplicada nesta camada ainda.</span>`}
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        const connector = idx < LAYERS.length - 1 ? `
+          <div class="layer-connector ${isAffected ? `is-breach-path` : ``}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            <span>${isAffected ? `Propagação do ataque / falha de fronteira` : `Fluxo de dados e confiança`}</span>
+          </div>
+        ` : ``;
+
+        return `
+          <div class="layer-lane ${laneStatusClass}"
+               ondragover="handleDragOver(event, this)"
+               ondragleave="handleDragLeave(this)"
+               ondrop="handleDrop(event, '${l.id}', this)">
+            <div class="layer-inner">
+              <div class="layer-meta">
+                <span class="layer-num">${escapeHtml(l.num)} · ${escapeHtml(l.subtitle)}</span>
+                <h3 class="layer-title">${escapeHtml(l.name)}</h3>
+                <div style="margin-top: var(--space-xs);">${statusBadge}</div>
+                <div class="layer-vertical-ctx">
+                  <strong>No PBL ${escapeHtml(vObj.name)}:</strong><br>
+                  ${escapeHtml(vObj.layerCtx[l.id])}
+                </div>
+              </div>
+
+              <div class="layer-canvas-zone">
+                <div class="layer-zone-head">
+                  <span class="section-label" style="margin:0;">Ferramentas &amp; Post-its Mapeados</span>
+                  ${lState.items.length > 0 && appState.selectedToolId ? quickAssignBtn : ``}
+                </div>
+                ${emptyHint}
+                ${lState.items.length > 0 ? `<div class="sticky-grid">${stickiesHtml}</div>` : ``}
+                ${modestySectionHtml}
+              </div>
+            </div>
+          </div>
+          ${connector}
+        `;
+      }).join(``);
+
+      contentEl.innerHTML = attackSummaryHtml + `<div class="layers-stack">${layersHtml}</div>`;
+    }
+
+    function renderMatrixView() {
+      const contentEl = document.getElementById(`board-content`);
+      if (!contentEl) return;
+
+      const headerCols = VERTICALS.map(function (v) {
+        const isCurrent = v.id === appState.activeVertical;
+        return `<th>${escapeHtml(v.name)} ${isCurrent ? `<span class="badge badge-yellow">Ativa</span>` : ``}</th>`;
+      }).join(``);
+
+      const rowsHtml = LAYERS.map(function (l) {
+        const cells = VERTICALS.map(function (v) {
+          const vs = appState.verticals[v.id] || createEmptyVerticalState();
+          const items = vs.layers[l.id].items;
+          const tacs = vs.layers[l.id].tactics;
+
+          const itemsBadges = items.slice(0, 3).map(function (it) {
+            return `<span class="badge">${escapeHtml(it.title)}</span>`;
+          }).join(` `);
+
+          const more = items.length > 3 ? `<span class="badge badge-black">+${items.length - 3}</span>` : ``;
+          const tacBadge = tacs.length > 0
+            ? `<span class="badge badge-positive">${tacs.length} tática(s) Bass</span>`
+            : `<span style="font-size:0.75rem; color: var(--on-surface-variant);">0 táticas D2</span>`;
+
+          return `
+            <td>
+              <button type="button" class="matrix-cell-btn" onclick="setVertical('${v.id}'); setBoardView('canvas');">
+                <span style="font-size:0.75rem; color: var(--on-surface-variant);">${escapeHtml(v.layerCtx[l.id])}</span>
+                <div style="display:flex; flex-wrap:wrap; gap: 4px;">
+                  ${itemsBadges || `<span style="font-size:0.75rem;">Sem controles D1</span>`}
+                  ${more}
+                </div>
+                <div>${tacBadge}</div>
+              </button>
+            </td>
+          `;
+        }).join(``);
+
+        return `
+          <tr>
+            <th scope="row" style="background: var(--surface-container);">
+              <span class="layer-num">${escapeHtml(l.num)}</span><br>
+              <strong>${escapeHtml(l.name)}</strong>
+            </th>
+            ${cells}
+          </tr>
+        `;
+      }).join(``);
+
+      contentEl.innerHTML = `
+        <div class="matrix-wrap">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th scope="col">Camada / Vertical PBL</th>
+                ${headerCols}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderAll() {
+      renderVerticalTabs();
+      renderKpis();
+      renderToolbox();
+      renderBoard();
+    }
+
+    /* =====================================================================
+       INICIALIZAÇÃO & PERSISTÊNCIA VIA NOTEBOOK APP API
+       ===================================================================== */
+
+    async function initApp() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object` && saved.verticals) {
+            appState = Object.assign(createInitialState(), saved);
+          }
+        }
+      } catch (err) {
+        // Inicia com estado limpo padrão se API indisponível
+      }
+
+      renderAll();
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
