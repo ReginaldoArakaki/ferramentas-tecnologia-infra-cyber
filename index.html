@@ -434,10 +434,18 @@
             </select>
           </div>
           <button type="button" id="btnProfessor" class="btn" onclick="toggleProfessor()">
-            <i data-lucide="graduation-cap" aria-hidden="true"></i>
+            <i data-lucide="lock" aria-hidden="true"></i>
             <span id="btnProfessorTxt">Modo Professor</span>
           </button>
         </div>
+        <form id="profUnlock" class="control-row" hidden onsubmit="event.preventDefault(); desbloquearProfessor();">
+          <div class="field-group">
+            <label class="field-label" for="profSenha">Senha do professor</label>
+            <input type="password" id="profSenha" class="bauhaus-input" autocomplete="current-password" placeholder="Senha">
+          </div>
+          <button type="submit" id="btnProfOk" class="btn btn-prof-on"><i data-lucide="key-round" aria-hidden="true"></i> Desbloquear</button>
+          <button type="button" class="btn" onclick="fecharUnlock()">Cancelar</button>
+        </form>
         <div class="control-row">
           <button type="button" class="btn btn-primary" onclick="simularSuplantamentoGlobal()">
             <i data-lucide="zap" aria-hidden="true"></i> Simular Suplantamento
@@ -871,8 +879,8 @@
       { id: 'heartbeat', grupo: 'det', nome: 'Heartbeat & monitor de serviço', camadas: ['telecom', 'lan'], peso: 8, dica: 'Percebe silêncio, lentidão ou queda de componente.' },
       // Recuperar
       { id: 'backup', grupo: 'rec', nome: 'Backup imutável offline (point-in-time)', camadas: ['bd'], peso: 22, dica: 'Cópia que não pode ser alterada nem alcançada pela rede.' },
-      { id: 'replicacao', grupo: 'rec', nome: 'Replicação síncrona (cluster)', camadas: ['bd'], peso: 8, dica: 'Copia cada escrita para o nó redundante em milissegundos.', armadilha: true },
-      { id: 'redundancia', grupo: 'rec', nome: 'Redundância ativa (failover)', camadas: ['telecom', 'lan'], peso: 10, dica: 'Componente gêmeo assume se o principal falhar.', armadilha: true },
+      { id: 'replicacao', grupo: 'rec', nome: 'Replicação síncrona (cluster)', camadas: ['bd'], peso: 8, dica: 'Copia cada escrita para o nó redundante em milissegundos.', neutralizavel: true },
+      { id: 'redundancia', grupo: 'rec', nome: 'Redundância ativa (failover)', camadas: ['telecom', 'lan'], peso: 10, dica: 'Componente gêmeo assume se o principal falhar.', neutralizavel: true },
       { id: 'rollback', grupo: 'rec', nome: 'Rollback por eventos (trilha imutável)', camadas: ['bd', 'ihc'], peso: 16, dica: 'Reconstrói o estado correto a partir do histórico de eventos.' },
       { id: 'degradacao', grupo: 'rec', nome: 'Degradação graciosa / modo manual', camadas: ['frontend', 'ihc'], peso: 14, dica: 'Serviço essencial continua, reduzido ou manual.' },
       { id: 'reintroducao', grupo: 'rec', nome: 'Reintrodução escalonada', camadas: ['lan', 'telecom'], peso: 10, dica: 'Religa por partes, verificando cada uma antes da próxima.' }
@@ -911,8 +919,7 @@
           infraViu: 'Tudo verde: TLS ok, WAF ok, autenticação ok, IDS sem assinatura.',
           pergunta: 'Se cada transação é válida, onde mora a anomalia, e qual camada consegue enxergá-la?',
           sinais: ['Novos dispositivos em massa num curto intervalo', 'Mesmo destino recebendo de muitas origens (fan-in)', 'Horário atípico para o perfil de cada cliente', 'Velocidade de navegação incompatível com humano'],
-          dilema: 'Suspender o Pix para todos (impacto B2C e reputacional) ou degradar seletivamente (limites noturnos menores, step-up só para dispositivos novos)?',
-          gabarito: ['Resistir/Reagir: MFA step-up adaptativo; circuit breaker por cliente-API; bloqueio cautelar das contas-destino.', 'Detectar: UEBA por cliente/dispositivo; votação/grafo de destinos (fan-in); velocity checks na IHC.', 'Recuperar: rollback por eventos do ledger; fluxo regulatório de devolução; degradação seletiva do canal.', 'Lição: o ledger precisa ser reconstituível por eventos, não só "backupeado".']
+          dilema: 'Suspender o Pix para todos (impacto B2C e reputacional) ou degradar seletivamente (limites noturnos menores, step-up só para dispositivos novos)?'
         },
         camadas: {
           frontend: { controles: ['Clientes em apps mobile e navegadores (B/C)', 'Tokens de sessão efêmeros e proteção anti-bot', 'Política de senha forte contra dicionário'], ameacas: ['Phishing, credential stuffing e password cracking', 'XSS e sequestro de sessão no browser'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
@@ -937,8 +944,7 @@
           infraViu: 'Antivírus sem assinatura; firewall de borda cego para tráfego interno (leste-oeste).',
           pergunta: 'Redundância é o mesmo que capacidade de recuperação?',
           sinais: ['Picos de escrita com alta entropia', 'Renomeação em massa de arquivos', 'Contas de serviço autenticando fora do horário', 'Acesso a compartilhamentos nunca usados'],
-          dilema: 'Desligar toda a rede (isola o ataque, mas cega a UTI) ou isolar segmentos e operar em contingência (papel e protocolo manual), e por quanto tempo?',
-          gabarito: ['Resistir/Reagir: microsegmentação IoMT × administrativo; revogação de credenciais de serviço.', 'Detectar: canários; integridade/entropia de escrita; UEBA em contas de serviço.', 'Recuperar: backup imutável offline point-in-time (3-2-1-1); degradação graciosa (cache somente-leitura das prescrições por leito); RTO/RPO por criticidade clínica.', 'Lição: replicação síncrona protege contra falha de hardware, não contra corrupção lógica.']
+          dilema: 'Desligar toda a rede (isola o ataque, mas cega a UTI) ou isolar segmentos e operar em contingência (papel e protocolo manual), e por quanto tempo?'
         },
         camadas: {
           frontend: { controles: ['Portal do paciente, totens de triagem, tablets clínicos', 'Autenticação de equipe com timeout de sessão'], ameacas: ['Credenciais compartilhadas em postos de enfermagem', 'Acesso indevido a laudos'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
@@ -963,8 +969,7 @@
           infraViu: 'Sem DDoS clássico: o volume cabe na rede e as requisições são válidas no formato.',
           pergunta: 'Como uma aplicação distingue demanda real de demanda fabricada antes de consumir o recurso escasso (a viatura)?',
           sinais: ['Concentração geográfica improvável', 'Contas recém-criadas e textos semelhantes', 'Nenhuma chamada de voz correlata', 'Câmeras da região sem anomalia'],
-          dilema: 'Endurecer a validação do app (risco de barrar cidadão real em emergência) ou manter o canal aberto e triar por prioridade?',
-          gabarito: ['Resistir/Reagir: rate limit por conta/dispositivo; fila priorizada por confiança da fonte; validação de dados.', 'Detectar: votação entre fontes independentes (voz, câmeras LPR, viaturas); anomalia de volume por região; sanity checking.', 'Recuperar: despacho manual por rádio (modo degradado); reintrodução gradual do canal digital; auditoria posterior.', 'Lição: em B2C2Gov, integridade da informação é tão crítica quanto disponibilidade.']
+          dilema: 'Endurecer a validação do app (risco de barrar cidadão real em emergência) ou manter o canal aberto e triar por prioridade?'
         },
         camadas: {
           frontend: { controles: ['Terminais em viaturas, câmeras corporais, app cidadão', 'Certificados de dispositivo em campo'], ameacas: ['Ocorrências falsas por bots no app cidadão', 'Captura de terminal em campo'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
@@ -989,8 +994,7 @@
           infraViu: 'Firewall IT/OT permitiu (havia regra de exceção para o fornecedor); protocolos legados não autenticam comandos.',
           pergunta: 'Num ambiente em que o tráfego é previsível, o que é "anômalo", e quem tem autoridade para desligar o automático?',
           sinais: ['Comando fora da janela de manutenção', 'Sequência de comandos em ritmo não humano', 'Medição física (corrente/tensão) diverge do estado exibido na IHM'],
-          dilema: 'Cortar todo acesso remoto (perde-se a operação centralizada) ou manter e operar subestações em modo local manual, com equipes em campo?',
-          gabarito: ['Resistir/Reagir: regra de duas pessoas para comandos críticos; revogação imediata de acesso de terceiros; microsegmentação IT/OT.', 'Detectar: baseline determinística de tráfego OT; verificação físico × lógico; alarme de comando fora da janela.', 'Recuperar: configuração "golden" de relés offline; operação manual local; reintrodução escalonada (black-start).', 'Lição: a exceção de acesso do fornecedor é um SPOF de governança, não de tecnologia.']
+          dilema: 'Cortar todo acesso remoto (perde-se a operação centralizada) ou manter e operar subestações em modo local manual, com equipes em campo?'
         },
         camadas: {
           frontend: { controles: ['Medidores inteligentes e portal da concessionária', 'Firmware assinado'], ameacas: ['Manipulação em massa de medidores', 'Acesso indevido via portal de fornecedores'], toolsDefault: { firewall: true, cripto: true } },
@@ -1015,8 +1019,7 @@
           infraViu: 'Pacotes autenticados pelo gateway correto; protocolo válido. O dado é que está errado.',
           pergunta: 'Como a arquitetura desconfia de um dado fisicamente impossível que chega por um canal perfeitamente seguro?',
           sinais: ['Velocidades implícitas impossíveis entre duas posições', 'GPS diverge de odômetro e tacógrafo', 'Vários veículos com o mesmo desvio ao mesmo tempo', 'Timestamps fora de ordem'],
-          dilema: 'Congelar a roteirização automática (frota para) ou rodar com as últimas rotas confiáveis?',
-          gabarito: ['Resistir/Reagir: validação de dados; isolar o feed suspeito (circuit breaker); alerta a motoristas por voz/rádio.', 'Detectar: sanity checking físico (velocidade/aceleração); votação entre sensores independentes; verificação de timestamp.', 'Recuperar: rollback para a última rota "conhecida boa"; despacho manual (degradação graciosa); comunicação a reguladores e clientes B2B.', 'Lição: canal seguro ≠ dado verdadeiro. Validar input é tática de arquitetura, não de rede.']
+          dilema: 'Congelar a roteirização automática (frota para) ou rodar com as últimas rotas confiáveis?'
         },
         camadas: {
           frontend: { controles: ['Rastreadores e telemetria embarcada, apps de motoristas e passageiros', 'Validadores de embarque NFC'], ameacas: ['GPS spoofing em rastreadores', 'Clonagem de cartões e credential stuffing no app de recarga'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
@@ -1043,7 +1046,6 @@
     let appState = {
       setorAtual: 'banking',
       camadaAtual: 'frontend',
-      professor: false,
       escala: 2,
       guardiao: false,
       decisoes: {},
@@ -1095,7 +1097,7 @@
 
     // Tática de redundância é neutralizada quando a camada em que atua foi suplantada
     function taticaNeutralizada(setor, t) {
-      if (!t.armadilha) return false;
+      if (!t.neutralizavel) return false;
       return t.camadas.some(l => getLayerState(setor, l).breached);
     }
 
@@ -1117,7 +1119,7 @@
         const w = t.peso * PESO_TATICA;
         if (t.grupo === 'rr') { if (t.sub === 'reagir') reagir += w; else resistir += w; }
         else if (t.grupo === 'det') det += w;
-        else if (!(st.breached && t.armadilha)) rec += w;
+        else if (!(st.breached && t.neutralizavel)) rec += w;
       });
 
       resistir -= (appState.escala - 1) * 6;
@@ -1240,13 +1242,14 @@
       setText('casoPergunta', c.caso.pergunta);
       setText('casoDilema', c.caso.dilema);
       document.getElementById('casoSinais').innerHTML = c.caso.sinais.map(s => `<li>${escapeHtml(s)}</li>`).join('');
-      document.getElementById('casoGabarito').innerHTML = c.caso.gabarito.map(s => `<li>${escapeHtml(s)}</li>`).join('');
-      document.getElementById('gabaritoBox').hidden = !appState.professor;
+      const gab = profUnlocked() ? (PROF_DATA.gabaritos[c.key] || []) : [];
+      document.getElementById('casoGabarito').innerHTML = gab.map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      document.getElementById('gabaritoBox').hidden = !profUnlocked();
       const miro = document.getElementById('miroUrl');
       if (document.activeElement !== miro) miro.value = appState.miro[appState.setorAtual] || '';
       const btn = document.getElementById('btnProfessor');
-      btn.classList.toggle('btn-prof-on', appState.professor);
-      setText('btnProfessorTxt', appState.professor ? 'Professor: ON' : 'Modo Professor');
+      btn.classList.toggle('btn-prof-on', profUnlocked());
+      setText('btnProfessorTxt', profUnlocked() ? 'Professor: ON · Bloquear' : 'Modo Professor');
     }
 
     function renderPipeline(m) {
@@ -1309,7 +1312,7 @@
           return `<span class="t-layer ${l === appState.camadaAtual ? 'is-here' : ''}">${escapeHtml(meta.short)}</span>`;
         }).join('');
         const sub = t.grupo === 'rr' ? `<span class="t-sub">${t.sub}</span>` : '';
-        const prof = appState.professor && t.armadilha ? `<span class="t-sub" style="color:var(--error);">armadilha: não protege contra corrupção lógica</span>` : '';
+        const prof = profUnlocked() && t.neutralizavel ? `<span class="t-sub" style="color:var(--error);">${escapeHtml(PROF_DATA.dicaArmadilha)}</span>` : '';
         html[t.grupo] += `
           <button type="button" class="${cls}" onclick="toggleTatica('${t.id}')" aria-pressed="${on}">
             <div class="t-top"><span>${escapeHtml(t.nome)}</span><span class="t-pill">${pill}</span></div>
@@ -1660,7 +1663,66 @@
     function toggleGuardian() { appState.guardiao = !appState.guardiao; commit(); }
     function toggleDecisao(id) { if (!appState.guardiao) return; appState.decisoes[id] = !appState.decisoes[id]; commit(); }
     function selecionarEscala(n) { appState.escala = clamp(Number(n) || 1, 1, 4); commit(); }
-    function toggleProfessor() { appState.professor = !appState.professor; commit(); }
+    // ----- Modo Professor: gabarito criptografado (AES-256-GCM, chave PBKDF2-SHA256 da senha) -----
+    // O bloco PROF_LOCK é gerado por gerar_trava_professor.py. Sem a senha, o gabarito não pode ser lido.
+    /*PROF_LOCK_START*/const PROF_LOCK = {"salt": "D8trsjgg+gBuGAIHyIL7fQ==", "iv": "jGCugegwODSJH8Gc", "iter": 600000, "ct": "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"};/*PROF_LOCK_END*/
+    let PROF_DATA = null;
+    const PROF_SESSION_KEY = 't35-prof-v2';
+    function profUnlocked() { return PROF_DATA !== null; }
+    function b64ToBytes(b64) { return Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)); }
+
+    async function decifrarProfessor(senha) {
+      const enc = new TextEncoder();
+      const base = await crypto.subtle.importKey('raw', enc.encode(senha), 'PBKDF2', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: b64ToBytes(PROF_LOCK.salt), iterations: PROF_LOCK.iter, hash: 'SHA-256' },
+        base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(PROF_LOCK.iv) }, key, b64ToBytes(PROF_LOCK.ct));
+      return JSON.parse(new TextDecoder().decode(plain));
+    }
+
+    function toggleProfessor() {
+      if (profUnlocked()) {
+        PROF_DATA = null;
+        try { sessionStorage.removeItem(PROF_SESSION_KEY); } catch (e) { /* sem storage */ }
+        mostrarFeedback('Modo Professor bloqueado.');
+        commit();
+        return;
+      }
+      if (!PROF_LOCK) { mostrarFeedback('Trava do professor ainda não configurada (rode gerar_trava_professor.py).'); return; }
+      const form = document.getElementById('profUnlock');
+      form.hidden = false;
+      document.getElementById('profSenha').focus();
+    }
+    function fecharUnlock() {
+      document.getElementById('profUnlock').hidden = true;
+      document.getElementById('profSenha').value = '';
+    }
+    async function desbloquearProfessor() {
+      const campo = document.getElementById('profSenha');
+      const btn = document.getElementById('btnProfOk');
+      btn.disabled = true;
+      try {
+        if (!(window.crypto && crypto.subtle)) throw new Error('webcrypto');
+        PROF_DATA = await decifrarProfessor(campo.value);
+        try { sessionStorage.setItem(PROF_SESSION_KEY, JSON.stringify(PROF_DATA)); } catch (e) { /* sem storage */ }
+        fecharUnlock();
+        mostrarFeedback('Modo Professor liberado nesta aba. Feche a aba ou clique em "Bloquear" ao terminar.');
+        commit();
+      } catch (e) {
+        PROF_DATA = null;
+        campo.value = '';
+        mostrarFeedback(e && e.message === 'webcrypto'
+          ? 'Este navegador não permite descriptografar aqui. Abra o site por https:// (GitHub Pages).'
+          : 'Senha incorreta.');
+      } finally { btn.disabled = false; }
+    }
+    function restaurarSessaoProfessor() {
+      try {
+        const salvo = JSON.parse(sessionStorage.getItem(PROF_SESSION_KEY) || 'null');
+        if (salvo && salvo.gabaritos) PROF_DATA = salvo;
+      } catch (e) { PROF_DATA = null; }
+    }
 
     function adicionarNota() {
       const input = document.getElementById('stickyInput');
@@ -1819,7 +1881,7 @@
       }
       if (!saved) { try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { saved = null; } }
       if (!saved || typeof saved !== 'object') return;
-      ['camadaAtual', 'professor', 'escala', 'guardiao', 'decisoes', 'overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro'].forEach(k => {
+      ['camadaAtual', 'escala', 'guardiao', 'decisoes', 'overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro'].forEach(k => {
         if (saved[k] !== undefined) appState[k] = saved[k];
       });
       if (saved.setorAtual && CENARIOS_DATA[saved.setorAtual]) appState.setorAtual = saved.setorAtual;
@@ -1841,10 +1903,10 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarEstado();
+      restaurarSessaoProfessor();
       const params = new URLSearchParams(window.location.search);
       const raw = params.get('setor');
       const doUrl = mapearParametroSetor(raw);
-      if (params.get('professor') === '1') appState.professor = true;
       if (doUrl) { appState.setorAtual = doUrl; mostrarFeedback(`Parâmetro ?setor=${raw} → ${CENARIOS_DATA[doUrl].nome}.`); }
       if (!LAYER_META.some(l => l.id === appState.camadaAtual)) appState.camadaAtual = 'frontend';
       document.getElementById('setorSelect').value = appState.setorAtual;
@@ -1855,4 +1917,5 @@
   </script>
 </body>
 </html>
+
 
