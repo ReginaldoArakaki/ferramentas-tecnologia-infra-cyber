@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="bauhaus">
+  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura · v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #ffffff;
+      --surface-container-low: #f8fafc;
+      --surface-container: #f1f5f9;
+      --surface-container-high: #e2e8f0;
+      --on-surface: #0f172a;
+      --on-surface-variant: #475569;
+      --outline: #0f172a;
+      --outline-variant: #cbd5e1;
+      --primary: #0f172a;
+      --on-primary: #ffffff;
+      --tertiary: #0044cc;
+      --tertiary-dark: #003399;
+      --on-tertiary: #ffffff;
+      --primary-container: #ff8c00;
+      --on-primary-container: #0f172a;
+      --secondary: #dc2626;
+      --error: #b91c1c;
+      --on-error: #ffffff;
+      --positive: #15803d;
+      --on-positive: #ffffff;
+      --warning: #b45309;
+      --focus: #0044cc;
+      --data-1: #0044cc;
+      --data-2: #ea580c;
+      --data-3: #dc2626;
+      --data-4: #0f172a;
+      --data-5: #15803d;
+      --data-context: #94a3b8;
+      --note-orange: #fff7ed;
+      --note-blue: #eff6ff;
+      --note-red: #fef2f2;
+      --note-green: #f0fdf4;
+      --note-purple: #faf5ff;
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-label: 'Space Grotesk', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --rounded: 0.125rem;
+      --border-thick: 3px solid var(--outline);
+      --border-medium: 2px solid var(--outline);
+      --offset-shadow: 6px 6px 0 var(--outline);
+      --offset-shadow-sm: 3px 3px 0 var(--outline);
+      --rule-heavy: 5px solid var(--outline);
+      --display-size: clamp(1.75rem, 1.35rem + 1.4vw, 2.5rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.55rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip; margin: 0; padding: 0;
+      background-color: var(--background); color: var(--on-surface);
+      font-family: var(--font-body); font-size: var(--body-size); line-height: 1.5;
+    }
+    body {
+      background-image: radial-gradient(var(--outline-variant) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    button, input, select, textarea { font-family: inherit; font-size: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+    .page-grid { display: grid; gap: var(--space-lg); padding: var(--space-lg); max-width: 1380px; margin: 0 auto; }
+    .page-grid * { min-width: 0; }
+
+    .block { border: var(--border-thick); border-radius: var(--rounded); box-shadow: var(--offset-shadow); background: var(--background); padding: var(--space-lg); }
+
+    /* Masthead */
+    .masthead {
+      border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background);
+      border-top: var(--space-sm) solid var(--tertiary); padding: var(--space-lg);
+      display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--space-lg); align-items: end;
+    }
+    .kicker {
+      display: inline-flex; align-items: center; gap: var(--space-xs);
+      font-family: var(--font-label); font-weight: 700; font-size: var(--label-size);
+      text-transform: uppercase; letter-spacing: 0.09em;
+      background: var(--tertiary); color: var(--on-tertiary); padding: var(--space-xs) var(--space-sm); margin-bottom: var(--space-sm);
+    }
+    .title { font-family: var(--font-headline); font-weight: 700; font-size: var(--display-size); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 var(--space-sm) 0; }
+    .title mark { background: var(--primary-container); color: var(--on-primary-container); padding-inline: var(--space-xs); }
+    .subtitle { margin: 0; color: var(--on-surface-variant); max-width: 68ch; }
+    .equation {
+      margin-top: var(--space-md); display: inline-block; font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem;
+      border: var(--border-medium); background: var(--note-orange); padding: var(--space-xs) var(--space-sm);
+    }
+
+    .controls-cluster { display: grid; gap: var(--space-sm); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); }
+    .control-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: end; }
+    .field-group { display: flex; flex-direction: column; gap: var(--space-xs); flex: 1 1 220px; }
+    .field-label { font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    select.bauhaus-select, input.bauhaus-input, textarea.bauhaus-textarea {
+      width: 100%; min-height: 44px; padding: var(--space-sm) var(--space-md);
+      background: var(--background); color: var(--on-surface); border: var(--border-medium); border-radius: var(--rounded); font-weight: 600;
+    }
+    textarea.bauhaus-textarea { font-weight: 500; resize: vertical; min-height: 76px; font-size: 0.875rem; }
+    select.bauhaus-select { cursor: pointer; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+      min-height: 44px; padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.07em;
+      border: var(--border-thick); border-radius: var(--rounded); box-shadow: var(--offset-shadow-sm);
+      background: var(--background); color: var(--on-surface); cursor: pointer; white-space: nowrap;
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+    .btn svg { width: 16px; height: 16px; }
+    .btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--outline); }
+    .btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .btn-primary { background: var(--tertiary); color: var(--on-tertiary); }
+    .btn-orange { background: var(--primary-container); color: var(--on-primary-container); }
+    .btn-danger { background: var(--error); color: var(--on-error); }
+    .btn-on { background: var(--error); color: var(--on-error); }
+    .btn-prof-on { background: var(--primary); color: var(--on-primary); }
+    .btn-sm { min-height: 34px; padding: 4px 10px; font-size: 0.68rem; box-shadow: 2px 2px 0 var(--outline); border-width: 2px; }
+
+    .inline-feedback { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; padding: var(--space-xs) var(--space-sm); border: var(--border-medium); background: var(--note-blue); display: none; }
+    .inline-feedback.is-visible { display: block; }
+
+    /* Timer */
+    .timer-strip {
+      border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background);
+      border-left: var(--space-sm) solid var(--primary-container); padding: var(--space-md) var(--space-lg);
+      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.9fr) auto; gap: var(--space-lg); align-items: center;
+    }
+    .timer-readout-wrap { display: flex; align-items: center; gap: var(--space-md); }
+    .timer-digits {
+      font-family: var(--font-mono); font-weight: 700; font-size: clamp(1.65rem, 1.3rem + 1vw, 2.25rem); font-variant-numeric: tabular-nums;
+      background: var(--primary); color: var(--on-primary); padding: var(--space-xs) var(--space-md); border: var(--border-medium); min-width: 128px; text-align: center;
+    }
+    .timer-meta { display: flex; flex-direction: column; gap: var(--space-xs); }
+    .timer-block-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--subhead-size); margin: 0; }
+    .timer-status-badge { font-family: var(--font-mono); font-size: var(--label-size); font-weight: 600; color: var(--on-surface-variant); }
+    .timer-blocks-progress { display: flex; flex-direction: column; gap: var(--space-sm); }
+    .block-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); }
+    .block-tab {
+      min-height: 44px; padding: var(--space-xs) var(--space-sm); border: var(--border-medium); background: var(--surface-container-low);
+      font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-align: left; cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center; color: var(--on-surface);
+    }
+    .block-tab.is-active { background: var(--primary-container); box-shadow: var(--offset-shadow-sm); }
+    .block-tab small { font-family: var(--font-mono); font-weight: 600; font-size: 0.68rem; }
+    .progress-label-row { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; color: var(--on-surface-variant); }
+    .progress-track-global { display: grid; grid-template-columns: 15fr 25fr 30fr 20fr; gap: 2px; height: 14px; background: var(--outline); border: var(--border-medium); overflow: hidden; }
+    .progress-seg { background: var(--surface-container-high); overflow: hidden; }
+    .progress-seg-fill { height: 100%; width: 0%; transition: width var(--dur-short) var(--ease-out); }
+    .fill-b1 { background: var(--tertiary); } .fill-b2 { background: var(--primary-container); } .fill-b3 { background: var(--secondary); } .fill-b4 { background: var(--positive); }
+    .timer-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
+    .kpi-card { border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--background); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-xs); border-top-width: 6px; }
+    .kpi-rr { border-top-color: var(--tertiary); } .kpi-det { border-top-color: var(--primary-container); } .kpi-rec { border-top-color: var(--positive); } .kpi-blast { border-top-color: var(--secondary); }
+    .kpi-head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--on-surface-variant); }
+    .kpi-head svg { width: 18px; height: 18px; }
+    .kpi-value { font-family: var(--font-headline); font-weight: 700; font-size: clamp(1.85rem, 1.4rem + 1.2vw, 2.4rem); line-height: 1; font-variant-numeric: tabular-nums; }
+    .kpi-caption { font-size: 0.8125rem; color: var(--on-surface-variant); margin: 0; }
+
+    .time-strip {
+      border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--primary); color: var(--on-primary);
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0;
+    }
+    .time-cell { padding: var(--space-sm) var(--space-md); border-right: 2px solid #334155; display: flex; flex-direction: column; gap: 2px; }
+    .time-cell:last-child { border-right: none; background: var(--secondary); }
+    .time-cell .lbl { font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
+    .time-cell .val { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .time-cell .hint { font-size: 0.72rem; opacity: 0.8; }
+    .time-cell.is-alarm .val { color: #fecaca; }
+
+    /* Section headers */
+    .section-open {
+      border-top: 6px solid var(--accent-line, var(--tertiary)); padding-top: var(--space-md); margin-bottom: var(--space-md);
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-sm);
+    }
+    .section-open.accent-red { --accent-line: var(--secondary); }
+    .section-open.accent-orange { --accent-line: var(--primary-container); }
+    .section-open.accent-green { --accent-line: var(--positive); }
+    .section-kicker {
+      display: inline-block; font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.1em;
+      background: var(--primary); color: var(--on-primary); padding: var(--space-xs) var(--space-sm); margin-bottom: var(--space-xs);
+    }
+    .section-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--headline-size); letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+
+    .tag {
+      display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-sm);
+      font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      border: var(--border-medium); border-radius: var(--rounded); background: var(--background); color: var(--on-surface);
+    }
+    .tag-blue { background: var(--tertiary); color: var(--on-tertiary); }
+    .tag-orange { background: var(--primary-container); }
+    .tag-red { background: var(--error); color: var(--on-error); }
+    .tag-green { background: var(--positive); color: var(--on-positive); }
+    .tags-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-xs); }
+
+    /* Case briefing */
+    .case-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-lg); }
+    .case-narrative { font-size: 0.95rem; margin: 0 0 var(--space-sm) 0; }
+    .case-box { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm) var(--space-md); margin-bottom: var(--space-sm); }
+    .case-box h4 { margin: 0 0 4px 0; font-family: var(--font-label); font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.08em; color: var(--tertiary); }
+    .case-box.is-question { background: var(--note-orange); border-width: 3px; }
+    .case-box.is-question h4 { color: var(--warning); }
+    .case-box.is-question p { font-family: var(--font-headline); font-weight: 700; font-size: 1.05rem; margin: 0; }
+    .case-box.is-green { background: var(--note-green); }
+    .case-box.is-green h4 { color: var(--positive); }
+    .case-box.is-red { background: var(--note-red); }
+    .case-box.is-red h4 { color: var(--error); }
+    .case-box ul { margin: 0; padding-left: 1.1rem; font-size: 0.875rem; }
+    .case-box p { margin: 0; font-size: 0.875rem; }
+    .gabarito { border: 3px dashed var(--primary); background: var(--note-purple); padding: var(--space-sm) var(--space-md); }
+    .gabarito h4 { margin: 0 0 4px 0; font-family: var(--font-label); font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.08em; }
+    .gabarito ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; }
+    .gabarito[hidden] { display: none; }
+
+    /* Workspace */
+    .workspace-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: var(--space-lg); align-items: start; }
+
+    .scenario-banner {
+      background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); margin-bottom: var(--space-md);
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); align-items: center;
+    }
+
+    .layers-pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-sm); margin-bottom: var(--space-md); }
+    .layer-node {
+      border: var(--border-thick); border-radius: var(--rounded); background: var(--background); padding: var(--space-sm); cursor: pointer; text-align: left;
+      display: flex; flex-direction: column; gap: var(--space-xs); min-height: 120px; box-shadow: var(--offset-shadow-sm); color: var(--on-surface);
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+    .layer-node:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--outline); }
+    .layer-node.is-selected { background: var(--primary-container); }
+    .layer-node.is-breached { border-color: var(--error); background: var(--note-red); }
+    .layer-node.is-selected.is-breached { background: var(--primary-container); box-shadow: 4px 4px 0 var(--error); }
+    .layer-num { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; display: flex; justify-content: space-between; }
+    .layer-name { font-family: var(--font-headline); font-weight: 700; font-size: 0.9rem; line-height: 1.15; }
+    .layer-status-text { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; }
+    .layer-bars { margin-top: auto; display: grid; gap: 2px; }
+    .layer-bar { height: 6px; background: var(--surface-container-high); border: 1px solid var(--outline); overflow: hidden; }
+    .layer-bar > span { display: block; height: 100%; }
+    .lb-rr { background: var(--tertiary); } .lb-det { background: var(--primary-container); } .lb-rec { background: var(--positive); }
+
+    .layer-inspector { border: var(--border-thick); background: var(--surface-container-low); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md); }
+    .inspector-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); border-bottom: var(--border-thick); padding-bottom: var(--space-sm); }
+    .inspector-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+    .info-box { background: var(--background); border: var(--border-medium); padding: var(--space-sm) var(--space-md); }
+    .info-box h4 { margin: 0 0 var(--space-xs) 0; font-family: var(--font-label); font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.08em; color: var(--tertiary); }
+    .info-box.is-threat h4 { color: var(--error); }
+    .info-box ul { margin: 0; padding-left: 1.1rem; font-size: 0.875rem; }
+
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-sm); }
+    .tool-toggle {
+      border: var(--border-medium); background: var(--background); padding: var(--space-sm); display: flex; flex-direction: column; gap: 2px;
+      cursor: pointer; text-align: left; min-height: 70px; color: var(--on-surface);
+    }
+    .tool-toggle:hover { box-shadow: var(--offset-shadow-sm); }
+    .tool-toggle.is-enabled { background: var(--note-blue); box-shadow: var(--offset-shadow-sm); }
+    .tool-toggle.is-bypassed { border-color: var(--error); background: var(--note-red); }
+    .tool-top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-xs); font-family: var(--font-label); font-weight: 700; font-size: 0.8rem; }
+    .tool-state-pill { font-family: var(--font-mono); font-size: 0.66rem; padding: 1px 6px; border: 1px solid var(--outline); font-weight: 700; }
+    .tool-toggle.is-enabled .tool-state-pill { background: var(--tertiary); color: var(--on-tertiary); }
+    .tool-toggle.is-bypassed .tool-state-pill { background: var(--error); color: var(--on-error); }
+    .tool-tactic { font-size: 0.72rem; color: var(--on-surface-variant); }
+
+    .callout-note { font-size: 0.8rem; border-left: 5px solid var(--primary-container); background: var(--note-orange); padding: var(--space-xs) var(--space-sm); margin: var(--space-xs) 0 0 0; }
+
+    /* Tactics board */
+    .tactics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md); }
+    .tactic-col { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); border-top-width: 6px; }
+    .tactic-col.col-rr { border-top-color: var(--tertiary); }
+    .tactic-col.col-det { border-top-color: var(--primary-container); }
+    .tactic-col.col-rec { border-top-color: var(--positive); }
+    .tactic-col h3 { margin: 0 0 4px 0; font-family: var(--font-headline); font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .tactic-col h3 small { font-family: var(--font-mono); font-size: 0.72rem; }
+    .tactic-card {
+      border: var(--border-medium); background: var(--background); padding: 6px var(--space-sm); text-align: left; cursor: pointer;
+      display: flex; flex-direction: column; gap: 2px; color: var(--on-surface); position: relative;
+    }
+    .tactic-card:hover { box-shadow: var(--offset-shadow-sm); }
+    .tactic-card .t-top { display: flex; justify-content: space-between; gap: 6px; font-family: var(--font-label); font-weight: 700; font-size: 0.8rem; line-height: 1.2; }
+    .tactic-card .t-pill { font-family: var(--font-mono); font-size: 0.64rem; border: 1px solid var(--outline); padding: 0 5px; height: fit-content; white-space: nowrap; }
+    .tactic-card .t-hint { font-size: 0.72rem; color: var(--on-surface-variant); }
+    .tactic-card .t-layers { display: flex; flex-wrap: wrap; gap: 3px; }
+    .tactic-card .t-layer { font-family: var(--font-mono); font-size: 0.6rem; border: 1px solid var(--outline-variant); padding: 0 4px; }
+    .tactic-card .t-layer.is-here { border-color: var(--outline); background: var(--primary-container); font-weight: 700; }
+    .tactic-card .t-sub { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; }
+    .col-rr .tactic-card.is-on { background: var(--note-blue); border-color: var(--tertiary); box-shadow: 3px 3px 0 var(--tertiary); }
+    .col-det .tactic-card.is-on { background: var(--note-orange); border-color: var(--warning); box-shadow: 3px 3px 0 var(--warning); }
+    .col-rec .tactic-card.is-on { background: var(--note-green); border-color: var(--positive); box-shadow: 3px 3px 0 var(--positive); }
+    .tactic-card.is-on .t-pill { background: var(--primary); color: var(--on-primary); }
+    .tactic-card.is-neutralized { opacity: 0.75; border-style: dashed; }
+    .tactic-card.is-neutralized .t-pill { background: var(--error); color: var(--on-error); }
+
+    /* Sticky notes */
+    .sticky-composer { display: grid; grid-template-columns: minmax(0, 1fr) 170px auto; gap: var(--space-sm); align-items: end; margin-top: var(--space-xs); }
+    .sticky-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+    .sticky-note { border: var(--border-medium); box-shadow: var(--offset-shadow-sm); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); font-size: 0.85rem; }
+    .sticky-note.tactic-rr { background: var(--note-blue); }
+    .sticky-note.tactic-det { background: #fef9c3; }
+    .sticky-note.tactic-rec { background: var(--note-green); }
+    .sticky-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; }
+    .sticky-del { background: transparent; border: 1px solid var(--outline); font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; cursor: pointer; }
+    .sticky-del:hover { background: var(--error); color: var(--on-error); }
+    .modesty-rule { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border: var(--border-medium); }
+    .modesty-rule.ok { background: var(--positive); color: var(--on-positive); }
+    .modesty-rule.nok { background: var(--note-red); color: var(--error); }
+
+    /* Guardian panel */
+    .guardian-panel { display: flex; flex-direction: column; gap: var(--space-md); }
+    .inject-list { display: flex; flex-direction: column; gap: var(--space-xs); }
+    .inject-card { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); align-items: center; }
+    .inject-card.is-due { background: var(--note-orange); border-width: 3px; }
+    .inject-card.is-applied { background: var(--note-red); border-color: var(--error); }
+    .inject-card strong { font-family: var(--font-headline); font-size: 0.9rem; display: block; }
+    .inject-card .i-meta { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; }
+    .inject-card p { margin: 2px 0 0 0; font-size: 0.78rem; color: var(--on-surface-variant); }
+
+    .guardian-status-bar { padding: var(--space-sm) var(--space-md); border: var(--border-medium); display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); background: var(--surface-container); }
+    .guardian-status-bar.is-active { background: var(--primary-container); }
+    .decision-list { display: grid; gap: var(--space-xs); }
+    .decision {
+      border: var(--border-medium); background: var(--background); padding: 6px var(--space-sm); text-align: left; cursor: pointer; color: var(--on-surface);
+      display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-sm); align-items: start;
+    }
+    .decision:disabled { opacity: 0.5; cursor: not-allowed; }
+    .decision .box { width: 18px; height: 18px; border: var(--border-medium); margin-top: 2px; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; }
+    .decision.is-on { background: var(--note-orange); box-shadow: var(--offset-shadow-sm); }
+    .decision.is-on .box { background: var(--primary); color: var(--on-primary); }
+    .decision strong { font-family: var(--font-label); font-size: 0.82rem; display: block; }
+    .decision span.eff { font-size: 0.74rem; color: var(--positive); font-weight: 600; display: block; }
+    .decision span.cost { font-size: 0.74rem; color: var(--error); font-weight: 600; display: block; }
+
+    .scale-controls { display: flex; flex-direction: column; gap: var(--space-xs); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); }
+    .scale-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); }
+    .scale-btn {
+      min-height: 44px; padding: var(--space-xs); border: var(--border-medium); background: var(--background); color: var(--on-surface);
+      font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; cursor: pointer; text-align: center;
+    }
+    .scale-btn.is-active { background: var(--error); color: var(--on-error); box-shadow: var(--offset-shadow-sm); }
+    .svg-cascade-frame { border: var(--border-thick); background: var(--background); padding: var(--space-sm); }
+    .modesty-callout { border: var(--border-medium); border-left: 6px solid var(--tertiary); background: var(--surface-container-low); padding: var(--space-md); font-size: 0.9rem; }
+    .modesty-callout > strong { font-family: var(--font-headline); color: var(--tertiary); }
+
+    /* Deliverables */
+    .deliv-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
+    .summary-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); margin-top: var(--space-md); align-items: start; }
+    .summary-wrap textarea { min-height: 170px; font-family: var(--font-mono); font-size: 0.75rem; }
+    .summary-actions { display: flex; flex-direction: column; gap: var(--space-xs); }
+
+    /* Charts */
+    .charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-lg); }
+    .chart-card { border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm); }
+    .chart-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--subhead-size); margin: 0; padding-bottom: var(--space-xs); border-bottom: var(--border-thick); }
+    .chart-caption { margin: 0; font-size: 0.8125rem; color: var(--on-surface-variant); }
+    .chart-box { position: relative; width: 100%; height: 290px; }
+
+    .table-wrap { overflow-x: auto; border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background); }
+    table.bauhaus-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    table.bauhaus-table th {
+      background: var(--surface-container-high); font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; text-align: left; padding: var(--space-sm) var(--space-md); border-bottom: var(--border-thick); white-space: nowrap;
+    }
+    table.bauhaus-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--outline-variant); vertical-align: top; }
+    table.bauhaus-table tr.is-current-row { background: var(--note-orange); font-weight: 600; }
+    .num-col { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+    .footer-sources { border-top: var(--rule-heavy); padding-top: var(--space-md); font-size: 0.8125rem; color: var(--on-surface-variant); display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-md); }
+
+    @media (max-width: 1100px) {
+      .masthead, .timer-strip, .workspace-grid, .case-grid, .charts-grid { grid-template-columns: 1fr; }
+      .layers-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tactics-grid, .deliv-grid { grid-template-columns: 1fr 1fr; }
+      .time-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .page-grid { padding: var(--space-sm); gap: var(--space-md); }
+      .kpi-grid, .block-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layers-pipeline, .inspector-grid, .sticky-composer, .tactics-grid, .deliv-grid, .summary-wrap, .scenario-banner { grid-template-columns: 1fr; }
+      .scale-steps, .time-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+
+    <!-- 1. MASTHEAD -->
+    <header class="masthead">
+      <div>
+        <span class="kicker">Turma T35 · 26/11/2026 · Ferramentas e Tecnologia Cyber · v2</span>
+        <h1 class="title">Quadro Interativo de <mark>Cibersegurança</mark> &amp; Arquitetura</h1>
+        <p class="subtitle">
+          Continuação do War Room. Dinâmica 1: mapear as 5 camadas e as ferramentas. Dinâmica 2: Exercício da Modéstia, que parte do princípio de que o perímetro <em>será</em> suplantado e pergunta quais decisões de arquitetura reduzem o estrago.
+        </p>
+        <div class="equation">Infra forte ≠ Suficiente &nbsp;⇒&nbsp; Dano ≈ Blast Radius × (MTTD + MTTR)</div>
+      </div>
+
+      <div class="controls-cluster">
+        <div class="control-row">
+          <div class="field-group">
+            <label class="field-label" for="setorSelect">Estudo de Caso (?setor=)</label>
+            <select id="setorSelect" class="bauhaus-select" onchange="handleSetorChange(this.value)">
+              <option value="banking">EC 1 · Banking &amp; Sistema Financeiro</option>
+              <option value="saude">EC 2 · Hospital &amp; Rede de Saúde</option>
+              <option value="policia">EC 3 · Polícia &amp; Segurança Pública (190)</option>
+              <option value="energia">EC 4 · Energia &amp; Rede Elétrica</option>
+              <option value="transporte">EC 5 · Transporte &amp; Logística Urbana</option>
+            </select>
+          </div>
+          <button type="button" id="btnProfessor" class="btn" onclick="toggleProfessor()">
+            <i data-lucide="lock" aria-hidden="true"></i>
+            <span id="btnProfessorTxt">Modo Professor</span>
+          </button>
+        </div>
+        <form id="profUnlock" class="control-row" hidden onsubmit="event.preventDefault(); desbloquearProfessor();">
+          <div class="field-group">
+            <label class="field-label" for="profSenha">Senha do professor</label>
+            <input type="password" id="profSenha" class="bauhaus-input" autocomplete="current-password" placeholder="Senha">
+          </div>
+          <button type="submit" id="btnProfOk" class="btn btn-prof-on"><i data-lucide="key-round" aria-hidden="true"></i> Desbloquear</button>
+          <button type="button" class="btn" onclick="fecharUnlock()">Cancelar</button>
+        </form>
+        <div class="control-row">
+          <button type="button" class="btn btn-primary" onclick="simularSuplantamentoGlobal()">
+            <i data-lucide="zap" aria-hidden="true"></i> Simular Suplantamento
+          </button>
+          <button type="button" class="btn" onclick="restaurarDefesasSetor()">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i> Restaurar Camadas
+          </button>
+          <button type="button" class="btn" onclick="exportarCSV()">
+            <i data-lucide="download" aria-hidden="true"></i> CSV
+          </button>
+        </div>
+        <div id="feedback" class="inline-feedback" role="status" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <!-- 2. TIMER 90 MIN (4 BLOCOS) -->
+    <section class="timer-strip" aria-label="Cronômetro da aula de 90 minutos">
+      <div class="timer-readout-wrap">
+        <div id="timerDisplay" class="timer-digits">15:00</div>
+        <div class="timer-meta">
+          <h2 id="timerBlockTitle" class="timer-block-title">Bloco 1 · Provocação</h2>
+          <span id="timerStatusText" class="timer-status-badge">AULA 90 MIN · PAUSADO</span>
+        </div>
+      </div>
+      <div class="timer-blocks-progress">
+        <div class="block-tabs" aria-label="Blocos da aula">
+          <button type="button" id="tabBloco1" class="block-tab" onclick="selecionarBlocoTimer(1)"><span>1 · Provocação</span><small>15 min</small></button>
+          <button type="button" id="tabBloco2" class="block-tab" onclick="selecionarBlocoTimer(2)"><span>2 · D1 Mapeamento</span><small>25 min</small></button>
+          <button type="button" id="tabBloco3" class="block-tab" onclick="selecionarBlocoTimer(3)"><span>3 · D2 Modéstia + Injects</span><small>30 min</small></button>
+          <button type="button" id="tabBloco4" class="block-tab" onclick="selecionarBlocoTimer(4)"><span>4 · Cascata &amp; Fechamento</span><small>20 min</small></button>
+        </div>
+        <div class="progress-label-row">
+          <span id="blockProgressLabel">Bloco 1: 0%</span>
+          <span id="globalProgressLabel">Aula: min 0 de 90</span>
+        </div>
+        <div class="progress-track-global">
+          <div class="progress-seg"><div id="progSeg1" class="progress-seg-fill fill-b1"></div></div>
+          <div class="progress-seg"><div id="progSeg2" class="progress-seg-fill fill-b2"></div></div>
+          <div class="progress-seg"><div id="progSeg3" class="progress-seg-fill fill-b3"></div></div>
+          <div class="progress-seg"><div id="progSeg4" class="progress-seg-fill fill-b4"></div></div>
+        </div>
+      </div>
+      <div class="timer-actions">
+        <button type="button" id="btnTimerStart" class="btn btn-primary" onclick="iniciarTimer()"><i data-lucide="play" aria-hidden="true"></i> Iniciar</button>
+        <button type="button" id="btnTimerPause" class="btn" onclick="pausarTimer()" disabled><i data-lucide="pause" aria-hidden="true"></i> Pausar</button>
+        <button type="button" class="btn btn-danger" onclick="resetarTimer()"><i data-lucide="refresh-cw" aria-hidden="true"></i> Resetar</button>
+      </div>
+    </section>
+
+    <!-- 3. KPIs (Resistir/Reagir · Detectar · Recuperar · Blast) -->
+    <section class="kpi-grid" aria-label="Indicadores das táticas">
+      <article class="kpi-card kpi-rr">
+        <div class="kpi-head"><span>Resistir / Reagir</span><i data-lucide="shield" aria-hidden="true"></i></div>
+        <div id="kpiRrVal" class="kpi-value">0%</div>
+        <p id="kpiRrCap" class="kpi-caption">Barreiras + contenção ativa</p>
+      </article>
+      <article class="kpi-card kpi-det">
+        <div class="kpi-head"><span>Detectar</span><i data-lucide="radar" aria-hidden="true"></i></div>
+        <div id="kpiDetVal" class="kpi-value">0%</div>
+        <p id="kpiDetCap" class="kpi-caption">Sinais que o perímetro não vê</p>
+      </article>
+      <article class="kpi-card kpi-rec">
+        <div class="kpi-head"><span>Recuperar</span><i data-lucide="history" aria-hidden="true"></i></div>
+        <div id="kpiRecVal" class="kpi-value">0%</div>
+        <p id="kpiRecCap" class="kpi-caption">Capacidade de voltar com dado confiável</p>
+      </article>
+      <article class="kpi-card kpi-blast">
+        <div class="kpi-head"><span>Raio de Impacto</span><i data-lucide="flame" aria-hidden="true"></i></div>
+        <div id="kpiBlastVal" class="kpi-value">0%</div>
+        <p id="kpiBlastCap" class="kpi-caption">Severidade e propagação</p>
+      </article>
+    </section>
+
+    <!-- 3b. TEMPO: MTTD / MTTR / RTO / RPO / DANO -->
+    <section class="time-strip" aria-label="Métricas de tempo do incidente">
+      <div class="time-cell"><span class="lbl">MTTD · até perceber</span><span id="tMTTD" class="val">—</span><span class="hint">puxado por Detectar</span></div>
+      <div class="time-cell"><span class="lbl">MTTR · até conter</span><span id="tMTTR" class="val">—</span><span class="hint">puxado por Reagir</span></div>
+      <div class="time-cell"><span class="lbl">RTO · até voltar</span><span id="tRTO" class="val">—</span><span class="hint">puxado por Recuperar</span></div>
+      <div class="time-cell" id="cellRPO"><span class="lbl">RPO · dado perdido</span><span id="tRPO" class="val">—</span><span id="tRPOhint" class="hint">janela de perda</span></div>
+      <div class="time-cell"><span class="lbl">Índice de Dano</span><span id="tDano" class="val">—</span><span class="hint">Blast × (MTTD + MTTR)</span></div>
+    </section>
+
+    <!-- 4. ESTUDO DE CASO (BRIEFING F0) -->
+    <section class="block" aria-label="Estudo de caso do grupo">
+      <div class="section-open accent-orange">
+        <div>
+          <span class="section-kicker">Frame F0 · Briefing do Estudo de Caso</span>
+          <h2 class="section-title" id="casoTitulo">—</h2>
+        </div>
+        <div style="display:flex; gap: var(--space-xs); flex-wrap: wrap;">
+          <span id="casoSegmento" class="tag tag-blue">B2C</span>
+          <span id="cenarioBadge" class="tag">—</span>
+        </div>
+      </div>
+      <div class="case-grid">
+        <div>
+          <p id="casoNarrativa" class="case-narrative"></p>
+          <div class="case-box is-red"><h4>O que a infraestrutura viu</h4><p id="casoInfraViu"></p></div>
+          <div class="case-box is-question"><h4>Pergunta motriz</h4><p id="casoPergunta"></p></div>
+          <div class="case-box"><h4>Dilema de War Room (Frame F5)</h4><p id="casoDilema"></p></div>
+        </div>
+        <div>
+          <div class="case-box is-green"><h4>Sinais fracos disponíveis</h4><ul id="casoSinais"></ul></div>
+          <div class="case-box">
+            <h4>Quadro do grupo no Miro</h4>
+            <div style="display:grid; gap: var(--space-xs);">
+              <input type="url" id="miroUrl" class="bauhaus-input" placeholder="Cole aqui o link do board Miro do grupo" oninput="salvarMiroUrl(this.value)">
+              <div style="display:flex; gap: var(--space-xs); flex-wrap: wrap;">
+                <button type="button" class="btn btn-sm btn-orange" onclick="abrirMiro()"><i data-lucide="external-link" aria-hidden="true"></i> Abrir Miro</button>
+                <button type="button" class="btn btn-sm" onclick="copiarLinkSetor()"><i data-lucide="link" aria-hidden="true"></i> Link deste EC</button>
+              </div>
+            </div>
+          </div>
+          <div id="gabaritoBox" class="gabarito" hidden>
+            <h4>Gabarito do professor</h4>
+            <ul id="casoGabarito"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. WORKSPACE -->
+    <div class="workspace-grid">
+      <!-- LEFT: D1 · 5 camadas + ferramentas -->
+      <section class="block" aria-label="Dinâmica 1 — 5 camadas">
+        <div class="section-open">
+          <div>
+            <span class="section-kicker">Dinâmica 1 · Frames F1–F2 · Infra (Autoestudos 1–4)</span>
+            <h2 class="section-title" id="cenarioTitulo">—</h2>
+          </div>
+        </div>
+        <div class="scenario-banner">
+          <div>
+            <strong id="cenarioSubtitulo"></strong>
+            <div id="cenarioTags" class="tags-row"></div>
+          </div>
+          <div style="text-align: right;">
+            <span class="field-label" style="display:block;">Camadas suplantadas</span>
+            <strong id="breachedCountBadge" style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--error);">0 / 5</strong>
+          </div>
+        </div>
+
+        <div id="layersPipeline" class="layers-pipeline" role="group" aria-label="Cinco camadas"></div>
+
+        <div class="layer-inspector">
+          <div class="inspector-header">
+            <div>
+              <span id="inspLayerTag" class="tag tag-orange">Camada</span>
+              <h3 id="inspLayerTitle" style="margin: 4px 0 0 0; font-family: var(--font-headline); font-size: 1.2rem;"></h3>
+            </div>
+            <button type="button" class="btn btn-danger" onclick="toggleBreachCamadaAtual()">
+              <i data-lucide="alert-triangle" aria-hidden="true"></i><span id="btnBreachLabel">Suplantar camada</span>
+            </button>
+          </div>
+          <div class="inspector-grid">
+            <div class="info-box"><h4>Pontos de controle, usuários &amp; fluxo</h4><ul id="inspControlesList"></ul></div>
+            <div class="info-box is-threat"><h4>Vulnerabilidades &amp; vetores</h4><ul id="inspAmeacasList"></ul></div>
+          </div>
+          <div>
+            <span class="field-label" style="display:block; margin-bottom: var(--space-xs);">Ferramentas de infraestrutura nesta camada (clique para ligar/desligar)</span>
+            <div id="toolsGrid" class="tools-grid"></div>
+            <p class="callout-note">Ferramenta sem tática rende pouco: os sinais de IDS, Honeypot e SIEM valem só <strong>metade</strong> em Detectar se nenhuma tática de detecção atua na camada. Nenhuma ferramenta soma em Recuperar.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: D2 · Injects, Guardião, Cascata -->
+      <aside class="block guardian-panel" aria-label="Dinâmica 2 — Modéstia e escala">
+        <div class="section-open accent-red">
+          <div>
+            <span class="section-kicker">Dinâmica 2 · Modéstia &amp; War Room</span>
+            <h2 class="section-title">Injects, Decisões &amp; Cascata</h2>
+          </div>
+        </div>
+
+        <div>
+          <span class="field-label" style="display:block; margin-bottom: var(--space-xs);">Injects do professor (Bloco 3)</span>
+          <div id="injectList" class="inject-list"></div>
+        </div>
+
+        <div id="guardianStatusBar" class="guardian-status-bar">
+          <div>
+            <strong id="guardianModeHeading" style="font-family: var(--font-headline); display:block;">Guardião Cibernético: desligado</strong>
+            <span id="guardianModeDesc" style="font-size: 0.8rem;">Ligar não melhora nada sozinho: libera decisões de War Room, cada uma com custo.</span>
+          </div>
+          <button type="button" id="btnGuardian" class="btn btn-sm btn-orange" onclick="toggleGuardian()">Ligar</button>
+        </div>
+        <div id="decisionList" class="decision-list"></div>
+
+        <div class="scale-controls">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm);">
+            <span class="field-label">Escala do incidente (1–4)</span>
+            <span id="escalaReadout" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.8rem;"></span>
+          </div>
+          <div class="scale-steps">
+            <button type="button" id="scaleBtn1" class="scale-btn" onclick="selecionarEscala(1)">1 · Local<br><small>Endpoint</small></button>
+            <button type="button" id="scaleBtn2" class="scale-btn" onclick="selecionarEscala(2)">2 · Rede<br><small>LAN / IHC</small></button>
+            <button type="button" id="scaleBtn3" class="scale-btn" onclick="selecionarEscala(3)">3 · Setorial<br><small>BD / Core</small></button>
+            <button type="button" id="scaleBtn4" class="scale-btn" onclick="selecionarEscala(4)">4 · Terror<br><small>Cascata</small></button>
+          </div>
+        </div>
+
+        <div class="svg-cascade-frame">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-xs);">
+            <span class="field-label">Frame F6 · Cascata intersetorial</span>
+            <span id="cascadeSeverityTag" class="tag tag-orange">—</span>
+          </div>
+          <svg id="cascadeSvg" viewBox="0 0 460 280" width="100%" height="260" role="img" aria-label="Grafo de propagação entre os 5 estudos de caso">
+            <line x1="230" y1="48" x2="380" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="230" y1="48" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="380" y1="124" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="380" y1="124" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="80" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="135" y1="229" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="230" y1="48" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+            <line x1="380" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle id="svgBlastRing" cx="230" cy="48" r="46" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-dasharray="5 3" opacity="0.75"/>
+            <g id="node-banking" style="cursor:pointer;" onclick="handleSetorChange('banking')">
+              <rect x="165" y="24" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="230" y="45" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 1 · BANKING</text>
+              <text id="svgRisk-banking" x="230" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-saude" style="cursor:pointer;" onclick="handleSetorChange('saude')">
+              <rect x="15" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="80" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 2 · HOSPITAL</text>
+              <text id="svgRisk-saude" x="80" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-energia" style="cursor:pointer;" onclick="handleSetorChange('energia')">
+              <rect x="315" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="380" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 4 · ENERGIA</text>
+              <text id="svgRisk-energia" x="380" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-policia" style="cursor:pointer;" onclick="handleSetorChange('policia')">
+              <rect x="70" y="205" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="135" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 3 · POLÍCIA</text>
+              <text id="svgRisk-policia" x="135" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-transporte" style="cursor:pointer;" onclick="handleSetorChange('transporte')">
+              <rect x="260" y="205" width="135" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="327" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 5 · TRANSPORTE</text>
+              <text id="svgRisk-transporte" x="327" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="modesty-callout">
+          <strong>Princípio da Modéstia (Assume Breach)</strong>
+          <p id="modestyDiagnosis" style="margin: 6px 0 0 0;"></p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 6. TÁTICAS ARQUITETURAIS (Frames F3–F4) -->
+    <section class="block" aria-label="Táticas arquiteturais">
+      <div class="section-open accent-green">
+        <div>
+          <span class="section-kicker">Dinâmica 2 · Frames F3–F4 · Táticas de Arquitetura (Bass et al.)</span>
+          <h2 class="section-title">Decisões de arquitetura: Resistir/Reagir · Detectar · Recuperar</h2>
+        </div>
+        <span class="tag">Camada selecionada: <span id="tacticLayerLabel" style="margin-left:4px;">—</span></span>
+      </div>
+      <p style="margin: 0 0 var(--space-md) 0; font-size: 0.9rem; color: var(--on-surface-variant);">
+        Táticas valem para o EC inteiro e atuam nas camadas indicadas (a camada selecionada aparece em destaque). Ao contrário das ferramentas, elas <strong>continuam funcionando quando o perímetro cai</strong>, porque olham comportamento, plausibilidade e tempo, e não assinaturas.
+      </p>
+      <div class="tactics-grid">
+        <div class="tactic-col col-rr"><h3>Resistir / Reagir <small id="cntRr">0</small></h3><div id="tacticsRr" style="display:grid; gap:var(--space-xs);"></div></div>
+        <div class="tactic-col col-det"><h3>Detectar <small id="cntDet">0</small></h3><div id="tacticsDet" style="display:grid; gap:var(--space-xs);"></div></div>
+        <div class="tactic-col col-rec"><h3>Recuperar <small id="cntRec">0</small></h3><div id="tacticsRec" style="display:grid; gap:var(--space-xs);"></div></div>
+      </div>
+
+      <div style="border-top: var(--border-medium); padding-top: var(--space-sm); margin-top: var(--space-md);">
+        <div style="display:flex; justify-content: space-between; align-items: center; gap: var(--space-sm); flex-wrap: wrap;">
+          <span class="field-label">Notas do grupo (espelho dos stickies do Miro)</span>
+          <span id="modestyRule" class="modesty-rule nok">Regra da Modéstia 1:2</span>
+        </div>
+        <div class="sticky-composer">
+          <div class="field-group">
+            <label class="field-label" for="stickyInput">Observação / contramedida</label>
+            <input type="text" id="stickyInput" class="bauhaus-input" placeholder="Ex.: Arquivos-canário no compartilhamento do PEP" onkeydown="if(event.key==='Enter'){adicionarNota();}">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="stickyTactic">Tática</label>
+            <select id="stickyTactic" class="bauhaus-select">
+              <option value="rr">Resistir / Reagir</option>
+              <option value="det">Detectar</option>
+              <option value="rec">Recuperar</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-orange" onclick="adicionarNota()"><i data-lucide="sticky-note" aria-hidden="true"></i> Fixar</button>
+        </div>
+        <div id="stickyBoard" class="sticky-board"></div>
+      </div>
+    </section>
+
+    <!-- 7. ENTREGÁVEIS -->
+    <section class="block" aria-label="Entregáveis do grupo">
+      <div class="section-open">
+        <div>
+          <span class="section-kicker">Entregáveis do Grupo · para colar no Miro</span>
+          <h2 class="section-title">SPOF, suplantamento, detecção e recuperação</h2>
+        </div>
+      </div>
+      <div class="deliv-grid">
+        <div class="field-group"><label class="field-label" for="planoSpof">SPOF / vulnerabilidade-chave</label><textarea id="planoSpof" class="bauhaus-textarea" oninput="salvarPlano('spof', this.value)" placeholder="Onde um único ponto derruba tudo?"></textarea></div>
+        <div class="field-group"><label class="field-label" for="planoAtaque">Plano de suplantamento</label><textarea id="planoAtaque" class="bauhaus-textarea" oninput="salvarPlano('ataque', this.value)" placeholder="Como o atacante passa pelas barreiras sem disparar alarme?"></textarea></div>
+        <div class="field-group"><label class="field-label" for="planoDeteccao">Plano de detecção (MTTD)</label><textarea id="planoDeteccao" class="bauhaus-textarea" oninput="salvarPlano('deteccao', this.value)" placeholder="Que sinal, em que camada, em quanto tempo?"></textarea></div>
+        <div class="field-group"><label class="field-label" for="planoRecuperacao">Plano de recuperação (RTO/RPO)</label><textarea id="planoRecuperacao" class="bauhaus-textarea" oninput="salvarPlano('recuperacao', this.value)" placeholder="Como voltam, em quanto tempo, perdendo o quê? Qual o modo degradado?"></textarea></div>
+      </div>
+      <div class="summary-wrap">
+        <div class="field-group">
+          <label class="field-label" for="resumoMiro">Resumo para o frame do grupo (atualiza sozinho)</label>
+          <textarea id="resumoMiro" class="bauhaus-textarea" readonly></textarea>
+        </div>
+        <div class="summary-actions">
+          <button type="button" class="btn btn-orange" onclick="copiarResumo()"><i data-lucide="copy" aria-hidden="true"></i> Copiar</button>
+          <button type="button" class="btn" onclick="baixarResumo()"><i data-lucide="file-text" aria-hidden="true"></i> Baixar TXT</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. GRÁFICOS -->
+    <section aria-label="Visualizações">
+      <div class="section-open accent-orange">
+        <div>
+          <span class="section-kicker">Telemetria Arquitetural</span>
+          <h2 class="section-title">Táticas, camadas, tempo e raio de impacto</h2>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <article class="chart-card">
+          <h3 class="chart-title">1. Perfil de táticas do EC</h3>
+          <p class="chart-caption">Postura atual contra a meta de referência Guardião Cibernético.</p>
+          <div class="chart-box"><canvas id="radarChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <h3 class="chart-title">2. Táticas por camada</h3>
+          <p class="chart-caption">Resistir/Reagir (azul), Detectar (laranja) e Recuperar (verde) em cada uma das 5 camadas.</p>
+          <div class="chart-box"><canvas id="layerBarChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <h3 class="chart-title">3. Linha do tempo do incidente (horas)</h3>
+          <p class="chart-caption">Até perceber (MTTD) + até conter (MTTR) + até voltar (RTO), nos 5 ECs. Barras longas = dano longo.</p>
+          <div class="chart-box"><canvas id="timeChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <h3 class="chart-title">4. Raio de impacto por EC</h3>
+          <p class="chart-caption">Exposição estimada (%) na escala atual. EC selecionado em vermelho.</p>
+          <div class="chart-box"><canvas id="blastChart"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 9. MATRIZ -->
+    <section class="block" aria-label="Matriz dos 5 estudos de caso">
+      <div class="section-open">
+        <div>
+          <span class="section-kicker">Síntese intersetorial · Bloco 4</span>
+          <h2 class="section-title">Matriz dos 5 Estudos de Caso</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="bauhaus-table">
+          <thead>
+            <tr>
+              <th>Estudo de caso</th>
+              <th>O que a infra não vê</th>
+              <th class="num-col">Resist./Reag.</th>
+              <th class="num-col">Detectar</th>
+              <th class="num-col">Recuperar</th>
+              <th class="num-col">MTTD</th>
+              <th class="num-col">RTO</th>
+              <th class="num-col">RPO</th>
+              <th class="num-col">Blast</th>
+            </tr>
+          </thead>
+          <tbody id="matrizTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer-sources">
+      <span><strong>Fontes:</strong> Autoestudos 1–4 (Prof. Reginaldo Arakaki) · Bass, Clements &amp; Kazman, <em>Software Architecture in Practice</em>, 4ª ed., 2021 (táticas de Segurança e de Disponibilidade) · Machado, <em>Segurança da Informação</em> (Criptografia e Password Cracking) · ISO/IEC 27001 · IEC 62443.</span>
+      <span>Turma T35 · Inteli · 26/11/2026 · v2</span>
+    </footer>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    // =========================================================================
+    // 1. CATÁLOGOS
+    // =========================================================================
+    const LAYER_META = [
+      { id: 'frontend', short: 'Frontend B/C', full: '1. Frontend B/C (Dispositivos de ponta)' },
+      { id: 'telecom', short: 'Telecom Web', full: '2. Telecom Web (Trânsito / Nuvem)' },
+      { id: 'ihc', short: 'IHC', full: '3. IHC (Módulos de aplicação, operadores e gestores)' },
+      { id: 'lan', short: 'LAN', full: '4. LAN (Rede local e middleware)' },
+      { id: 'bd', short: 'Acesso BD', full: '5. Acesso BD Interno / Externo' }
+    ];
+
+    const GRUPOS = {
+      rr: { label: 'Resistir / Reagir', curto: 'Resistir/Reagir' },
+      det: { label: 'Detectar', curto: 'Detectar' },
+      rec: { label: 'Recuperar', curto: 'Recuperar' }
+    };
+
+    // Ferramentas de infraestrutura (por camada). Nenhuma soma em Recuperar.
+    const TOOLS_CATALOG = [
+      { id: 'firewall', name: 'Firewall / NGFW / WAF', papel: 'Resistir', r: 22, d: 4 },
+      { id: 'cripto', name: 'Criptografia (TLS / AES / KMS)', papel: 'Resistir', r: 18, d: 2 },
+      { id: 'antivirus', name: 'Antivírus / EDR', papel: 'Resistir + sinal p/ Detectar', r: 10, d: 12 },
+      { id: 'ids', name: 'IDS / IPS', papel: 'Sinal p/ Detectar', r: 6, d: 18 },
+      { id: 'honeypot', name: 'Honeypot (armadilha)', papel: 'Sinal p/ Detectar', r: 0, d: 14 },
+      { id: 'siem', name: 'SIEM / Logs centralizados', papel: 'Sinal p/ Detectar', r: 0, d: 14 }
+    ];
+
+    // Táticas arquiteturais (por EC, atuam em camadas específicas)
+    const TACTICS_CATALOG = [
+      // Resistir / Reagir
+      { id: 'microseg', grupo: 'rr', sub: 'resistir', nome: 'Microsegmentação (separar entidades)', camadas: ['lan', 'bd'], peso: 14, dica: 'Zonas isoladas: o que cai num segmento não alcança o outro.' },
+      { id: 'mfa', grupo: 'rr', sub: 'resistir', nome: 'MFA adaptativo (step-up)', camadas: ['frontend', 'ihc'], peso: 12, dica: 'Pede um segundo fator só quando o contexto foge do padrão.' },
+      { id: 'validacao', grupo: 'rr', sub: 'resistir', nome: 'Validação de input e de dados', camadas: ['telecom', 'ihc'], peso: 10, dica: 'Rejeita dado fora de formato, faixa ou regra de negócio.' },
+      { id: 'circuit', grupo: 'rr', sub: 'reagir', nome: 'Circuit breaker & rate limit adaptativo', camadas: ['telecom', 'ihc'], peso: 12, dica: 'Corta ou desacelera um fluxo anômalo sem parar o serviço inteiro.' },
+      { id: 'revogacao', grupo: 'rr', sub: 'reagir', nome: 'Revogação automática de acesso', camadas: ['ihc', 'lan'], peso: 12, dica: 'Derruba sessões e credenciais suspeitas assim que há alerta.' },
+      { id: 'duaspessoas', grupo: 'rr', sub: 'reagir', nome: 'Regra de duas pessoas p/ comando crítico', camadas: ['ihc'], peso: 10, dica: 'Ação irreversível exige confirmação independente.' },
+      // Detectar
+      { id: 'ueba', grupo: 'det', nome: 'Baseline comportamental (UEBA)', camadas: ['frontend', 'ihc', 'lan'], peso: 16, dica: 'Compara o que a entidade faz com o que ela costuma fazer.' },
+      { id: 'sanity', grupo: 'det', nome: 'Sanity checking (plausibilidade)', camadas: ['ihc', 'bd'], peso: 14, dica: 'O valor é física ou economicamente possível?' },
+      { id: 'votacao', grupo: 'det', nome: 'Votação entre fontes independentes', camadas: ['frontend', 'ihc'], peso: 14, dica: 'Duas ou mais fontes concordam sobre o mesmo fato?' },
+      { id: 'integridade', grupo: 'det', nome: 'Verificação de integridade (hash · físico × lógico)', camadas: ['bd', 'lan'], peso: 12, dica: 'O estado exibido confere com o estado real?' },
+      { id: 'canario', grupo: 'det', nome: 'Canários / arquivos-isca', camadas: ['lan', 'bd'], peso: 12, dica: 'Ninguém legítimo toca nisso; se tocou, é alarme.' },
+      { id: 'heartbeat', grupo: 'det', nome: 'Heartbeat & monitor de serviço', camadas: ['telecom', 'lan'], peso: 8, dica: 'Percebe silêncio, lentidão ou queda de componente.' },
+      // Recuperar
+      { id: 'backup', grupo: 'rec', nome: 'Backup imutável offline (point-in-time)', camadas: ['bd'], peso: 22, dica: 'Cópia que não pode ser alterada nem alcançada pela rede.' },
+      { id: 'replicacao', grupo: 'rec', nome: 'Replicação síncrona (cluster)', camadas: ['bd'], peso: 8, dica: 'Copia cada escrita para o nó redundante em milissegundos.', neutralizavel: true },
+      { id: 'redundancia', grupo: 'rec', nome: 'Redundância ativa (failover)', camadas: ['telecom', 'lan'], peso: 10, dica: 'Componente gêmeo assume se o principal falhar.', neutralizavel: true },
+      { id: 'rollback', grupo: 'rec', nome: 'Rollback por eventos (trilha imutável)', camadas: ['bd', 'ihc'], peso: 16, dica: 'Reconstrói o estado correto a partir do histórico de eventos.' },
+      { id: 'degradacao', grupo: 'rec', nome: 'Degradação graciosa / modo manual', camadas: ['frontend', 'ihc'], peso: 14, dica: 'Serviço essencial continua, reduzido ou manual.' },
+      { id: 'reintroducao', grupo: 'rec', nome: 'Reintrodução escalonada', camadas: ['lan', 'telecom'], peso: 10, dica: 'Religa por partes, verificando cada uma antes da próxima.' }
+    ];
+    const TACTICAS_PADRAO = { replicacao: true, redundancia: true };
+    const PESO_TATICA = 2; // táticas atuam em poucas camadas; o peso compensa a média das 5
+
+    const DECISOES_GUARDIAO = [
+      { id: 'csirt', nome: 'Acionar CSIRT setorial / ComDCiber', efeito: 'MTTD −20% · MTTR −30%', custo: 'Incidente vira público' },
+      { id: 'iocs', nome: 'Compartilhar indicadores (IoCs) com os outros ECs', efeito: 'Cascata −30%', custo: 'Expõe fragilidade a parceiros e concorrentes' },
+      { id: 'degradado', nome: 'Modo degradado coordenado', efeito: 'Blast −12 pts', custo: 'Serviço parcial a clientes / cidadãos' },
+      { id: 'killswitch', nome: 'Desconectar o EC (kill switch)', efeito: 'Blast −25 pts · MTTR ≤ 1 h', custo: 'Serviço parado · RTO +24 h' }
+    ];
+
+    const INJECTS = [
+      { n: 1, min: 42, titulo: 'Credencial legítima', texto: 'O atacante não quebrou nada: entrou com usuário e senha válidos. Frontend e IHC ficam suplantados, e assinaturas (IDS/AV/SIEM) perdem força.' },
+      { n: 2, min: 52, titulo: 'A rede de segurança furou', texto: 'O BD foi corrompido. A réplica e o failover de que vocês dependiam também foram comprometidos?' },
+      { n: 3, min: 62, titulo: 'Cascata', texto: 'Outro setor caiu (sorteado). Escala sobe para Terror. Que dependência vocês não mapearam?' }
+    ];
+
+    // =========================================================================
+    // 2. OS 5 ESTUDOS DE CASO
+    // =========================================================================
+    const CENARIOS_DATA = {
+      banking: {
+        key: 'banking', codigo: 'EC 1', segmento: 'B2C / B2B',
+        nome: 'EC 1 · Banking & Sistema Financeiro',
+        subtitulo: 'Pagamentos instantâneos, Internet Banking, APIs Open Finance e Core Bancário',
+        badge: 'ISO 27001 · Tier 1 Financeiro',
+        tags: ['Pix / Core Bancário', 'Open Finance', 'Alta dependência de Energia'],
+        naoVe: 'Comportamento agregado de transações individualmente válidas',
+        dependencias: { energia: 0.72, saude: 0.35, policia: 0.45, transporte: 0.40 },
+        caso: {
+          titulo: 'Fraude lenta, painel verde',
+          narrativa: 'Sexta-feira à noite, milhares de contas começam a fazer transferências Pix abaixo dos limites para dezenas de contas-laranja. As credenciais vieram de vazamentos de outros sites (credential stuffing), e os acessos usam o app oficial, por TLS válido. Isoladamente, cada requisição é legítima.',
+          infraViu: 'Tudo verde: TLS ok, WAF ok, autenticação ok, IDS sem assinatura.',
+          pergunta: 'Se cada transação é válida, onde mora a anomalia, e qual camada consegue enxergá-la?',
+          sinais: ['Novos dispositivos em massa num curto intervalo', 'Mesmo destino recebendo de muitas origens (fan-in)', 'Horário atípico para o perfil de cada cliente', 'Velocidade de navegação incompatível com humano'],
+          dilema: 'Suspender o Pix para todos (impacto B2C e reputacional) ou degradar seletivamente (limites noturnos menores, step-up só para dispositivos novos)?'
+        },
+        camadas: {
+          frontend: { controles: ['Clientes em apps mobile e navegadores (B/C)', 'Tokens de sessão efêmeros e proteção anti-bot', 'Política de senha forte contra dicionário'], ameacas: ['Phishing, credential stuffing e password cracking', 'XSS e sequestro de sessão no browser'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
+          telecom: { controles: ['WAF, roteadores de borda redundantes, balanceadores HTTPS', 'mTLS nas integrações Open Finance'], ameacas: ['DDoS volumétrico e bypass de regras WAF', 'Interceptação em gateways mal configurados'], toolsDefault: { firewall: true, cripto: true, ids: true } },
+          ihc: { controles: ['Portais de tesouraria, analistas de fraude e gestores', 'RBAC e aprovação em duas etapas'], ameacas: ['Escalada de privilégio e brute force em contas administrativas', 'Engenharia social sobre operadores internos'], toolsDefault: { firewall: true, cripto: true, antivirus: true, ids: true } },
+          lan: { controles: ['VLANs entre atendimento e processamento', 'Monitoração de tráfego leste-oeste'], ameacas: ['Movimento lateral após estação comprometida', 'Sniffing de protocolos internos sem criptografia'], toolsDefault: { firewall: true, antivirus: true, ids: true, honeypot: true } },
+          bd: { controles: ['Ledger ACID, cofre de chaves HSM', 'Auditoria de queries de integrações internas e externas'], ameacas: ['SQL Injection via APIs externas e exfiltração de hashes', 'Ransomware nos volumes de replicação do ledger'], toolsDefault: { firewall: true, cripto: true, ids: true, siem: true } }
+        }
+      },
+
+      saude: {
+        key: 'saude', codigo: 'EC 2', segmento: 'B2C / B2B',
+        nome: 'EC 2 · Hospital & Rede de Saúde',
+        subtitulo: 'Prontuário Eletrônico (PEP), equipamentos IoMT de UTI, laboratórios e telemedicina',
+        badge: 'Risco à vida · LGPD sensível',
+        tags: ['Prontuário PEP', 'Dispositivos IoMT', 'Dependência de Energia'],
+        naoVe: 'Corrupção lógica replicada para o ambiente redundante',
+        dependencias: { energia: 0.85, banking: 0.30, policia: 0.65, transporte: 0.25 },
+        caso: {
+          titulo: 'O backup que replicou o problema',
+          narrativa: 'Um ransomware entra por uma estação administrativa e, ao longo de dias, move-se lateralmente pela LAN, que é plana. Na madrugada de domingo, ele cifra o PEP. A equipe aciona o failover para o BD redundante em nuvem, que está igualmente cifrado, porque a replicação era síncrona. O centro cirúrgico precisa das prescrições ativas em 2 horas.',
+          infraViu: 'Antivírus sem assinatura; firewall de borda cego para tráfego interno (leste-oeste).',
+          pergunta: 'Redundância é o mesmo que capacidade de recuperação?',
+          sinais: ['Picos de escrita com alta entropia', 'Renomeação em massa de arquivos', 'Contas de serviço autenticando fora do horário', 'Acesso a compartilhamentos nunca usados'],
+          dilema: 'Desligar toda a rede (isola o ataque, mas cega a UTI) ou isolar segmentos e operar em contingência (papel e protocolo manual), e por quanto tempo?'
+        },
+        camadas: {
+          frontend: { controles: ['Portal do paciente, totens de triagem, tablets clínicos', 'Autenticação de equipe com timeout de sessão'], ameacas: ['Credenciais compartilhadas em postos de enfermagem', 'Acesso indevido a laudos'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
+          telecom: { controles: ['VPN entre hospitais, laboratórios e operadoras', 'Firewall perimetral para HL7/FHIR'], ameacas: ['VPNs e telemedicina sem patch', 'Queda de link remoto impedindo exames'], toolsDefault: { firewall: true, cripto: true } },
+          ihc: { controles: ['Interfaces de UTI, bombas de infusão, centro cirúrgico', 'Perfis clínicos separados de TI hospitalar'], ameacas: ['Bloqueio da interface clínica por malware', 'Password cracking em contas legadas de manutenção biomédica'], toolsDefault: { antivirus: true, ids: true } },
+          lan: { controles: ['Isolamento de IoMT legado da LAN administrativa', 'Detecção passiva para não impactar monitores'], ameacas: ['Propagação de ransomware em LAN plana', 'Equipamentos médicos sem suporte a antivírus'], toolsDefault: { firewall: true, antivirus: true, ids: true } },
+          bd: { controles: ['Prontuários, imagens DICOM, backup diário', 'Criptografia em repouso'], ameacas: ['Ransomware bloqueando cirurgias e prontuários', 'Vazamento em massa via integração externa'], toolsDefault: { firewall: true, cripto: true, honeypot: true } }
+        }
+      },
+
+      policia: {
+        key: 'policia', codigo: 'EC 3', segmento: 'B2C2Gov',
+        nome: 'EC 3 · Polícia & Segurança Pública (190 / C2)',
+        subtitulo: 'Centro de Comando e Controle, despacho de viaturas, app cidadão e cadeia de custódia',
+        badge: 'Segurança pública · Missão crítica',
+        tags: ['Despacho 190 / C2', 'Rádio & Telecom', 'Cadeia de custódia'],
+        naoVe: 'Demanda fabricada, porém plausível',
+        dependencias: { energia: 0.65, transporte: 0.70, saude: 0.60, banking: 0.35 },
+        caso: {
+          titulo: 'A cidade que não existe',
+          narrativa: 'Durante um grande evento, a central 190 recebe 4× o volume normal. Parte das ocorrências chega pelo app/portal cidadão, com coordenadas plausíveis, mas falsas, geradas por fazendas de bots. Os despachantes, sobrecarregados, enviam viaturas para pontos onde nada acontece, enquanto ocorrências reais ficam na fila.',
+          infraViu: 'Sem DDoS clássico: o volume cabe na rede e as requisições são válidas no formato.',
+          pergunta: 'Como uma aplicação distingue demanda real de demanda fabricada antes de consumir o recurso escasso (a viatura)?',
+          sinais: ['Concentração geográfica improvável', 'Contas recém-criadas e textos semelhantes', 'Nenhuma chamada de voz correlata', 'Câmeras da região sem anomalia'],
+          dilema: 'Endurecer a validação do app (risco de barrar cidadão real em emergência) ou manter o canal aberto e triar por prioridade?'
+        },
+        camadas: {
+          frontend: { controles: ['Terminais em viaturas, câmeras corporais, app cidadão', 'Certificados de dispositivo em campo'], ameacas: ['Ocorrências falsas por bots no app cidadão', 'Captura de terminal em campo'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
+          telecom: { controles: ['Gateways celulares redundantes, rádio digital criptografado', 'Roteamento resiliente delegacias ↔ viaturas'], ameacas: ['Jamming e interceptação do canal de despacho', 'Roteadores de borda comprometidos em unidades regionais'], toolsDefault: { firewall: true, cripto: true, ids: true } },
+          ihc: { controles: ['Mesas de despacho, painéis de gestores, videomonitoramento', 'Auditoria de consultas por operador'], ameacas: ['Paralisação da tela de despacho no pico', 'Uso indevido de credencial interna para vazar investigações'], toolsDefault: { firewall: true, antivirus: true, ids: true } },
+          lan: { controles: ['Segregação entre câmeras LPR, servidores C2 e estações', 'Honeypots simulando arquivos de evidência'], ameacas: ['Pivoteamento a partir de câmeras IoT para a LAN', 'Ransomware em servidores locais de despacho'], toolsDefault: { firewall: true, antivirus: true, ids: true, honeypot: true } },
+          bd: { controles: ['Banco de evidências com hash de integridade', 'Integração controlada com tribunais e bases nacionais'], ameacas: ['Adulteração da cadeia de custódia', 'Exfiltração de dados sigilosos'], toolsDefault: { firewall: true, cripto: true, ids: true } }
+        }
+      },
+
+      energia: {
+        key: 'energia', codigo: 'EC 4', segmento: 'B2B2Gov',
+        nome: 'EC 4 · Energia & Rede Elétrica',
+        subtitulo: 'Subestações automatizadas, SCADA/ICS, geração distribuída e medidores inteligentes',
+        badge: 'Infraestrutura crítica · Efeito dominó',
+        tags: ['SCADA / OT', 'Subestações remotas', 'Risco de blackout'],
+        naoVe: 'Comando legítimo com intenção maliciosa',
+        dependencias: { banking: 0.88, saude: 0.92, policia: 0.82, transporte: 0.85 },
+        caso: {
+          titulo: 'O notebook do fornecedor',
+          narrativa: 'Um técnico terceirizado conecta o notebook de manutenção a uma estação de engenharia SCADA, com acesso remoto legítimo e credencial válida. Semanas depois, fora da janela de manutenção, comandos de abertura de disjuntores chegam a três subestações em sequência. Por alguns minutos, as telas da IHM mostram estado "normal".',
+          infraViu: 'Firewall IT/OT permitiu (havia regra de exceção para o fornecedor); protocolos legados não autenticam comandos.',
+          pergunta: 'Num ambiente em que o tráfego é previsível, o que é "anômalo", e quem tem autoridade para desligar o automático?',
+          sinais: ['Comando fora da janela de manutenção', 'Sequência de comandos em ritmo não humano', 'Medição física (corrente/tensão) diverge do estado exibido na IHM'],
+          dilema: 'Cortar todo acesso remoto (perde-se a operação centralizada) ou manter e operar subestações em modo local manual, com equipes em campo?'
+        },
+        camadas: {
+          frontend: { controles: ['Medidores inteligentes e portal da concessionária', 'Firmware assinado'], ameacas: ['Manipulação em massa de medidores', 'Acesso indevido via portal de fornecedores'], toolsDefault: { firewall: true, cripto: true } },
+          telecom: { controles: ['Gateways industriais, enlaces MPLS/satélite entre subestações', 'Inspeção de protocolos industriais'], ameacas: ['Sequestro de gateway remoto centro ↔ subestação', 'Modbus/DNP3 sem criptografia nem autenticação'], toolsDefault: { firewall: true, ids: true } },
+          ihc: { controles: ['IHM/SCADA de operadores de carga', 'Segregação IT × OT'], ameacas: ['Abertura simultânea de disjuntores (blackout)', 'Password cracking em estações de engenharia'], toolsDefault: { firewall: true, antivirus: true, ids: true } },
+          lan: { controles: ['Zonas e conduítes IEC 62443, honeypots ICS', 'Monitoração de CLPs'], ameacas: ['Salto IT → OT via estação de manutenção', 'Sabotagem persistente em CLPs'], toolsDefault: { firewall: true, ids: true, honeypot: true } },
+          bd: { controles: ['Historiadores de telemetria, faturamento, planos de black-start', 'Cópias de configurações de proteção'], ameacas: ['Destruição de histórico e perfis de relés', 'Ataque pela cadeia de suprimentos'], toolsDefault: { firewall: true, cripto: true } }
+        }
+      },
+
+      transporte: {
+        key: 'transporte', codigo: 'EC 5', segmento: 'B2C / B2B / B2C2Gov',
+        nome: 'EC 5 · Transporte & Logística Urbana',
+        subtitulo: 'Telemetria de frota, roteirização, bilhetagem eletrônica e Centro de Controle Operacional (CCO)',
+        badge: 'Mobilidade & abastecimento urbano',
+        tags: ['Telemetria de frota', 'Bilhetagem NFC', 'CCO / Semáforos'],
+        naoVe: 'Dado falso chegando por canal seguro',
+        dependencias: { energia: 0.78, policia: 0.74, banking: 0.55, saude: 0.42 },
+        caso: {
+          titulo: 'Caminhões que se teletransportam',
+          narrativa: 'O servidor de integração de telemetria de uma frota de abastecimento passa a receber posições GPS manipuladas (spoofing). O roteador otimizado confia nos dados e redireciona caminhões de combustível e alimentos para rotas que convergem em gargalos viários. Em 6 horas, postos e supermercados de uma região começam a ficar sem estoque.',
+          infraViu: 'Pacotes autenticados pelo gateway correto; protocolo válido. O dado é que está errado.',
+          pergunta: 'Como a arquitetura desconfia de um dado fisicamente impossível que chega por um canal perfeitamente seguro?',
+          sinais: ['Velocidades implícitas impossíveis entre duas posições', 'GPS diverge de odômetro e tacógrafo', 'Vários veículos com o mesmo desvio ao mesmo tempo', 'Timestamps fora de ordem'],
+          dilema: 'Congelar a roteirização automática (frota para) ou rodar com as últimas rotas confiáveis?'
+        },
+        camadas: {
+          frontend: { controles: ['Rastreadores e telemetria embarcada, apps de motoristas e passageiros', 'Validadores de embarque NFC'], ameacas: ['GPS spoofing em rastreadores', 'Clonagem de cartões e credential stuffing no app de recarga'], toolsDefault: { firewall: true, cripto: true, antivirus: true } },
+          telecom: { controles: ['Gateways IoT 4G/5G e satélite', 'Túneis criptografados terminais ↔ CCO'], ameacas: ['Telemetria falsa injetada por canal válido', 'Invasão de gateways em cruzamentos e terminais'], toolsDefault: { firewall: true, cripto: true } },
+          ihc: { controles: ['CCO, roteirização de frota e despacho logístico', 'Perfis separados de operador e gestor'], ameacas: ['Alteração maliciosa de rotas e tempos semafóricos', 'Senhas fracas em painéis de gestão de frota'], toolsDefault: { firewall: true, antivirus: true, ids: true } },
+          lan: { controles: ['LAN do CCO e dos centros de distribuição segmentadas', 'IDS e antivírus'], ameacas: ['Wi-Fi de terminal migrando para a LAN interna', 'Ransomware paralisando catracas e despacho'], toolsDefault: { firewall: true, antivirus: true, ids: true } },
+          bd: { controles: ['BD de posições de frota, bilhetagem e integração com reguladores', 'Backups diários'], ameacas: ['Envenenamento do histórico de posições usado pelo otimizador', 'Fraude em saldos via API de bilhetagem'], toolsDefault: { firewall: true, cripto: true } }
+        }
+      }
+    };
+    const SETORES = Object.keys(CENARIOS_DATA);
+
+    // =========================================================================
+    // 3. ESTADO
+    // =========================================================================
+    const BLOCOS_TIMER = {
+      1: { nome: 'Bloco 1 · Provocação & Conceitos', duracaoSeg: 15 * 60 },
+      2: { nome: 'Bloco 2 · D1 Mapeamento PBL', duracaoSeg: 25 * 60 },
+      3: { nome: 'Bloco 3 · D2 Modéstia + Injects', duracaoSeg: 30 * 60 },
+      4: { nome: 'Bloco 4 · Cascata & Fechamento', duracaoSeg: 20 * 60 }
+    };
+    const STORAGE_KEY = 't35-cyber-v2';
+
+    let appState = {
+      setorAtual: 'banking',
+      camadaAtual: 'frontend',
+      escala: 2,
+      guardiao: false,
+      decisoes: {},
+      overrides: {},   // setor -> camada -> { tools, breached }
+      taticas: {},     // setor -> { id: bool }
+      injects: {},     // setor -> { 1: bool, 2: bool, 3: bool }
+      cascataAlvo: {}, // setor -> setorKey sorteado no inject 3
+      notas: [],
+      planos: {},      // setor -> { spof, ataque, deteccao, recuperacao }
+      miro: {},        // setor -> url
+      timer: { blocoAtivo: 1, restante: { 1: 900, 2: 1500, 3: 1800, 4: 1200 }, rodando: false }
+    };
+
+    let timerIntervalId = null;
+    const charts = {};
+
+    function mapearParametroSetor(raw) {
+      if (!raw) return null;
+      const mapa = {
+        banking: 'banking', ec1: 'banking', mc1: 'banking',
+        saude: 'saude', hospital: 'saude', ec2: 'saude', mc2: 'saude',
+        policia: 'policia', logistica: 'policia', ec3: 'policia', mc3: 'policia',
+        energia: 'energia', ec4: 'energia', mc4: 'energia',
+        transporte: 'transporte', educacao: 'transporte', ec5: 'transporte', mc5: 'transporte'
+      };
+      return mapa[String(raw).trim().toLowerCase()] || null;
+    }
+
+    // =========================================================================
+    // 4. MODELO DE CÁLCULO
+    // =========================================================================
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    function getLayerState(setor, layer) {
+      const base = CENARIOS_DATA[setor].camadas[layer];
+      const ov = (appState.overrides[setor] || {})[layer] || {};
+      const tools = {};
+      TOOLS_CATALOG.forEach(t => { tools[t.id] = false; });
+      Object.assign(tools, base.toolsDefault, ov.tools || {});
+      return { tools, breached: Boolean(ov.breached) };
+    }
+    function setLayerState(setor, layer, updater) {
+      if (!appState.overrides[setor]) appState.overrides[setor] = {};
+      appState.overrides[setor][layer] = updater(getLayerState(setor, layer));
+    }
+    function getTaticas(setor) { return Object.assign({}, TACTICAS_PADRAO, appState.taticas[setor] || {}); }
+    function getInjects(setor) { return Object.assign({ 1: false, 2: false, 3: false }, appState.injects[setor] || {}); }
+    function decisao(id) { return appState.guardiao && Boolean(appState.decisoes[id]); }
+
+    // Tática de redundância é neutralizada quando a camada em que atua foi suplantada
+    function taticaNeutralizada(setor, t) {
+      if (!t.neutralizavel) return false;
+      return t.camadas.some(l => getLayerState(setor, l).breached);
+    }
+
+    function calcularCamada(setor, layer) {
+      const st = getLayerState(setor, layer);
+      const tat = getTaticas(setor);
+      const inj = getInjects(setor);
+      let resistir = 10, reagir = 0, det = 8, rec = 6, toolDet = 0;
+
+      TOOLS_CATALOG.forEach(t => { if (st.tools[t.id]) { resistir += t.r; toolDet += t.d; } });
+
+      const temDetTatica = TACTICS_CATALOG.some(t => t.grupo === 'det' && tat[t.id] && t.camadas.includes(layer));
+      let fator = temDetTatica ? 1 : 0.5;
+      if (inj[1]) fator *= 0.4; // credencial legítima: assinaturas não disparam
+      det += toolDet * fator;
+
+      TACTICS_CATALOG.forEach(t => {
+        if (!tat[t.id] || !t.camadas.includes(layer)) return;
+        const w = t.peso * PESO_TATICA;
+        if (t.grupo === 'rr') { if (t.sub === 'reagir') reagir += w; else resistir += w; }
+        else if (t.grupo === 'det') det += w;
+        else if (!(st.breached && t.neutralizavel)) rec += w;
+      });
+
+      resistir -= (appState.escala - 1) * 6;
+      if (st.breached) resistir *= 0.2;
+
+      return {
+        rr: Math.round(clamp(resistir + reagir, 5, 100)),
+        det: Math.round(clamp(det, 5, 100)),
+        rec: Math.round(clamp(rec, 5, 100)),
+        breached: st.breached
+      };
+    }
+
+    function calcularSetor(setor) {
+      const tat = getTaticas(setor);
+      const porCamada = {};
+      let sR = 0, sD = 0, sC = 0, breachedCount = 0;
+      LAYER_META.forEach(l => {
+        const m = calcularCamada(setor, l.id);
+        porCamada[l.id] = m; sR += m.rr; sD += m.det; sC += m.rec;
+        if (m.breached) breachedCount++;
+      });
+      const rr = Math.round(sR / 5), det = Math.round(sD / 5), rec = Math.round(sC / 5);
+
+      // Capacidade de reagir (não cai quando o perímetro é suplantado)
+      let pesoReagir = 0;
+      TACTICS_CATALOG.forEach(t => { if (t.sub === 'reagir' && tat[t.id]) pesoReagir += t.peso; });
+      const reagir = clamp(15 + pesoReagir * 2, 0, 95);
+
+      let mttd = 0.25 + 168 * Math.pow(1 - det / 100, 2);
+      let mttr = 0.5 + 72 * Math.pow(1 - reagir / 100, 2);
+      let rto = 1 + 120 * Math.pow(1 - rec / 100, 2);
+      if (decisao('csirt')) { mttd *= 0.8; mttr *= 0.7; }
+      if (decisao('killswitch')) { mttr = Math.min(mttr, 1); rto += 24; }
+
+      // RPO: depende do que existe para restaurar e se o BD foi atingido
+      const bdBreached = porCamada.bd.breached;
+      let rpo, rpoMotivo;
+      if (tat.rollback) { rpo = 0.25; rpoMotivo = 'reconstrução por eventos'; }
+      else if (tat.backup) { rpo = 1; rpoMotivo = 'backup point-in-time'; }
+      else if (bdBreached && tat.replicacao) { rpo = Infinity; rpoMotivo = 'réplica copiou a corrupção'; }
+      else if (bdBreached) { rpo = Infinity; rpoMotivo = 'sem cópia confiável'; }
+      else { rpo = 24; rpoMotivo = 'backup diário convencional'; }
+      if (bdBreached && !tat.backup && !tat.rollback) rto *= 2;
+
+      const defesa = rr * 0.3 + det * 0.35 + rec * 0.35;
+      let blast = (100 - defesa) * 0.45 + appState.escala * 10 + breachedCount * 8 + Math.min(15, (mttd + mttr) / 12);
+      if (rpo === Infinity) blast += 8;
+      if (decisao('degradado')) blast -= 12;
+      if (decisao('killswitch')) blast -= 25;
+      blast = Math.round(clamp(blast, 5, 99));
+
+      const dano = (blast / 100) * (mttd + mttr);
+      const integridadeBD = Math.round((porCamada.bd.rr + porCamada.bd.rec + porCamada.bd.det) / 3);
+
+      return { rr, det, rec, reagir: Math.round(reagir), integridadeBD, blast, breachedCount, porCamada, mttd, mttr, rto, rpo, rpoMotivo, dano };
+    }
+
+    function fmtHoras(h) {
+      if (h === Infinity) return 'Perda total';
+      if (h < 1) return `${Math.round(h * 60)} min`;
+      if (h < 48) return `${h.toFixed(1).replace('.', ',')} h`;
+      return `${(h / 24).toFixed(1).replace('.', ',')} dias`;
+    }
+
+    // =========================================================================
+    // 5. RENDERIZAÇÃO
+    // =========================================================================
+    function renderTudo() {
+      const c = CENARIOS_DATA[appState.setorAtual];
+      const m = calcularSetor(appState.setorAtual);
+
+      setText('cenarioTitulo', c.nome);
+      setText('cenarioSubtitulo', c.subtitulo);
+      setText('cenarioBadge', c.badge);
+      setText('breachedCountBadge', `${m.breachedCount} / 5`);
+      document.getElementById('cenarioTags').innerHTML = c.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+
+      // KPIs
+      setText('kpiRrVal', `${m.rr}%`);
+      setText('kpiDetVal', `${m.det}%`);
+      setText('kpiRecVal', `${m.rec}%`);
+      setText('kpiBlastVal', `${m.blast}%`);
+      setText('kpiRrCap', `Barreiras + contenção · Reagir ${m.reagir}%`);
+      let sev = 'Controlado (contenção local)';
+      if (m.blast >= 75) sev = 'Catastrófico (cascata intersetorial)';
+      else if (m.blast >= 55) sev = 'Crítico (risco sistêmico)';
+      else if (m.blast >= 35) sev = 'Elevado (impacto setorial)';
+      setText('kpiBlastCap', sev);
+
+      // Tempo
+      setText('tMTTD', fmtHoras(m.mttd));
+      setText('tMTTR', fmtHoras(m.mttr));
+      setText('tRTO', fmtHoras(m.rto));
+      setText('tRPO', fmtHoras(m.rpo));
+      setText('tRPOhint', m.rpoMotivo);
+      document.getElementById('cellRPO').classList.toggle('is-alarm', m.rpo === Infinity);
+      setText('tDano', `${(m.dano).toFixed(1).replace('.', ',')}`);
+
+      renderCaso(c);
+      renderPipeline(m);
+      renderInspector();
+      renderTaticas();
+      renderNotas();
+      renderInjects();
+      renderGuardian(m);
+      renderPlanos();
+      atualizarGraficos(m);
+      renderTabela();
+      renderResumo(m);
+
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    }
+
+    function renderCaso(c) {
+      setText('casoTitulo', `${c.codigo} · ${c.caso.titulo}`);
+      setText('casoSegmento', c.segmento);
+      setText('casoNarrativa', c.caso.narrativa);
+      setText('casoInfraViu', c.caso.infraViu);
+      setText('casoPergunta', c.caso.pergunta);
+      setText('casoDilema', c.caso.dilema);
+      document.getElementById('casoSinais').innerHTML = c.caso.sinais.map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      const gab = profUnlocked() ? (PROF_DATA.gabaritos[c.key] || []) : [];
+      document.getElementById('casoGabarito').innerHTML = gab.map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      document.getElementById('gabaritoBox').hidden = !profUnlocked();
+      const miro = document.getElementById('miroUrl');
+      if (document.activeElement !== miro) miro.value = appState.miro[appState.setorAtual] || '';
+      const btn = document.getElementById('btnProfessor');
+      btn.classList.toggle('btn-prof-on', profUnlocked());
+      setText('btnProfessorTxt', profUnlocked() ? 'Professor: ON · Bloquear' : 'Modo Professor');
+    }
+
+    function renderPipeline(m) {
+      document.getElementById('layersPipeline').innerHTML = LAYER_META.map((layer, idx) => {
+        const lm = m.porCamada[layer.id];
+        const cls = ['layer-node', appState.camadaAtual === layer.id ? 'is-selected' : '', lm.breached ? 'is-breached' : ''].filter(Boolean).join(' ');
+        return `
+          <button type="button" class="${cls}" onclick="selecionarCamada('${layer.id}')">
+            <div class="layer-num"><span>C0${idx + 1}</span><span style="color:var(--error);">${lm.breached ? 'SUPLANTADA' : ''}</span></div>
+            <div class="layer-name">${escapeHtml(layer.short)}</div>
+            <div class="layer-status-text">R/R:${lm.rr} · D:${lm.det} · Rec:${lm.rec}</div>
+            <div class="layer-bars">
+              <div class="layer-bar"><span class="lb-rr" style="width:${lm.rr}%"></span></div>
+              <div class="layer-bar"><span class="lb-det" style="width:${lm.det}%"></span></div>
+              <div class="layer-bar"><span class="lb-rec" style="width:${lm.rec}%"></span></div>
+            </div>
+          </button>`;
+      }).join('');
+    }
+
+    function renderInspector() {
+      const c = CENARIOS_DATA[appState.setorAtual];
+      const meta = LAYER_META.find(l => l.id === appState.camadaAtual) || LAYER_META[0];
+      const data = c.camadas[meta.id];
+      const st = getLayerState(appState.setorAtual, meta.id);
+      const tag = document.getElementById('inspLayerTag');
+      tag.textContent = st.breached ? 'CAMADA SUPLANTADA · ASSUME BREACH' : `ATIVA · ${c.codigo}`;
+      tag.className = st.breached ? 'tag tag-red' : 'tag tag-orange';
+      setText('inspLayerTitle', meta.full);
+      setText('btnBreachLabel', st.breached ? 'Restaurar camada' : 'Suplantar camada');
+      document.getElementById('inspControlesList').innerHTML = data.controles.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+      document.getElementById('inspAmeacasList').innerHTML = data.ameacas.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+      document.getElementById('toolsGrid').innerHTML = TOOLS_CATALOG.map(t => {
+        const on = Boolean(st.tools[t.id]);
+        let cls = on ? 'is-enabled' : '', lbl = on ? 'ATIVO' : 'INATIVO';
+        if (st.breached && on && (t.id === 'firewall' || t.id === 'cripto')) { cls = 'is-bypassed'; lbl = 'BYPASS'; }
+        return `
+          <button type="button" class="tool-toggle ${cls}" onclick="toggleFerramenta('${t.id}')" aria-pressed="${on}">
+            <div class="tool-top"><span>${escapeHtml(t.name)}</span><span class="tool-state-pill">${lbl}</span></div>
+            <span class="tool-tactic">${escapeHtml(t.papel)}</span>
+          </button>`;
+      }).join('');
+    }
+
+    function renderTaticas() {
+      const setor = appState.setorAtual;
+      const tat = getTaticas(setor);
+      const layerShort = (LAYER_META.find(l => l.id === appState.camadaAtual) || {}).short || '';
+      setText('tacticLayerLabel', layerShort);
+      const cont = { rr: 0, det: 0, rec: 0 };
+      const html = { rr: '', det: '', rec: '' };
+      TACTICS_CATALOG.forEach(t => {
+        const on = Boolean(tat[t.id]);
+        if (on) cont[t.grupo]++;
+        const neutral = on && taticaNeutralizada(setor, t);
+        const cls = ['tactic-card', on ? 'is-on' : '', neutral ? 'is-neutralized' : ''].filter(Boolean).join(' ');
+        const pill = neutral ? 'NEUTRALIZADA' : (on ? 'ATIVA' : 'OFF');
+        const layers = t.camadas.map(l => {
+          const meta = LAYER_META.find(x => x.id === l);
+          return `<span class="t-layer ${l === appState.camadaAtual ? 'is-here' : ''}">${escapeHtml(meta.short)}</span>`;
+        }).join('');
+        const sub = t.grupo === 'rr' ? `<span class="t-sub">${t.sub}</span>` : '';
+        const prof = profUnlocked() && t.neutralizavel ? `<span class="t-sub" style="color:var(--error);">${escapeHtml(PROF_DATA.dicaArmadilha)}</span>` : '';
+        html[t.grupo] += `
+          <button type="button" class="${cls}" onclick="toggleTatica('${t.id}')" aria-pressed="${on}">
+            <div class="t-top"><span>${escapeHtml(t.nome)}</span><span class="t-pill">${pill}</span></div>
+            ${sub}
+            <span class="t-hint">${escapeHtml(t.dica)}</span>
+            <div class="t-layers">${layers}</div>
+            ${prof}
+          </button>`;
+      });
+      document.getElementById('tacticsRr').innerHTML = html.rr;
+      document.getElementById('tacticsDet').innerHTML = html.det;
+      document.getElementById('tacticsRec').innerHTML = html.rec;
+      setText('cntRr', `${cont.rr} ativas`);
+      setText('cntDet', `${cont.det} ativas`);
+      setText('cntRec', `${cont.rec} ativas`);
+    }
+
+    function renderInjects() {
+      const inj = getInjects(appState.setorAtual);
+      const minAula = minutosDecorridos();
+      document.getElementById('injectList').innerHTML = INJECTS.map(i => {
+        const aplicado = inj[i.n];
+        const due = minAula >= i.min;
+        const cls = ['inject-card', aplicado ? 'is-applied' : (due ? 'is-due' : '')].filter(Boolean).join(' ');
+        let extra = '';
+        if (i.n === 3 && aplicado && appState.cascataAlvo[appState.setorAtual]) {
+          extra = ` → caiu: ${escapeHtml(CENARIOS_DATA[appState.cascataAlvo[appState.setorAtual]].codigo)}`;
+        }
+        return `
+          <div class="${cls}">
+            <div>
+              <span class="i-meta">INJECT ${i.n} · MIN ${i.min}${due && !aplicado ? ' · LIBERADO' : ''}${aplicado ? ' · APLICADO' + extra : ''}</span>
+              <strong>${escapeHtml(i.titulo)}</strong>
+              <p>${escapeHtml(i.texto)}</p>
+            </div>
+            <button type="button" class="btn btn-sm ${aplicado ? '' : 'btn-danger'}" onclick="toggleInject(${i.n})">${aplicado ? 'Desfazer' : 'Aplicar'}</button>
+          </div>`;
+      }).join('');
+    }
+
+    function renderGuardian(m) {
+      const bar = document.getElementById('guardianStatusBar');
+      bar.classList.toggle('is-active', appState.guardiao);
+      setText('guardianModeHeading', appState.guardiao ? 'Guardião Cibernético: ligado' : 'Guardião Cibernético: desligado');
+      setText('guardianModeDesc', appState.guardiao
+        ? 'Escolham as decisões de War Room. Cada uma tem efeito e custo: justifiquem no Frame F5.'
+        : 'Ligar não melhora nada sozinho: libera decisões de War Room, cada uma com custo.');
+      const btn = document.getElementById('btnGuardian');
+      btn.textContent = appState.guardiao ? 'Desligar' : 'Ligar';
+      btn.className = appState.guardiao ? 'btn btn-sm btn-on' : 'btn btn-sm btn-orange';
+
+      document.getElementById('decisionList').innerHTML = DECISOES_GUARDIAO.map(d => {
+        const on = decisao(d.id);
+        return `
+          <button type="button" class="decision ${on ? 'is-on' : ''}" ${appState.guardiao ? '' : 'disabled'} onclick="toggleDecisao('${d.id}')" aria-pressed="${on}">
+            <span class="box">${on ? '✓' : ''}</span>
+            <span><strong>${escapeHtml(d.nome)}</strong><span class="eff">Efeito: ${escapeHtml(d.efeito)}</span><span class="cost">Custo: ${escapeHtml(d.custo)}</span></span>
+          </button>`;
+      }).join('');
+
+      const labelsEscala = { 1: 'Nível 1 · Endpoint', 2: 'Nível 2 · LAN / IHC', 3: 'Nível 3 · Crise setorial', 4: 'Nível 4 · Ciberterrorismo' };
+      setText('escalaReadout', labelsEscala[appState.escala]);
+      for (let i = 1; i <= 4; i++) document.getElementById(`scaleBtn${i}`).classList.toggle('is-active', i === appState.escala);
+
+      // Modéstia
+      const tat = getTaticas(appState.setorAtual);
+      const el = document.getElementById('modestyDiagnosis');
+      if (m.rpo === Infinity) {
+        el.innerHTML = `<strong>Recuperação comprometida:</strong> o BD foi atingido e ${tat.replicacao ? 'a <em>replicação síncrona copiou a corrupção</em>' : 'não há cópia confiável'}. RPO = perda total. Que tática de Recuperar teria evitado isso?`;
+      } else if (m.breachedCount > 0) {
+        el.innerHTML = `<strong>${m.breachedCount} camada(s) suplantada(s).</strong> Resistir/Reagir caiu para <strong>${m.rr}%</strong>. Agora o dano depende do tempo: perceber em <strong>${fmtHoras(m.mttd)}</strong>, conter em <strong>${fmtHoras(m.mttr)}</strong> e voltar em <strong>${fmtHoras(m.rto)}</strong>.`;
+      } else {
+        el.innerHTML = `Nenhuma barreira é infalível contra credencial roubada ou zero-day. Hoje o EC levaria <strong>${fmtHoras(m.mttd)}</strong> para perceber um ataque e <strong>${fmtHoras(m.rto)}</strong> para voltar. Suplantem uma camada e vejam o que sobra.`;
+      }
+
+      // Cascata
+      const origem = appState.setorAtual;
+      const deps = CENARIOS_DATA[origem].dependencias;
+      const alvo = appState.cascataAlvo[origem];
+      const coords = { banking: [230, 48], saude: [80, 124], energia: [380, 124], policia: [135, 229], transporte: [327, 229] };
+      const ring = document.getElementById('svgBlastRing');
+      ring.setAttribute('cx', coords[origem][0]);
+      ring.setAttribute('cy', coords[origem][1]);
+      ring.setAttribute('r', String(36 + Math.round(m.blast * 0.7)));
+      const fatorIocs = decisao('iocs') ? 0.7 : 1;
+      SETORES.forEach(k => {
+        const node = document.getElementById(`node-${k}`);
+        const rect = node.querySelector('rect');
+        if (k === origem) {
+          rect.setAttribute('fill', 'var(--primary-container)');
+          rect.setAttribute('stroke', 'var(--error)');
+          rect.setAttribute('stroke-width', '3');
+          setText(`svgRisk-${k}`, `ORIGEM · ${m.blast}%`);
+        } else {
+          let cas = Math.round(m.blast * (deps[k] || 0.35) * (appState.escala >= 3 ? 1.05 : 0.72) * fatorIocs);
+          if (k === alvo) cas = Math.max(cas, 85);
+          cas = Math.min(98, cas);
+          rect.setAttribute('fill', cas >= 55 ? 'var(--note-red)' : cas >= 35 ? 'var(--note-orange)' : 'var(--background)');
+          rect.setAttribute('stroke', cas >= 55 ? 'var(--error)' : 'var(--outline)');
+          rect.setAttribute('stroke-width', k === alvo ? '6' : '3');
+          setText(`svgRisk-${k}`, `${k === alvo ? 'INJECT 3' : 'CASCATA'} · ${cas}%`);
+        }
+      });
+      const sevTag = document.getElementById('cascadeSeverityTag');
+      if (appState.escala === 4 || m.blast >= 70) { sevTag.className = 'tag tag-red'; sevTag.textContent = 'Ciberterrorismo sistêmico'; }
+      else if (m.blast >= 45) { sevTag.className = 'tag tag-orange'; sevTag.textContent = 'Cascata elevada'; }
+      else { sevTag.className = 'tag tag-blue'; sevTag.textContent = 'Contenção regional'; }
+    }
+
+    function renderPlanos() {
+      const p = appState.planos[appState.setorAtual] || {};
+      const map = { planoSpof: 'spof', planoAtaque: 'ataque', planoDeteccao: 'deteccao', planoRecuperacao: 'recuperacao' };
+      Object.keys(map).forEach(id => {
+        const el = document.getElementById(id);
+        if (document.activeElement !== el) el.value = p[map[id]] || '';
+      });
+    }
+
+    function renderNotas() {
+      const board = document.getElementById('stickyBoard');
+      const notas = appState.notas.filter(n => n.setor === appState.setorAtual);
+      const nRr = notas.filter(n => n.tatica === 'rr').length;
+      const nOutros = notas.filter(n => n.tatica !== 'rr').length;
+      const ok = nOutros >= 2 * nRr && notas.length > 0;
+      const badge = document.getElementById('modestyRule');
+      badge.className = `modesty-rule ${ok ? 'ok' : 'nok'}`;
+      badge.textContent = `Regra da Modéstia · ${nRr} Resistir/Reagir : ${nOutros} Detectar+Recuperar ${ok ? '✓' : '(meta 1:2)'}`;
+
+      if (notas.length === 0) {
+        board.innerHTML = `<div style="grid-column: 1 / -1; padding: var(--space-sm); border: 1px dashed var(--outline); font-size: 0.85rem; color: var(--on-surface-variant);">Nenhuma nota para ${escapeHtml(CENARIOS_DATA[appState.setorAtual].codigo)}. Regra: para cada nota azul (Resistir/Reagir), pelo menos duas de Detectar ou Recuperar.</div>`;
+        return;
+      }
+      board.innerHTML = notas.map(n => {
+        const lo = LAYER_META.find(l => l.id === n.camada);
+        return `
+          <article class="sticky-note tactic-${escapeHtml(n.tatica)}">
+            <div class="sticky-meta"><span>${escapeHtml((lo ? lo.short : n.camada).toUpperCase())} · ${escapeHtml(GRUPOS[n.tatica] ? GRUPOS[n.tatica].curto.toUpperCase() : n.tatica)}</span>
+              <button type="button" class="sticky-del" onclick="removerNota('${escapeHtml(n.id)}')" aria-label="Remover nota">✕</button></div>
+            <div>${escapeHtml(n.texto)}</div>
+          </article>`;
+      }).join('');
+    }
+
+    function renderTabela() {
+      document.getElementById('matrizTableBody').innerHTML = SETORES.map(k => {
+        const c = CENARIOS_DATA[k];
+        const m = calcularSetor(k);
+        return `
+          <tr class="${k === appState.setorAtual ? 'is-current-row' : ''}" onclick="handleSetorChange('${k}')" style="cursor:pointer;">
+            <td><strong>${escapeHtml(c.codigo)} · ${escapeHtml(c.caso.titulo)}</strong><br><small>${escapeHtml(c.segmento)}</small></td>
+            <td>${escapeHtml(c.naoVe)}</td>
+            <td class="num-col">${m.rr}%</td>
+            <td class="num-col">${m.det}%</td>
+            <td class="num-col">${m.rec}%</td>
+            <td class="num-col">${fmtHoras(m.mttd)}</td>
+            <td class="num-col">${fmtHoras(m.rto)}</td>
+            <td class="num-col">${fmtHoras(m.rpo)}</td>
+            <td class="num-col"><strong>${m.blast}%</strong></td>
+          </tr>`;
+      }).join('');
+    }
+
+    function gerarResumo(m) {
+      const setor = appState.setorAtual;
+      const c = CENARIOS_DATA[setor];
+      const tat = getTaticas(setor);
+      const p = appState.planos[setor] || {};
+      const inj = getInjects(setor);
+      const linhas = [];
+      linhas.push(`T35 · ${c.nome} · "${c.caso.titulo}"`);
+      linhas.push(`Resistir/Reagir ${m.rr}% · Detectar ${m.det}% · Recuperar ${m.rec}% · Blast ${m.blast}%`);
+      linhas.push(`MTTD ${fmtHoras(m.mttd)} · MTTR ${fmtHoras(m.mttr)} · RTO ${fmtHoras(m.rto)} · RPO ${fmtHoras(m.rpo)} (${m.rpoMotivo})`);
+      linhas.push(`Camadas suplantadas: ${LAYER_META.filter(l => m.porCamada[l.id].breached).map(l => l.short).join(', ') || 'nenhuma'}`);
+      linhas.push(`Injects aplicados: ${INJECTS.filter(i => inj[i.n]).map(i => i.n + ' ' + i.titulo).join('; ') || 'nenhum'}`);
+      ['rr', 'det', 'rec'].forEach(g => {
+        const ativos = TACTICS_CATALOG.filter(t => t.grupo === g && tat[t.id]).map(t => t.nome + (taticaNeutralizada(setor, t) ? ' [NEUTRALIZADA]' : ''));
+        linhas.push(`${GRUPOS[g].label}: ${ativos.join('; ') || '—'}`);
+      });
+      if (appState.guardiao) {
+        const ds = DECISOES_GUARDIAO.filter(d => decisao(d.id)).map(d => `${d.nome} (custo: ${d.custo})`);
+        linhas.push(`Decisões de War Room: ${ds.join('; ') || '—'}`);
+      }
+      linhas.push(`SPOF: ${p.spof || '—'}`);
+      linhas.push(`Suplantamento: ${p.ataque || '—'}`);
+      linhas.push(`Detecção: ${p.deteccao || '—'}`);
+      linhas.push(`Recuperação: ${p.recuperacao || '—'}`);
+      const notas = appState.notas.filter(n => n.setor === setor);
+      if (notas.length) {
+        linhas.push('Notas:');
+        notas.forEach(n => linhas.push(`  [${GRUPOS[n.tatica] ? GRUPOS[n.tatica].curto : n.tatica} · ${n.camada}] ${n.texto}`));
+      }
+      return linhas.join('\n');
+    }
+    function renderResumo(m) { document.getElementById('resumoMiro').value = gerarResumo(m); }
+
+    // =========================================================================
+    // 6. GRÁFICOS
+    // =========================================================================
+    function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+    function upsertChart(key, canvasId, config, updater) {
+      if (typeof Chart === 'undefined') return;
+      if (!charts[key]) { charts[key] = new Chart(document.getElementById(canvasId), config); }
+      else { updater(charts[key]); charts[key].update(); }
+    }
+
+    function atualizarGraficos(m) {
+      if (typeof Chart === 'undefined') return;
+      const cBlue = tok('--data-1'), cOrange = tok('--data-2'), cRed = tok('--data-3'), cInk = tok('--data-4'), cGreen = tok('--data-5'), cCtx = tok('--data-context');
+      const legend = { position: 'bottom', labels: { color: cInk, font: { family: 'Space Grotesk', weight: '600' } } };
+
+      const radarData = [m.rr, m.det, m.rec, m.reagir, m.integridadeBD];
+      upsertChart('radar', 'radarChart', {
+        type: 'radar',
+        data: {
+          labels: ['Resistir/Reagir', 'Detectar', 'Recuperar', 'Capacidade de Reagir', 'Integridade BD'],
+          datasets: [
+            { label: 'Postura atual', data: radarData, borderColor: cBlue, backgroundColor: 'rgba(0,68,204,0.18)', borderWidth: 3, pointBackgroundColor: cBlue },
+            { label: 'Meta Guardião', data: [80, 85, 85, 80, 85], borderColor: cOrange, backgroundColor: 'rgba(234,88,12,0.08)', borderWidth: 2, borderDash: [5, 4], pointBackgroundColor: cOrange }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, backdropColor: 'transparent', color: cInk }, grid: { color: cCtx }, angleLines: { color: cCtx }, pointLabels: { color: cInk, font: { family: 'Space Grotesk', weight: '700', size: 11 } } } },
+          plugins: { legend }
+        }
+      }, ch => { ch.data.datasets[0].data = radarData; });
+
+      const labels = LAYER_META.map(l => l.short);
+      const rrA = LAYER_META.map(l => m.porCamada[l.id].rr);
+      const dA = LAYER_META.map(l => m.porCamada[l.id].det);
+      const cA = LAYER_META.map(l => m.porCamada[l.id].rec);
+      upsertChart('layers', 'layerBarChart', {
+        type: 'bar',
+        data: { labels, datasets: [
+          { label: 'Resistir/Reagir', data: rrA, backgroundColor: cBlue, borderColor: cInk, borderWidth: 1.5 },
+          { label: 'Detectar', data: dA, backgroundColor: cOrange, borderColor: cInk, borderWidth: 1.5 },
+          { label: 'Recuperar', data: cA, backgroundColor: cGreen, borderColor: cInk, borderWidth: 1.5 }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false,
+          scales: { y: { min: 0, max: 100, ticks: { color: cInk }, grid: { color: cCtx } }, x: { ticks: { color: cInk, font: { family: 'Space Grotesk', weight: '700', size: 10 } }, grid: { display: false } } },
+          plugins: { legend } }
+      }, ch => { ch.data.datasets[0].data = rrA; ch.data.datasets[1].data = dA; ch.data.datasets[2].data = cA; });
+
+      const ms = SETORES.map(k => calcularSetor(k));
+      const lbls = SETORES.map(k => CENARIOS_DATA[k].codigo);
+      const tD = ms.map(x => +x.mttd.toFixed(1)), tR = ms.map(x => +x.mttr.toFixed(1)), tO = ms.map(x => +x.rto.toFixed(1));
+      upsertChart('time', 'timeChart', {
+        type: 'bar',
+        data: { labels: lbls, datasets: [
+          { label: 'MTTD (perceber)', data: tD, backgroundColor: cOrange, borderColor: cInk, borderWidth: 1.5 },
+          { label: 'MTTR (conter)', data: tR, backgroundColor: cBlue, borderColor: cInk, borderWidth: 1.5 },
+          { label: 'RTO (voltar)', data: tO, backgroundColor: cGreen, borderColor: cInk, borderWidth: 1.5 }
+        ] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          scales: { x: { stacked: true, ticks: { color: cInk }, grid: { color: cCtx }, title: { display: true, text: 'horas', color: cInk } }, y: { stacked: true, ticks: { color: cInk, font: { family: 'Space Grotesk', weight: '700' } }, grid: { display: false } } },
+          plugins: { legend } }
+      }, ch => { ch.data.datasets[0].data = tD; ch.data.datasets[1].data = tR; ch.data.datasets[2].data = tO; });
+
+      const bV = ms.map(x => x.blast);
+      const bC = SETORES.map(k => k === appState.setorAtual ? cRed : cBlue);
+      upsertChart('blast', 'blastChart', {
+        type: 'bar',
+        data: { labels: SETORES.map(k => `${CENARIOS_DATA[k].codigo} ${CENARIOS_DATA[k].nome.split('·')[1].trim().split(' ')[0]}`), datasets: [{ label: 'Raio de impacto (%)', data: bV, backgroundColor: bC, borderColor: cInk, borderWidth: 2 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          scales: { x: { min: 0, max: 100, ticks: { color: cInk }, grid: { color: cCtx } }, y: { ticks: { color: cInk, font: { family: 'Space Grotesk', weight: '700', size: 11 } }, grid: { display: false } } },
+          plugins: { legend: { display: false } } }
+      }, ch => { ch.data.datasets[0].data = bV; ch.data.datasets[0].backgroundColor = bC; });
+    }
+
+    // =========================================================================
+    // 7. INTERAÇÕES
+    // =========================================================================
+    function commit() { renderTudo(); persistirEstado(); }
+
+    function handleSetorChange(v) {
+      appState.setorAtual = CENARIOS_DATA[v] ? v : 'banking';
+      document.getElementById('setorSelect').value = appState.setorAtual;
+      commit();
+    }
+    function selecionarCamada(id) { appState.camadaAtual = id; commit(); }
+
+    function toggleFerramenta(toolId) {
+      setLayerState(appState.setorAtual, appState.camadaAtual, st => {
+        const tools = Object.assign({}, st.tools); tools[toolId] = !tools[toolId];
+        return { tools, breached: st.breached };
+      });
+      commit();
+    }
+    function toggleBreachCamadaAtual() {
+      setLayerState(appState.setorAtual, appState.camadaAtual, st => ({ tools: st.tools, breached: !st.breached }));
+      commit();
+    }
+    function toggleTatica(id) {
+      const s = appState.setorAtual;
+      const atual = getTaticas(s);
+      appState.taticas[s] = Object.assign({}, appState.taticas[s] || {}, { [id]: !atual[id] });
+      commit();
+    }
+
+    function simularSuplantamentoGlobal() {
+      const alvos = appState.escala >= 3 ? ['frontend', 'telecom', 'lan'] : ['frontend', 'ihc'];
+      alvos.forEach(l => setLayerState(appState.setorAtual, l, st => ({ tools: st.tools, breached: true })));
+      mostrarFeedback(`Suplantamento em ${alvos.length} camadas de ${CENARIOS_DATA[appState.setorAtual].codigo}. Observem MTTD, RTO e RPO.`);
+      commit();
+    }
+    function restaurarDefesasSetor() {
+      const s = appState.setorAtual;
+      delete appState.overrides[s];
+      delete appState.injects[s];
+      delete appState.cascataAlvo[s];
+      mostrarFeedback(`Camadas, ferramentas e injects de ${CENARIOS_DATA[s].codigo} restaurados. As táticas escolhidas pelo grupo foram mantidas.`);
+      commit();
+    }
+
+    function toggleInject(n) {
+      const s = appState.setorAtual;
+      const inj = getInjects(s);
+      const ativar = !inj[n];
+      inj[n] = ativar;
+      appState.injects[s] = inj;
+      const breach = (layers, val) => layers.forEach(l => setLayerState(s, l, st => ({ tools: st.tools, breached: val })));
+      if (n === 1) breach(['frontend', 'ihc'], ativar);
+      if (n === 2) breach(['bd'], ativar);
+      if (n === 3) {
+        if (ativar) {
+          const outros = SETORES.filter(k => k !== s);
+          appState.cascataAlvo[s] = outros[Math.floor(Math.random() * outros.length)];
+          appState.escala = 4;
+        } else {
+          delete appState.cascataAlvo[s];
+          appState.escala = 2;
+        }
+      }
+      if (ativar) {
+        let msg = `Inject ${n} aplicado: ${INJECTS[n - 1].titulo}.`;
+        if (n === 2) {
+          const tat = getTaticas(s);
+          if (!tat.backup && !tat.rollback) msg += tat.replicacao ? ' A réplica síncrona copiou a corrupção.' : ' Não há cópia confiável.';
+          else msg += ' A cópia imutável/histórico de eventos segurou o RPO.';
+        }
+        if (n === 3) msg += ` Caiu: ${CENARIOS_DATA[appState.cascataAlvo[s]].nome}.`;
+        mostrarFeedback(msg);
+      }
+      commit();
+    }
+
+    function toggleGuardian() { appState.guardiao = !appState.guardiao; commit(); }
+    function toggleDecisao(id) { if (!appState.guardiao) return; appState.decisoes[id] = !appState.decisoes[id]; commit(); }
+    function selecionarEscala(n) { appState.escala = clamp(Number(n) || 1, 1, 4); commit(); }
+    // ----- Modo Professor: gabarito criptografado (AES-256-GCM, chave PBKDF2-SHA256 da senha) -----
+    // O bloco PROF_LOCK é gerado por gerar_trava_professor.py. Sem a senha, o gabarito não pode ser lido.
+    /*PROF_LOCK_START*/const PROF_LOCK = {"salt": "D8trsjgg+gBuGAIHyIL7fQ==", "iv": "jGCugegwODSJH8Gc", "iter": 600000, "ct": "NLJh79YsOXpPFFdO8UfGjdRSP/catSTXIAlfJCl2NWMcUkg09J57OshFKGYCqOTC1p2tuBA1BpX139XmjzWl96E2fvFNPb7sM+uYiB0hJtPcM52BVEb4ibqMi9Y28QE3Uy/5Sot0JQBGXqbNOsAuG/93WzzAuxe6yLqP9IYPCeQSuq+yM3M96XGGo8Huzr+YES5NVsejKxW3fHA8db8JzNJEiA5WfmHXmROjY6cDkbCMaxDZ1hObE1H1K9aelpWJiQDJzMmdaV4L9TIO+UtEOuQBSXWeN84V+ejEtUWYx2gP1XbdRIkkqXSO8IMtf+wDhmZDtqB5Dh/339kAvePN6Dy6SAyFX9I5boAuTFrfPISak3I3d0ZdFsPCQ4FNkmAm39SHmO97FYsT2+LCMad4/WayfsqBsysITIV69Pca5tDQvrxwgp0Qu6gPdlj6DiB8l8bnOv/v4tR4dDZa5SjPG8Bjn9ok9Eo+QmlV8t2NIy5fUzGcSn1DjgrpbRR/meOHrr/DIjM5muTInes7LEvWVtpydtEsBObIMMl7yNDKBIhxXWN5g1XwzFAIhRg4p/Mqlk302lzcegZGDq1bBe39XmrVbmCN8Durf173ajEIOEOVyOMzMltPk4UoF0VrtVkfmGWexhjXx9+NRDIIKvsud25ZT2EF6HujiYFzlyEOtfqffFVRx6NAf7PJQ2Wym14TCH/m8UIsUzJDHreoRGH6CBBvSEGBUF5bFOpLOb6QyWMSWHxl0c6u6Rq3aReNEm/oO8Uc0vTjK8HYMvxZ4LCGax5qtOgzXeyB5LVyaV+ffyorfayodUh528rAovgNg7kkmL1AFd6lYjA2hXHE22WmSYm7k7W0WQDQhtfsdbbPfXJvY1uhAbsh/FKx7/9LzOoFiB0pzu2dp4Ip24C8/Dqz03oY8kToVA276aKM2laofY8tJsSgq8gcYVqmE5nm4Ct5VFdiGPw5Pnl7bjZHUozv0xpzD9mPz5gC3xpPlTPwM31Vad6kqqEGHJwk8J6wtqxT3NzAr4T7MBkD7mOx77M9gwKeO+SRFDyUtjC1W6Qn2WVD6jpllhl4w5niYo6t/XlLnYVRmOjl01XYdoh8GDjI4OjbAEnzqY8t6oVrVup6YAjkxEYVrXfBeniPiqKkHD94npCeby68lwxNpJ6OmI8nd4ys74JtpIdgb+Q31gvveosbDmT26TsuVeoQi7j1Kj1DaWw28+lVXVZ+ADdi0vvBPw/afhq7+YytKwZ3y83BfSI1ECSTEk8cxMaBloOWhRg/nG9To4MsTCmOt8TVtVvlL6BLXo+KbkZJ225eqvJfKMBnulAviyxh5S+oFA7zS715yYmqTL7zUwd4deW2zxzcoNbaBI8yP29mmOpShkm4E/Mach36TMrst1AJkKZRcnD8WiSJ/PFTX7IyeXseENeSytlNOHWGtg2pzbPq+royhsaYOD2RAYLScWvr7tWGqdwvhSV9mQaKyRjq0DbfZt1/Qz6CxmVcV8xnGb09TFhCH5eFfv8GQQpntCbFHNRWg/jStj/VuTvzvlHtglloDxyfWkjMUF5cDhi+W4XwoazBvz7nzBaOuZfdFpM46wRZumqu9opSwr8QpmoL7SNLIql79MMwEq/wlSCdneXDFHVIWK1cHF+lt8S9C0YfysBOhnItIDw1qrsnbV/TexFDZH7TPAZrT51zsATWBB1cslYOYvHuTOk7vdbIrxvCnlBAc2UWwcN98+KP4oBCxFX6M4MIHIn/XVRAa3V08YzWVrDrJmsIFSalWcocazltokAjQi/7SVsiGfCsM4O37HloU0YyxNDC78nx36sTEr0g06Lhgbeuazbbdw4rzpqNJN2ju/VXjQW8iACzv0k2l9W7qx0V+b3KD76Dozf7gU0U1h6NHF23+wbnxlLHXvHkln3b5PyNN5tFNXzkMoZ4lZoxam8/76TBFrxDm6FgkhL3aqH3309t/+h0FkgVFFthwoEkyLNoo59HWBFaEMRAkIw5IMk0T31siQ2EKxMl6addWP8HlE7cCn80WCuWdnS1x+my42ZvkMIJsUsmcbtg7n/685TYqqM4pdNhZK/OK/c4NCOtYSFQUAJwhXBi63+yBeBCOWsYlMW+CMXysRjCsqm2nzbxG9+WhHhZHA/NPyKbsjUPDPQFrCCi8axFVmj/TbhGV/i3zHj3ms/x1fH1PJwtWf1SRUfrLMl4R8l+6xrfY+5d0i0JdXn+36jpv1iS1omXzyMl3CRg2DmzLQmJhTRzTPzGSfcVGjvoDMGGcOEc++GI1YFMKIHw9Y2Eftsa5xG4EBOddT1OFd1OTZ8kEaYjcWf6Kn3yD1ZjUXt0ZdFxMaZ68pw9pyQMa096K2Dx9PKJ6CVcS3ddxVG1LXaQkKWRan8cgfvUHkxNiM7iWZ50yKEpartX348wFTWw3LZm7+GjthDZqiXPpg6C2uUxPMTJxwMGWt4EzQ5BurEw/vbYo+5OPdI/V0KZnm8Jj4fGhiljFSD0Mk5I3d7O+slJUDm55Kpb3Zp7n31hozKJUdZ0qUBBmNWUm/cpz3TEOMHY3gs8lY9cuLWIkiQppAj5N7LeFwDh9RF8eVaazPH9bjKDk+9X6DFL+FHzC5SkVri+X9O9yf7gyz3RSbNIF6YWD2IwQWgbrWEy7+r/CVlYG0VdUaAleUZ/24NDVYeHj0F9h5Z/bvyYyaA4tLXvMts0I39XrSnKXVJmOgVvWNj4Ok6qqW4Imb2yM5fwZKcfRsbvssjpngus8ZiaSLTIzxdFZ+ZHdigjZ4ltVE6ga6Q39ENbfx5htvmEJnJjdQ/4fs7pS4UuTBSxjqSPkKKV6UNehvmVc6KS99CvGUuoEWTlmpwU8l2Pmr3drF/zOk8ztND1XtF42WGW8j+9v9sIbTR1VlzqfUx2/3v5GA6gh36zpvmvUM5JPGlkoKXPemkwOAQTuFD+R7gkXlnE2v785F721k+pYbzDKa8MjxYxOpau2Vpw61JfEeqYrTJVtW1YXa7qDmMQZ1UsdFYKY5nNZniNJ4Nh9E0NcHrEBLkYPNsmARtN67EvL8Y5ACwaTQvIiUUNhHIcGPqQSgD1UlkX/m0O+DafZNdGMDYrKWkOduYGn2ojfcIFI8O58yqblWSGT7WiWSjjmnW2KtilR+HdMW5v/FFCdASYy787EtiY/vv/29YFf1OT0OxxaTsob8UtAQjbaViwUoISg6/omqYFs6fvBZ3bHwcW0gwUjTmmsI08qyPnP3ji/ejuf20/VTADDalXO98G42+N1z9pBUKoqT8FMdRd6wz8meesnfEq5uYAaGyK9pN2mh7nHnrH4Du9957MW6tp8yj95EufW0k+Kxc+u07vMdruYVfLNfAu6J4GOEK7TFFPW8ovS2bmSp8rumow9+XpJ2vX1gc2vN+SNALK8wQgKU542badO0fq+99L4XmNiC4K5Iu2bMI="};/*PROF_LOCK_END*/
+    let PROF_DATA = null;
+    const PROF_SESSION_KEY = 't35-prof-v2';
+    function profUnlocked() { return PROF_DATA !== null; }
+    function b64ToBytes(b64) { return Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)); }
+
+    async function decifrarProfessor(senha) {
+      const enc = new TextEncoder();
+      const base = await crypto.subtle.importKey('raw', enc.encode(senha), 'PBKDF2', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: b64ToBytes(PROF_LOCK.salt), iterations: PROF_LOCK.iter, hash: 'SHA-256' },
+        base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(PROF_LOCK.iv) }, key, b64ToBytes(PROF_LOCK.ct));
+      return JSON.parse(new TextDecoder().decode(plain));
+    }
+
+    function toggleProfessor() {
+      if (profUnlocked()) {
+        PROF_DATA = null;
+        try { sessionStorage.removeItem(PROF_SESSION_KEY); } catch (e) { /* sem storage */ }
+        mostrarFeedback('Modo Professor bloqueado.');
+        commit();
+        return;
+      }
+      if (!PROF_LOCK) { mostrarFeedback('Trava do professor ainda não configurada (rode gerar_trava_professor.py).'); return; }
+      const form = document.getElementById('profUnlock');
+      form.hidden = false;
+      document.getElementById('profSenha').focus();
+    }
+    function fecharUnlock() {
+      document.getElementById('profUnlock').hidden = true;
+      document.getElementById('profSenha').value = '';
+    }
+    async function desbloquearProfessor() {
+      const campo = document.getElementById('profSenha');
+      const btn = document.getElementById('btnProfOk');
+      btn.disabled = true;
+      try {
+        if (!(window.crypto && crypto.subtle)) throw new Error('webcrypto');
+        PROF_DATA = await decifrarProfessor(campo.value);
+        try { sessionStorage.setItem(PROF_SESSION_KEY, JSON.stringify(PROF_DATA)); } catch (e) { /* sem storage */ }
+        fecharUnlock();
+        mostrarFeedback('Modo Professor liberado nesta aba. Feche a aba ou clique em "Bloquear" ao terminar.');
+        commit();
+      } catch (e) {
+        PROF_DATA = null;
+        campo.value = '';
+        mostrarFeedback(e && e.message === 'webcrypto'
+          ? 'Este navegador não permite descriptografar aqui. Abra o site por https:// (GitHub Pages).'
+          : 'Senha incorreta.');
+      } finally { btn.disabled = false; }
+    }
+    function restaurarSessaoProfessor() {
+      try {
+        const salvo = JSON.parse(sessionStorage.getItem(PROF_SESSION_KEY) || 'null');
+        if (salvo && salvo.gabaritos) PROF_DATA = salvo;
+      } catch (e) { PROF_DATA = null; }
+    }
+
+    function adicionarNota() {
+      const input = document.getElementById('stickyInput');
+      const texto = input.value.trim();
+      if (!texto) { mostrarFeedback('Digite uma observação antes de fixar a nota.'); return; }
+      appState.notas.unshift({ id: `n_${Date.now()}`, setor: appState.setorAtual, camada: appState.camadaAtual, tatica: document.getElementById('stickyTactic').value, texto });
+      input.value = '';
+      commit();
+    }
+    function removerNota(id) { appState.notas = appState.notas.filter(n => n.id !== id); commit(); }
+
+    function salvarPlano(campo, valor) {
+      const s = appState.setorAtual;
+      appState.planos[s] = Object.assign({}, appState.planos[s] || {}, { [campo]: valor });
+      renderResumo(calcularSetor(s));
+      persistirEstado();
+    }
+    function salvarMiroUrl(v) { appState.miro[appState.setorAtual] = v.trim(); persistirEstado(); }
+    function abrirMiro() {
+      const url = appState.miro[appState.setorAtual];
+      if (!url || !/^https?:\/\//i.test(url)) { mostrarFeedback('Cole primeiro o link do board Miro do grupo (começando com https://).'); return; }
+      window.open(url, '_blank', 'noopener');
+    }
+
+    async function copiarTexto(txt, okMsg) {
+      try { await navigator.clipboard.writeText(txt); mostrarFeedback(okMsg); }
+      catch (e) { mostrarFeedback('Não foi possível copiar automaticamente: selecione o texto e use Ctrl+C.'); }
+    }
+    function copiarLinkSetor() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('setor', appState.setorAtual);
+      copiarTexto(url.toString(), `Link do ${CENARIOS_DATA[appState.setorAtual].codigo} copiado: cole no frame F0 do Miro.`);
+    }
+    function copiarResumo() {
+      const ta = document.getElementById('resumoMiro');
+      ta.select();
+      copiarTexto(ta.value, 'Resumo copiado: cole no frame do grupo no Miro.');
+    }
+
+    function baixarArquivo(conteudo, nome, tipo) {
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+        window.notebookAppApi.triggerFileDownload({ content: conteudo, contentType: tipo, encoding: 'UTF-8', filename: nome });
+        return;
+      }
+      try {
+        const blob = new Blob(['﻿' + conteudo], { type: `${tipo};charset=utf-8` });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = nome;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      } catch (e) { mostrarFeedback('Download bloqueado neste ambiente: use o botão Copiar.'); }
+    }
+    function baixarResumo() {
+      baixarArquivo(document.getElementById('resumoMiro').value, `t35_${appState.setorAtual}_resumo.txt`, 'text/plain');
+      mostrarFeedback('Resumo TXT gerado.');
+    }
+    function exportarCSV() {
+      const s = appState.setorAtual, c = CENARIOS_DATA[s], m = calcularSetor(s);
+      const q = v => `"${String(v).replace(/"/g, '""')}"`;
+      const L = [['EC', 'Camada', 'Resistir/Reagir (%)', 'Detectar (%)', 'Recuperar (%)', 'Suplantada'].join(';')];
+      LAYER_META.forEach(l => { const x = m.porCamada[l.id]; L.push([q(c.nome), q(l.short), x.rr, x.det, x.rec, x.breached ? 'SIM' : 'NAO'].join(';')); });
+      L.push('');
+      L.push(['Métrica', 'Valor'].join(';'));
+      [['MTTD', fmtHoras(m.mttd)], ['MTTR', fmtHoras(m.mttr)], ['RTO', fmtHoras(m.rto)], ['RPO', `${fmtHoras(m.rpo)} (${m.rpoMotivo})`], ['Blast radius', `${m.blast}%`], ['Índice de dano', m.dano.toFixed(1)]]
+        .forEach(r => L.push([q(r[0]), q(r[1])].join(';')));
+      L.push('');
+      L.push(['Tática', 'Grupo', 'Ativa'].join(';'));
+      const tat = getTaticas(s);
+      TACTICS_CATALOG.forEach(t => L.push([q(t.nome), q(GRUPOS[t.grupo].label), tat[t.id] ? 'SIM' : 'NAO'].join(';')));
+      baixarArquivo(L.join('\n'), `t35_cyber_${s}.csv`, 'text/csv');
+      mostrarFeedback(`CSV de ${c.codigo} gerado.`);
+    }
+
+    // =========================================================================
+    // 8. CRONÔMETRO (4 blocos: 15 · 25 · 30 · 20)
+    // =========================================================================
+    function formatarMMSS(seg) {
+      const s = Math.max(0, Math.floor(seg));
+      return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    }
+    function minutosDecorridos() {
+      let dec = 0;
+      for (let i = 1; i <= 4; i++) dec += BLOCOS_TIMER[i].duracaoSeg - appState.timer.restante[i];
+      return Math.floor(dec / 60);
+    }
+    function atualizarUITimer() {
+      const b = appState.timer.blocoAtivo;
+      const rest = appState.timer.restante[b];
+      const dur = BLOCOS_TIMER[b].duracaoSeg;
+      setText('timerDisplay', formatarMMSS(rest));
+      setText('timerBlockTitle', BLOCOS_TIMER[b].nome);
+      setText('timerStatusText', `AULA 90 MIN · ${appState.timer.rodando ? 'EM ANDAMENTO' : 'PAUSADO'}`);
+      setText('blockProgressLabel', `Bloco ${b}: ${Math.round(((dur - rest) / dur) * 100)}%`);
+      setText('globalProgressLabel', `Aula: min ${minutosDecorridos()} de 90`);
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`tabBloco${i}`).classList.toggle('is-active', i === b);
+        const pct = ((BLOCOS_TIMER[i].duracaoSeg - appState.timer.restante[i]) / BLOCOS_TIMER[i].duracaoSeg) * 100;
+        document.getElementById(`progSeg${i}`).style.width = `${clamp(pct, 0, 100)}%`;
+      }
+      document.getElementById('btnTimerStart').disabled = appState.timer.rodando;
+      document.getElementById('btnTimerPause').disabled = !appState.timer.rodando;
+    }
+    let ultimoMinutoInjects = -1;
+    function iniciarTimer() {
+      if (appState.timer.rodando) return;
+      appState.timer.rodando = true;
+      atualizarUITimer();
+      clearInterval(timerIntervalId);
+      timerIntervalId = setInterval(() => {
+        const b = appState.timer.blocoAtivo;
+        if (appState.timer.restante[b] > 0) appState.timer.restante[b]--;
+        else if (b < 4) { appState.timer.blocoAtivo = b + 1; mostrarFeedback(`Bloco ${b} concluído. Avançando para o Bloco ${b + 1}.`); }
+        else { pausarTimer(); mostrarFeedback('Aula de 90 minutos concluída.'); }
+        atualizarUITimer();
+        const min = minutosDecorridos();
+        if (min !== ultimoMinutoInjects) {
+          ultimoMinutoInjects = min;
+          const novo = INJECTS.find(i => i.min === min);
+          if (novo) mostrarFeedback(`Inject ${novo.n} liberado: ${novo.titulo}.`);
+          renderInjects();
+        }
+        if (appState.timer.restante[appState.timer.blocoAtivo] % 15 === 0) persistirEstado();
+      }, 1000);
+    }
+    function pausarTimer() {
+      appState.timer.rodando = false;
+      clearInterval(timerIntervalId); timerIntervalId = null;
+      atualizarUITimer(); persistirEstado();
+    }
+    function resetarTimer() {
+      pausarTimer();
+      appState.timer.blocoAtivo = 1;
+      appState.timer.restante = { 1: 900, 2: 1500, 3: 1800, 4: 1200 };
+      atualizarUITimer(); renderInjects(); persistirEstado();
+    }
+    function selecionarBlocoTimer(n) { appState.timer.blocoAtivo = n; atualizarUITimer(); persistirEstado(); }
+
+    // =========================================================================
+    // 9. PERSISTÊNCIA (notebookAppApi → localStorage)
+    // =========================================================================
+    function snapshot() {
+      const { timer, ...resto } = appState;
+      return Object.assign({}, resto, { timer: { blocoAtivo: timer.blocoAtivo, restante: timer.restante } });
+    }
+    async function persistirEstado() {
+      const data = snapshot();
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === 'function') {
+        try { await window.notebookAppApi.setAppState(data); return; } catch (e) { /* segue */ }
+      }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* sem storage */ }
+    }
+    async function carregarEstado() {
+      let saved = null;
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === 'function') {
+        try { saved = await window.notebookAppApi.getAppState(); } catch (e) { saved = null; }
+      }
+      if (!saved) { try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { saved = null; } }
+      if (!saved || typeof saved !== 'object') return;
+      ['camadaAtual', 'escala', 'guardiao', 'decisoes', 'overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro'].forEach(k => {
+        if (saved[k] !== undefined) appState[k] = saved[k];
+      });
+      if (saved.setorAtual && CENARIOS_DATA[saved.setorAtual]) appState.setorAtual = saved.setorAtual;
+      if (Array.isArray(saved.notas)) appState.notas = saved.notas;
+      if (saved.timer && saved.timer.restante && saved.timer.restante[4] !== undefined) {
+        appState.timer.blocoAtivo = saved.timer.blocoAtivo || 1;
+        appState.timer.restante = Object.assign(appState.timer.restante, saved.timer.restante);
+      }
+    }
+
+    // =========================================================================
+    // 10. HELPERS & INIT
+    // =========================================================================
+    function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function mostrarFeedback(msg) { const el = document.getElementById('feedback'); el.textContent = msg; el.classList.add('is-visible'); }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await carregarEstado();
+      restaurarSessaoProfessor();
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get('setor');
+      const doUrl = mapearParametroSetor(raw);
+      if (doUrl) { appState.setorAtual = doUrl; mostrarFeedback(`Parâmetro ?setor=${raw} → ${CENARIOS_DATA[doUrl].nome}.`); }
+      if (!LAYER_META.some(l => l.id === appState.camadaAtual)) appState.camadaAtual = 'frontend';
+      document.getElementById('setorSelect').value = appState.setorAtual;
+      atualizarUITimer();
+      commit();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') window.notebookAppApi.notifyAppReady();
+    });
+  </script>
+</body>
+</html>
+
+
