@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="artifact-type" content="dashboard">
   <meta name="design-style" content="bauhaus">
-  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura · v2</title>
+  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura · v3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -25,7 +25,6 @@
       --primary: #0f172a;
       --on-primary: #ffffff;
       --tertiary: #0044cc;
-      --tertiary-dark: #003399;
       --on-tertiary: #ffffff;
       --primary-container: #ff8c00;
       --on-primary-container: #0f172a;
@@ -70,9 +69,11 @@
       --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
       --dur-micro: 120ms;
       --dur-short: 220ms;
+      --trail-h: 150px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     html, body {
       overflow-x: clip; margin: 0; padding: 0;
       background-color: var(--background); color: var(--on-surface);
@@ -105,9 +106,11 @@
     .title { font-family: var(--font-headline); font-weight: 700; font-size: var(--display-size); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 var(--space-sm) 0; }
     .title mark { background: var(--primary-container); color: var(--on-primary-container); padding-inline: var(--space-xs); }
     .subtitle { margin: 0; color: var(--on-surface-variant); max-width: 68ch; }
+    .how-to { margin: var(--space-md) 0 0 0; padding: var(--space-sm) var(--space-md); border: var(--border-medium); background: var(--note-orange); font-size: 0.9rem; max-width: 72ch; }
+    .how-to ol { margin: 4px 0 0 0; padding-left: 1.2rem; }
     .equation {
       margin-top: var(--space-md); display: inline-block; font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem;
-      border: var(--border-medium); background: var(--note-orange); padding: var(--space-xs) var(--space-sm);
+      border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-xs) var(--space-sm);
     }
 
     .controls-cluster { display: grid; gap: var(--space-sm); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); }
@@ -119,7 +122,7 @@
       width: 100%; min-height: 44px; padding: var(--space-sm) var(--space-md);
       background: var(--background); color: var(--on-surface); border: var(--border-medium); border-radius: var(--rounded); font-weight: 600;
     }
-    textarea.bauhaus-textarea { font-weight: 500; resize: vertical; min-height: 76px; font-size: 0.875rem; }
+    textarea.bauhaus-textarea { font-weight: 500; resize: vertical; min-height: 84px; font-size: 0.875rem; }
     select.bauhaus-select { cursor: pointer; }
 
     .btn {
@@ -139,74 +142,102 @@
     .btn-danger { background: var(--error); color: var(--on-error); }
     .btn-on { background: var(--error); color: var(--on-error); }
     .btn-prof-on { background: var(--primary); color: var(--on-primary); }
+    .btn-done { background: var(--positive); color: var(--on-positive); }
     .btn-sm { min-height: 34px; padding: 4px 10px; font-size: 0.68rem; box-shadow: 2px 2px 0 var(--outline); border-width: 2px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
 
-    .inline-feedback { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; padding: var(--space-xs) var(--space-sm); border: var(--border-medium); background: var(--note-blue); display: none; }
+    /* Toast de feedback */
+    .inline-feedback {
+      position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 120;
+      max-width: min(640px, 92vw); font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600;
+      padding: var(--space-sm) var(--space-md); border: var(--border-thick); background: var(--note-blue); box-shadow: var(--offset-shadow-sm); display: none;
+    }
     .inline-feedback.is-visible { display: block; }
 
-    /* Timer */
-    .timer-strip {
-      border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background);
-      border-left: var(--space-sm) solid var(--primary-container); padding: var(--space-md) var(--space-lg);
-      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.9fr) auto; gap: var(--space-lg); align-items: center;
+    /* ===== Trilha fixa: etapas + métricas ===== */
+    .trail {
+      position: sticky; top: 0; z-index: 60;
+      border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--background);
+      display: grid; gap: 0;
     }
-    .timer-readout-wrap { display: flex; align-items: center; gap: var(--space-md); }
-    .timer-digits {
-      font-family: var(--font-mono); font-weight: 700; font-size: clamp(1.65rem, 1.3rem + 1vw, 2.25rem); font-variant-numeric: tabular-nums;
-      background: var(--primary); color: var(--on-primary); padding: var(--space-xs) var(--space-md); border: var(--border-medium); min-width: 128px; text-align: center;
+    .trail-row { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) var(--space-sm); border-bottom: var(--border-medium); }
+    .trail-pills { display: flex; gap: 4px; overflow-x: auto; flex: 1 1 auto; padding: 2px 0; scrollbar-width: thin; align-items: center; }
+    .trail-pills > * { flex-shrink: 0; }
+    .pill-sep { font-family: var(--font-label); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; color: #fff; white-space: nowrap; margin-left: 6px; }
+    .pill-sep:first-child { margin-left: 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: pointer;
+      border: 2px solid var(--outline); background: var(--background); color: var(--on-surface);
+      font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; padding: 3px 8px; min-height: 32px;
     }
-    .timer-meta { display: flex; flex-direction: column; gap: var(--space-xs); }
-    .timer-block-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--subhead-size); margin: 0; }
-    .timer-status-badge { font-family: var(--font-mono); font-size: var(--label-size); font-weight: 600; color: var(--on-surface-variant); }
-    .timer-blocks-progress { display: flex; flex-direction: column; gap: var(--space-sm); }
-    .block-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); }
-    .block-tab {
-      min-height: 44px; padding: var(--space-xs) var(--space-sm); border: var(--border-medium); background: var(--surface-container-low);
-      font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-align: left; cursor: pointer;
-      display: flex; flex-direction: column; justify-content: center; color: var(--on-surface);
-    }
-    .block-tab.is-active { background: var(--primary-container); box-shadow: var(--offset-shadow-sm); }
-    .block-tab small { font-family: var(--font-mono); font-weight: 600; font-size: 0.68rem; }
-    .progress-label-row { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; color: var(--on-surface-variant); }
-    .progress-track-global { display: grid; grid-template-columns: 15fr 25fr 30fr 20fr; gap: 2px; height: 14px; background: var(--outline); border: var(--border-medium); overflow: hidden; }
-    .progress-seg { background: var(--surface-container-high); overflow: hidden; }
-    .progress-seg-fill { height: 100%; width: 0%; transition: width var(--dur-short) var(--ease-out); }
-    .fill-b1 { background: var(--tertiary); } .fill-b2 { background: var(--primary-container); } .fill-b3 { background: var(--secondary); } .fill-b4 { background: var(--positive); }
-    .timer-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+    .pill b { font-family: var(--font-mono); display: inline-grid; place-items: center; min-width: 18px; height: 18px; border: 1px solid var(--outline); font-size: 0.7rem; }
+    .pill.is-done b { background: var(--positive); color: #fff; border-color: var(--positive); }
+    .pill.is-current { background: var(--fase-cor); color: var(--fase-txt); box-shadow: 2px 2px 0 var(--outline); }
+    .fase-abertura { --fase-cor: var(--primary-container); --fase-txt: var(--on-primary-container); }
+    .fase-d1 { --fase-cor: var(--tertiary); --fase-txt: #fff; }
+    .fase-d2 { --fase-cor: var(--secondary); --fase-txt: #fff; }
+    .fase-fech { --fase-cor: var(--positive); --fase-txt: #fff; }
+    .pill-sep.fase-abertura { color: var(--on-primary-container); }
+    .pill-sep { background: var(--fase-cor); }
+    .where-btn { flex: 0 0 auto; }
 
-    /* KPIs */
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
-    .kpi-card { border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--background); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-xs); border-top-width: 6px; }
-    .kpi-rr { border-top-color: var(--tertiary); } .kpi-det { border-top-color: var(--primary-container); } .kpi-rec { border-top-color: var(--positive); } .kpi-blast { border-top-color: var(--secondary); }
-    .kpi-head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--on-surface-variant); }
-    .kpi-head svg { width: 18px; height: 18px; }
-    .kpi-value { font-family: var(--font-headline); font-weight: 700; font-size: clamp(1.85rem, 1.4rem + 1.2vw, 2.4rem); line-height: 1; font-variant-numeric: tabular-nums; }
-    .kpi-caption { font-size: 0.8125rem; color: var(--on-surface-variant); margin: 0; }
+    .metrics-bar { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); background: var(--primary); color: var(--on-primary); }
+    .m-cell { padding: 4px var(--space-sm); border-right: 1px solid #334155; display: flex; flex-direction: column; gap: 0; }
+    .m-cell:last-child { border-right: none; }
+    .m-cell .lbl { font-family: var(--font-label); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .m-cell .val { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
+    .m-cell .hint { font-size: 0.62rem; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .m-cell.c-rr { border-top: 4px solid var(--tertiary); }
+    .m-cell.c-det { border-top: 4px solid var(--primary-container); }
+    .m-cell.c-rec { border-top: 4px solid var(--positive); }
+    .m-cell.c-blast { border-top: 4px solid var(--secondary); }
+    .m-cell.c-time { border-top: 4px solid #475569; }
+    .m-cell.is-alarm { background: var(--secondary); }
 
-    .time-strip {
-      border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--primary); color: var(--on-primary);
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0;
-    }
-    .time-cell { padding: var(--space-sm) var(--space-md); border-right: 2px solid #334155; display: flex; flex-direction: column; gap: 2px; }
-    .time-cell:last-child { border-right: none; background: var(--secondary); }
-    .time-cell .lbl { font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
-    .time-cell .val { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .time-cell .hint { font-size: 0.72rem; opacity: 0.8; }
-    .time-cell.is-alarm .val { color: #fecaca; }
+    .fab-where { display: none; position: fixed; right: 14px; bottom: 14px; z-index: 110; }
 
-    /* Section headers */
-    .section-open {
-      border-top: 6px solid var(--accent-line, var(--tertiary)); padding-top: var(--space-md); margin-bottom: var(--space-md);
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-sm);
+    /* ===== Divisores das dinâmicas ===== */
+    .dyn-divider {
+      margin-top: var(--space-xl); border: var(--border-thick); box-shadow: var(--offset-shadow);
+      background: var(--fase-cor); color: var(--fase-txt);
+      display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-lg); align-items: center; padding: var(--space-lg);
     }
-    .section-open.accent-red { --accent-line: var(--secondary); }
-    .section-open.accent-orange { --accent-line: var(--primary-container); }
-    .section-open.accent-green { --accent-line: var(--positive); }
-    .section-kicker {
-      display: inline-block; font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.1em;
-      background: var(--primary); color: var(--on-primary); padding: var(--space-xs) var(--space-sm); margin-bottom: var(--space-xs);
-    }
+    .dyn-divider:first-of-type { margin-top: 0; }
+    .dyn-big { font-family: var(--font-headline); font-weight: 700; font-size: clamp(2.2rem, 1.6rem + 2.4vw, 3.6rem); line-height: 0.95; letter-spacing: -0.04em; text-transform: uppercase; }
+    .dyn-meta { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9; }
+    .dyn-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--headline-size); margin: 2px 0 4px 0; line-height: 1.15; }
+    .dyn-desc { margin: 0; font-size: 0.92rem; max-width: 80ch; }
+
+    /* ===== Etapas ===== */
+    .etapa { scroll-margin-top: calc(var(--trail-h) + 12px); border-left: 12px solid var(--fase-cor); }
+
+    .mission { border: var(--border-medium); background: var(--surface-container-low); margin-bottom: var(--space-md); }
+    .mission-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-md); align-items: center; padding: var(--space-sm) var(--space-md); border-bottom: var(--border-medium); background: var(--background); }
+    .mission-num { font-family: var(--font-headline); font-weight: 700; font-size: 2.4rem; line-height: 1; min-width: 58px; height: 58px; display: grid; place-items: center; background: var(--fase-cor); color: var(--fase-txt); border: var(--border-medium); }
+    .mission-kicker { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--on-surface-variant); }
     .section-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--headline-size); letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+    .mission-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-md); padding: var(--space-md); }
+    .mission-body h4 { margin: 0 0 4px 0; font-family: var(--font-label); font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.08em; }
+    .mission-body ol { margin: 0; padding-left: 1.3rem; font-size: 0.92rem; }
+    .mission-body ol li { margin-bottom: 3px; }
+    .mission-miro { border: 3px dashed var(--outline); background: var(--background); padding: var(--space-sm) var(--space-md); font-size: 0.88rem; }
+    .mission-miro p { margin: 2px 0; }
+    .mission-miro h4 { color: var(--warning); }
+
+    .print-zone { position: relative; border: 3px dashed var(--outline); padding: calc(var(--space-md) + 14px) var(--space-md) var(--space-md); margin-top: var(--space-lg); background: var(--background); }
+    .print-zone::before {
+      content: attr(data-label); position: absolute; top: -13px; left: 12px; max-width: calc(100% - 24px);
+      background: var(--primary); color: var(--on-primary); font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .work-area { margin-top: var(--space-md); }
+    .sub-head { font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin: var(--space-md) 0 var(--space-xs) 0; }
+
+    .snap { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 0; border: var(--border-medium); margin-top: var(--space-sm); background: var(--primary); color: var(--on-primary); }
+    .snap-cell { padding: 4px 8px; border-right: 1px solid #334155; display: flex; flex-direction: column; }
+    .snap-cell span { font-family: var(--font-label); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; opacity: 0.85; }
+    .snap-cell strong { font-family: var(--font-mono); font-size: 0.95rem; }
+    .snap-cell.is-alarm { background: var(--secondary); }
 
     .tag {
       display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-sm);
@@ -216,10 +247,11 @@
     .tag-blue { background: var(--tertiary); color: var(--on-tertiary); }
     .tag-orange { background: var(--primary-container); }
     .tag-red { background: var(--error); color: var(--on-error); }
-    .tag-green { background: var(--positive); color: var(--on-positive); }
     .tags-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-xs); }
 
     /* Case briefing */
+    .case-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+    .case-head h3 { margin: 0; font-family: var(--font-headline); font-size: 1.3rem; }
     .case-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-lg); }
     .case-narrative { font-size: 0.95rem; margin: 0 0 var(--space-sm) 0; }
     .case-box { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm) var(--space-md); margin-bottom: var(--space-sm); }
@@ -238,18 +270,15 @@
     .gabarito ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; }
     .gabarito[hidden] { display: none; }
 
-    /* Workspace */
-    .workspace-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: var(--space-lg); align-items: start; }
-
     .scenario-banner {
-      background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); margin-bottom: var(--space-md);
+      background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-sm) var(--space-md); margin-bottom: var(--space-md);
       display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); align-items: center;
     }
 
-    .layers-pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-sm); margin-bottom: var(--space-md); }
+    .layers-pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-sm); }
     .layer-node {
       border: var(--border-thick); border-radius: var(--rounded); background: var(--background); padding: var(--space-sm); cursor: pointer; text-align: left;
-      display: flex; flex-direction: column; gap: var(--space-xs); min-height: 120px; box-shadow: var(--offset-shadow-sm); color: var(--on-surface);
+      display: flex; flex-direction: column; gap: var(--space-xs); min-height: 112px; box-shadow: var(--offset-shadow-sm); color: var(--on-surface);
       transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
     }
     .layer-node:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--outline); }
@@ -264,8 +293,7 @@
     .layer-bar > span { display: block; height: 100%; }
     .lb-rr { background: var(--tertiary); } .lb-det { background: var(--primary-container); } .lb-rec { background: var(--positive); }
 
-    .layer-inspector { border: var(--border-thick); background: var(--surface-container-low); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md); }
-    .inspector-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); border-bottom: var(--border-thick); padding-bottom: var(--space-sm); }
+    .inspector-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); border-bottom: var(--border-thick); padding-bottom: var(--space-sm); margin: var(--space-md) 0; }
     .inspector-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
     .info-box { background: var(--background); border: var(--border-medium); padding: var(--space-sm) var(--space-md); }
     .info-box h4 { margin: 0 0 var(--space-xs) 0; font-family: var(--font-label); font-size: var(--label-size); text-transform: uppercase; letter-spacing: 0.08em; color: var(--tertiary); }
@@ -281,21 +309,25 @@
     .tool-toggle.is-enabled { background: var(--note-blue); box-shadow: var(--offset-shadow-sm); }
     .tool-toggle.is-bypassed { border-color: var(--error); background: var(--note-red); }
     .tool-top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-xs); font-family: var(--font-label); font-weight: 700; font-size: 0.8rem; }
-    .tool-state-pill { font-family: var(--font-mono); font-size: 0.66rem; padding: 1px 6px; border: 1px solid var(--outline); font-weight: 700; }
+    .tool-state-pill { flex-shrink: 0; font-family: var(--font-mono); font-size: 0.66rem; padding: 1px 6px; border: 1px solid var(--outline); font-weight: 700; }
     .tool-toggle.is-enabled .tool-state-pill { background: var(--tertiary); color: var(--on-tertiary); }
     .tool-toggle.is-bypassed .tool-state-pill { background: var(--error); color: var(--on-error); }
     .tool-tactic { font-size: 0.72rem; color: var(--on-surface-variant); }
 
-    .callout-note { font-size: 0.8rem; border-left: 5px solid var(--primary-container); background: var(--note-orange); padding: var(--space-xs) var(--space-sm); margin: var(--space-xs) 0 0 0; }
+    .callout-note { font-size: 0.8rem; border-left: 5px solid var(--primary-container); background: var(--note-orange); padding: var(--space-xs) var(--space-sm); margin: var(--space-sm) 0 0 0; }
 
-    /* Tactics board */
-    .tactics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md); }
+    .breach-actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; margin-top: var(--space-md); }
+
+    /* Táticas */
+    .tactics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
     .tactic-col { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); border-top-width: 6px; }
     .tactic-col.col-rr { border-top-color: var(--tertiary); }
     .tactic-col.col-det { border-top-color: var(--primary-container); }
     .tactic-col.col-rec { border-top-color: var(--positive); }
     .tactic-col h3 { margin: 0 0 4px 0; font-family: var(--font-headline); font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
     .tactic-col h3 small { font-family: var(--font-mono); font-size: 0.72rem; }
+    .tactic-list { display: grid; gap: var(--space-xs); }
+    .tactic-list.wide { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
     .tactic-card {
       border: var(--border-medium); background: var(--background); padding: 6px var(--space-sm); text-align: left; cursor: pointer;
       display: flex; flex-direction: column; gap: 2px; color: var(--on-surface); position: relative;
@@ -315,7 +347,7 @@
     .tactic-card.is-neutralized { opacity: 0.75; border-style: dashed; }
     .tactic-card.is-neutralized .t-pill { background: var(--error); color: var(--on-error); }
 
-    /* Sticky notes */
+    /* Notas */
     .sticky-composer { display: grid; grid-template-columns: minmax(0, 1fr) 170px auto; gap: var(--space-sm); align-items: end; margin-top: var(--space-xs); }
     .sticky-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
     .sticky-note { border: var(--border-medium); box-shadow: var(--offset-shadow-sm); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); font-size: 0.85rem; }
@@ -329,19 +361,17 @@
     .modesty-rule.ok { background: var(--positive); color: var(--on-positive); }
     .modesty-rule.nok { background: var(--note-red); color: var(--error); }
 
-    /* Guardian panel */
-    .guardian-panel { display: flex; flex-direction: column; gap: var(--space-md); }
+    /* Injects, Guardião, cascata */
     .inject-list { display: flex; flex-direction: column; gap: var(--space-xs); }
-    .inject-card { border: var(--border-medium); background: var(--surface-container-low); padding: var(--space-sm); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); align-items: center; }
-    .inject-card.is-due { background: var(--note-orange); border-width: 3px; }
+    .inject-card { border: var(--border-medium); background: var(--note-orange); padding: var(--space-sm); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); align-items: center; }
     .inject-card.is-applied { background: var(--note-red); border-color: var(--error); }
-    .inject-card strong { font-family: var(--font-headline); font-size: 0.9rem; display: block; }
+    .inject-card strong { font-family: var(--font-headline); font-size: 0.95rem; display: block; }
     .inject-card .i-meta { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; }
-    .inject-card p { margin: 2px 0 0 0; font-size: 0.78rem; color: var(--on-surface-variant); }
+    .inject-card p { margin: 2px 0 0 0; font-size: 0.82rem; color: var(--on-surface-variant); }
 
-    .guardian-status-bar { padding: var(--space-sm) var(--space-md); border: var(--border-medium); display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); background: var(--surface-container); }
+    .guardian-status-bar { padding: var(--space-sm) var(--space-md); border: var(--border-medium); display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); background: var(--surface-container); margin-bottom: var(--space-sm); }
     .guardian-status-bar.is-active { background: var(--primary-container); }
-    .decision-list { display: grid; gap: var(--space-xs); }
+    .decision-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-xs); }
     .decision {
       border: var(--border-medium); background: var(--background); padding: 6px var(--space-sm); text-align: left; cursor: pointer; color: var(--on-surface);
       display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-sm); align-items: start;
@@ -354,31 +384,36 @@
     .decision span.eff { font-size: 0.74rem; color: var(--positive); font-weight: 600; display: block; }
     .decision span.cost { font-size: 0.74rem; color: var(--error); font-weight: 600; display: block; }
 
-    .scale-controls { display: flex; flex-direction: column; gap: var(--space-xs); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); }
+    .cascade-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: var(--space-lg); align-items: start; }
+    .scale-controls { display: flex; flex-direction: column; gap: var(--space-xs); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); margin-top: var(--space-sm); }
     .scale-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); }
     .scale-btn {
       min-height: 44px; padding: var(--space-xs); border: var(--border-medium); background: var(--background); color: var(--on-surface);
       font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; cursor: pointer; text-align: center;
     }
     .scale-btn.is-active { background: var(--error); color: var(--on-error); box-shadow: var(--offset-shadow-sm); }
-    .svg-cascade-frame { border: var(--border-thick); background: var(--background); padding: var(--space-sm); }
-    .modesty-callout { border: var(--border-medium); border-left: 6px solid var(--tertiary); background: var(--surface-container-low); padding: var(--space-md); font-size: 0.9rem; }
+    .modesty-callout { border: var(--border-medium); border-left: 6px solid var(--tertiary); background: var(--surface-container-low); padding: var(--space-md); font-size: 0.9rem; margin-top: var(--space-sm); }
     .modesty-callout > strong { font-family: var(--font-headline); color: var(--tertiary); }
 
-    /* Deliverables */
-    .deliv-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
-    .summary-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); margin-top: var(--space-md); align-items: start; }
-    .summary-wrap textarea { min-height: 170px; font-family: var(--font-mono); font-size: 0.75rem; }
+    .plan-box { margin-top: var(--space-md); }
+
+    /* Fechamento */
+    .summary-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); align-items: start; }
+    .summary-wrap textarea { min-height: 200px; font-family: var(--font-mono); font-size: 0.75rem; }
     .summary-actions { display: flex; flex-direction: column; gap: var(--space-xs); }
 
-    /* Charts */
+    .annex { border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background); }
+    .annex > summary { cursor: pointer; padding: var(--space-md) var(--space-lg); font-family: var(--font-headline); font-weight: 700; font-size: var(--subhead-size); list-style: none; display: flex; justify-content: space-between; gap: var(--space-sm); }
+    .annex > summary::after { content: '+ abrir'; font-family: var(--font-mono); font-size: 0.75rem; }
+    .annex[open] > summary::after { content: '− fechar'; }
+    .annex-body { padding: 0 var(--space-lg) var(--space-lg); }
     .charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-lg); }
-    .chart-card { border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm); }
+    .chart-card { border: var(--border-medium); background: var(--background); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm); }
     .chart-title { font-family: var(--font-headline); font-weight: 700; font-size: var(--subhead-size); margin: 0; padding-bottom: var(--space-xs); border-bottom: var(--border-thick); }
     .chart-caption { margin: 0; font-size: 0.8125rem; color: var(--on-surface-variant); }
     .chart-box { position: relative; width: 100%; height: 290px; }
 
-    .table-wrap { overflow-x: auto; border: var(--border-thick); box-shadow: var(--offset-shadow); background: var(--background); }
+    .table-wrap { overflow-x: auto; border: var(--border-thick); background: var(--background); }
     table.bauhaus-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     table.bauhaus-table th {
       background: var(--surface-container-high); font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase;
@@ -388,21 +423,40 @@
     table.bauhaus-table tr.is-current-row { background: var(--note-orange); font-weight: 600; }
     .num-col { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 
+    /* Onde estou? */
+    .where-dialog { border: var(--border-thick); box-shadow: var(--offset-shadow); padding: 0; width: min(1100px, 96vw); max-height: 90vh; }
+    .where-dialog::backdrop { background: rgba(15, 23, 42, 0.55); }
+    .where-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); padding: var(--space-md) var(--space-lg); border-bottom: var(--border-thick); background: var(--primary-container); position: sticky; top: 0; z-index: 2; }
+    .where-head h2 { margin: 0; font-family: var(--font-headline); font-size: var(--headline-size); }
+    .where-body { padding: var(--space-md) var(--space-lg) var(--space-lg); }
+    .where-hint { margin: 0 0 var(--space-md) 0; padding: var(--space-sm) var(--space-md); border: var(--border-medium); background: var(--note-blue); font-size: 0.92rem; }
+    .where-table td.fase-cell { border-left: 8px solid var(--fase-cor); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .where-table tr.is-here td { background: var(--note-orange); }
+    .where-table tr.is-done td:not(.fase-cell) { color: var(--on-surface-variant); }
+    .here-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; background: var(--secondary); color: #fff; padding: 1px 6px; margin-left: 4px; }
+    .where-table input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--positive); }
+
     .footer-sources { border-top: var(--rule-heavy); padding-top: var(--space-md); font-size: 0.8125rem; color: var(--on-surface-variant); display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-md); }
 
     @media (max-width: 1100px) {
-      .masthead, .timer-strip, .workspace-grid, .case-grid, .charts-grid { grid-template-columns: 1fr; }
-      .layers-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .tactics-grid, .deliv-grid { grid-template-columns: 1fr 1fr; }
-      .time-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .masthead, .case-grid, .charts-grid, .cascade-grid, .mission-body { grid-template-columns: 1fr; }
+      .layers-pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .metrics-bar { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      :root { --trail-h: 190px; }
     }
-    @media (max-width: 640px) {
+    @media (max-width: 760px) {
       .page-grid { padding: var(--space-sm); gap: var(--space-md); }
-      .kpi-grid, .block-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .layers-pipeline, .inspector-grid, .sticky-composer, .tactics-grid, .deliv-grid, .summary-wrap, .scenario-banner { grid-template-columns: 1fr; }
-      .scale-steps, .time-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .trail { position: static; }
+      .fab-where { display: inline-flex; }
+      .etapa { scroll-margin-top: 12px; border-left-width: 6px; }
+      .layers-pipeline, .inspector-grid, .sticky-composer, .tactics-grid, .summary-wrap, .scenario-banner, .decision-list, .dyn-divider { grid-template-columns: 1fr; }
+      .layers-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scale-steps, .metrics-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .mission-top { grid-template-columns: auto minmax(0, 1fr); }
+      .mission-top .btn { grid-column: 1 / -1; }
     }
     @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
       *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
     }
   </style>
@@ -410,21 +464,30 @@
 <body>
   <div class="page-grid">
 
-    <!-- 1. MASTHEAD -->
+    <!-- ================= MASTHEAD ================= -->
     <header class="masthead">
       <div>
-        <span class="kicker">Turma T35 · 26/11/2026 · Ferramentas e Tecnologia Cyber · v2</span>
+        <span class="kicker">Turma T35 · 26/11/2026 · Ferramentas e Tecnologia Cyber · v3</span>
         <h1 class="title">Quadro Interativo de <mark>Cibersegurança</mark> &amp; Arquitetura</h1>
         <p class="subtitle">
           Continuação do War Room. Dinâmica 1: mapear as 5 camadas e as ferramentas. Dinâmica 2: Exercício da Modéstia, que parte do princípio de que o perímetro <em>será</em> suplantado e pergunta quais decisões de arquitetura reduzem o estrago.
         </p>
+        <div class="how-to">
+          <strong>Como usar este quadro</strong>
+          <ol>
+            <li>Escolham o estudo de caso (EC) do grupo no seletor de EC.</li>
+            <li>Sigam as etapas <strong>na ordem</strong>, de cima para baixo. Cada etapa abre com um cartão: <strong>O que fazer</strong> e <strong>📸 Para o Miro</strong>.</li>
+            <li>Tirem print da <strong>área tracejada</strong> indicada e colem no frame do Miro que aparece no rótulo.</li>
+            <li>Perdidos? Cliquem em <strong>Onde estou?</strong> na barra do topo.</li>
+          </ol>
+        </div>
         <div class="equation">Infra forte ≠ Suficiente &nbsp;⇒&nbsp; Dano ≈ Blast Radius × (MTTD + MTTR)</div>
       </div>
 
       <div class="controls-cluster">
         <div class="control-row">
           <div class="field-group">
-            <label class="field-label" for="setorSelect">Estudo de Caso (?setor=)</label>
+            <label class="field-label" for="setorSelect">Estudo de Caso do grupo (?setor=)</label>
             <select id="setorSelect" class="bauhaus-select" onchange="handleSetorChange(this.value)">
               <option value="banking">EC 1 · Banking &amp; Sistema Financeiro</option>
               <option value="saude">EC 2 · Hospital &amp; Rede de Saúde</option>
@@ -433,6 +496,14 @@
               <option value="transporte">EC 5 · Transporte &amp; Logística Urbana</option>
             </select>
           </div>
+        </div>
+        <div class="control-row">
+          <button type="button" class="btn btn-orange" onclick="abrirOndeEstou()">
+            <i data-lucide="map-pin" aria-hidden="true"></i> Onde estou?
+          </button>
+          <button type="button" class="btn" onclick="exportarCSV()">
+            <i data-lucide="download" aria-hidden="true"></i> CSV
+          </button>
           <button type="button" id="btnProfessor" class="btn" onclick="toggleProfessor()">
             <i data-lucide="lock" aria-hidden="true"></i>
             <span id="btnProfessorTxt">Modo Professor</span>
@@ -446,279 +517,189 @@
           <button type="submit" id="btnProfOk" class="btn btn-prof-on"><i data-lucide="key-round" aria-hidden="true"></i> Desbloquear</button>
           <button type="button" class="btn" onclick="fecharUnlock()">Cancelar</button>
         </form>
-        <div class="control-row">
-          <button type="button" class="btn btn-primary" onclick="simularSuplantamentoGlobal()">
-            <i data-lucide="zap" aria-hidden="true"></i> Simular Suplantamento
-          </button>
-          <button type="button" class="btn" onclick="restaurarDefesasSetor()">
-            <i data-lucide="rotate-ccw" aria-hidden="true"></i> Restaurar Camadas
-          </button>
-          <button type="button" class="btn" onclick="exportarCSV()">
-            <i data-lucide="download" aria-hidden="true"></i> CSV
-          </button>
-        </div>
-        <div id="feedback" class="inline-feedback" role="status" aria-live="polite"></div>
       </div>
     </header>
 
-    <!-- 2. TIMER 90 MIN (4 BLOCOS) -->
-    <section class="timer-strip" aria-label="Cronômetro da aula de 90 minutos">
-      <div class="timer-readout-wrap">
-        <div id="timerDisplay" class="timer-digits">15:00</div>
-        <div class="timer-meta">
-          <h2 id="timerBlockTitle" class="timer-block-title">Bloco 1 · Provocação</h2>
-          <span id="timerStatusText" class="timer-status-badge">AULA 90 MIN · PAUSADO</span>
-        </div>
+    <!-- ================= TRILHA FIXA ================= -->
+    <nav class="trail" aria-label="Etapas da aula e métricas do EC">
+      <div class="trail-row">
+        <div id="trailPills" class="trail-pills"></div>
+        <button type="button" class="btn btn-sm btn-orange where-btn" onclick="abrirOndeEstou()"><i data-lucide="map-pin" aria-hidden="true"></i> Onde estou?</button>
       </div>
-      <div class="timer-blocks-progress">
-        <div class="block-tabs" aria-label="Blocos da aula">
-          <button type="button" id="tabBloco1" class="block-tab" onclick="selecionarBlocoTimer(1)"><span>1 · Provocação</span><small>15 min</small></button>
-          <button type="button" id="tabBloco2" class="block-tab" onclick="selecionarBlocoTimer(2)"><span>2 · D1 Mapeamento</span><small>25 min</small></button>
-          <button type="button" id="tabBloco3" class="block-tab" onclick="selecionarBlocoTimer(3)"><span>3 · D2 Modéstia + Injects</span><small>30 min</small></button>
-          <button type="button" id="tabBloco4" class="block-tab" onclick="selecionarBlocoTimer(4)"><span>4 · Cascata &amp; Fechamento</span><small>20 min</small></button>
-        </div>
-        <div class="progress-label-row">
-          <span id="blockProgressLabel">Bloco 1: 0%</span>
-          <span id="globalProgressLabel">Aula: min 0 de 90</span>
-        </div>
-        <div class="progress-track-global">
-          <div class="progress-seg"><div id="progSeg1" class="progress-seg-fill fill-b1"></div></div>
-          <div class="progress-seg"><div id="progSeg2" class="progress-seg-fill fill-b2"></div></div>
-          <div class="progress-seg"><div id="progSeg3" class="progress-seg-fill fill-b3"></div></div>
-          <div class="progress-seg"><div id="progSeg4" class="progress-seg-fill fill-b4"></div></div>
-        </div>
+      <div class="metrics-bar" aria-label="Métricas do EC">
+        <div class="m-cell c-rr"><span class="lbl">Resist./Reagir</span><span id="kpiRrVal" class="val">—</span><span id="kpiRrCap" class="hint"></span></div>
+        <div class="m-cell c-det"><span class="lbl">Detectar</span><span id="kpiDetVal" class="val">—</span><span class="hint">sinais além do perímetro</span></div>
+        <div class="m-cell c-rec"><span class="lbl">Recuperar</span><span id="kpiRecVal" class="val">—</span><span class="hint">voltar com dado confiável</span></div>
+        <div class="m-cell c-blast"><span class="lbl">Raio de impacto</span><span id="kpiBlastVal" class="val">—</span><span id="kpiBlastCap" class="hint"></span></div>
+        <div class="m-cell c-time"><span class="lbl">MTTD · perceber</span><span id="tMTTD" class="val">—</span><span class="hint">puxado por Detectar</span></div>
+        <div class="m-cell c-time"><span class="lbl">MTTR · conter</span><span id="tMTTR" class="val">—</span><span class="hint">puxado por Reagir</span></div>
+        <div class="m-cell c-time"><span class="lbl">RTO · voltar</span><span id="tRTO" class="val">—</span><span class="hint">puxado por Recuperar</span></div>
+        <div class="m-cell c-time" id="cellRPO"><span class="lbl">RPO · dado perdido</span><span id="tRPO" class="val">—</span><span id="tRPOhint" class="hint">janela de perda</span></div>
+        <div class="m-cell c-time"><span class="lbl">Índice de dano</span><span id="tDano" class="val">—</span><span class="hint">Blast × (MTTD+MTTR)</span></div>
       </div>
-      <div class="timer-actions">
-        <button type="button" id="btnTimerStart" class="btn btn-primary" onclick="iniciarTimer()"><i data-lucide="play" aria-hidden="true"></i> Iniciar</button>
-        <button type="button" id="btnTimerPause" class="btn" onclick="pausarTimer()" disabled><i data-lucide="pause" aria-hidden="true"></i> Pausar</button>
-        <button type="button" class="btn btn-danger" onclick="resetarTimer()"><i data-lucide="refresh-cw" aria-hidden="true"></i> Resetar</button>
-      </div>
-    </section>
+    </nav>
 
-    <!-- 3. KPIs (Resistir/Reagir · Detectar · Recuperar · Blast) -->
-    <section class="kpi-grid" aria-label="Indicadores das táticas">
-      <article class="kpi-card kpi-rr">
-        <div class="kpi-head"><span>Resistir / Reagir</span><i data-lucide="shield" aria-hidden="true"></i></div>
-        <div id="kpiRrVal" class="kpi-value">0%</div>
-        <p id="kpiRrCap" class="kpi-caption">Barreiras + contenção ativa</p>
-      </article>
-      <article class="kpi-card kpi-det">
-        <div class="kpi-head"><span>Detectar</span><i data-lucide="radar" aria-hidden="true"></i></div>
-        <div id="kpiDetVal" class="kpi-value">0%</div>
-        <p id="kpiDetCap" class="kpi-caption">Sinais que o perímetro não vê</p>
-      </article>
-      <article class="kpi-card kpi-rec">
-        <div class="kpi-head"><span>Recuperar</span><i data-lucide="history" aria-hidden="true"></i></div>
-        <div id="kpiRecVal" class="kpi-value">0%</div>
-        <p id="kpiRecCap" class="kpi-caption">Capacidade de voltar com dado confiável</p>
-      </article>
-      <article class="kpi-card kpi-blast">
-        <div class="kpi-head"><span>Raio de Impacto</span><i data-lucide="flame" aria-hidden="true"></i></div>
-        <div id="kpiBlastVal" class="kpi-value">0%</div>
-        <p id="kpiBlastCap" class="kpi-caption">Severidade e propagação</p>
-      </article>
-    </section>
-
-    <!-- 3b. TEMPO: MTTD / MTTR / RTO / RPO / DANO -->
-    <section class="time-strip" aria-label="Métricas de tempo do incidente">
-      <div class="time-cell"><span class="lbl">MTTD · até perceber</span><span id="tMTTD" class="val">—</span><span class="hint">puxado por Detectar</span></div>
-      <div class="time-cell"><span class="lbl">MTTR · até conter</span><span id="tMTTR" class="val">—</span><span class="hint">puxado por Reagir</span></div>
-      <div class="time-cell"><span class="lbl">RTO · até voltar</span><span id="tRTO" class="val">—</span><span class="hint">puxado por Recuperar</span></div>
-      <div class="time-cell" id="cellRPO"><span class="lbl">RPO · dado perdido</span><span id="tRPO" class="val">—</span><span id="tRPOhint" class="hint">janela de perda</span></div>
-      <div class="time-cell"><span class="lbl">Índice de Dano</span><span id="tDano" class="val">—</span><span class="hint">Blast × (MTTD + MTTR)</span></div>
-    </section>
-
-    <!-- 4. ESTUDO DE CASO (BRIEFING F0) -->
-    <section class="block" aria-label="Estudo de caso do grupo">
-      <div class="section-open accent-orange">
-        <div>
-          <span class="section-kicker">Frame F0 · Briefing do Estudo de Caso</span>
-          <h2 class="section-title" id="casoTitulo">—</h2>
-        </div>
-        <div style="display:flex; gap: var(--space-xs); flex-wrap: wrap;">
-          <span id="casoSegmento" class="tag tag-blue">B2C</span>
-          <span id="cenarioBadge" class="tag">—</span>
-        </div>
+    <!-- ================= ABERTURA ================= -->
+    <div class="dyn-divider fase-abertura">
+      <div class="dyn-big">Abertura</div>
+      <div>
+        <div class="dyn-meta">Bloco 1 · 15 min · Frame F0</div>
+        <h2 class="dyn-title">O caso do grupo</h2>
+        <p class="dyn-desc">Depois da provocação do professor, cada grupo lê o seu estudo de caso e prepara o frame F0 do Miro.</p>
       </div>
-      <div class="case-grid">
-        <div>
-          <p id="casoNarrativa" class="case-narrative"></p>
-          <div class="case-box is-red"><h4>O que a infraestrutura viu</h4><p id="casoInfraViu"></p></div>
-          <div class="case-box is-question"><h4>Pergunta motriz</h4><p id="casoPergunta"></p></div>
-          <div class="case-box"><h4>Dilema de War Room (Frame F5)</h4><p id="casoDilema"></p></div>
+    </div>
+
+    <section id="etapa-0" class="block etapa fase-abertura" data-etapa="0" aria-labelledby="titulo-etapa-0">
+      <div class="mission" data-mission="0"></div>
+      <div class="print-zone" data-frame="F0">
+        <div class="case-head">
+          <h3 id="casoTitulo">—</h3>
+          <div class="tags-row" style="margin:0;">
+            <span id="casoSegmento" class="tag tag-blue">B2C</span>
+            <span id="cenarioBadge" class="tag">—</span>
+          </div>
         </div>
-        <div>
-          <div class="case-box is-green"><h4>Sinais fracos disponíveis</h4><ul id="casoSinais"></ul></div>
-          <div class="case-box">
-            <h4>Quadro do grupo no Miro</h4>
-            <div style="display:grid; gap: var(--space-xs);">
-              <input type="url" id="miroUrl" class="bauhaus-input" placeholder="Cole aqui o link do board Miro do grupo" oninput="salvarMiroUrl(this.value)">
-              <div style="display:flex; gap: var(--space-xs); flex-wrap: wrap;">
-                <button type="button" class="btn btn-sm btn-orange" onclick="abrirMiro()"><i data-lucide="external-link" aria-hidden="true"></i> Abrir Miro</button>
-                <button type="button" class="btn btn-sm" onclick="copiarLinkSetor()"><i data-lucide="link" aria-hidden="true"></i> Link deste EC</button>
-              </div>
+        <div class="case-grid">
+          <div>
+            <p id="casoNarrativa" class="case-narrative"></p>
+            <div class="case-box is-red"><h4>O que a infraestrutura viu</h4><p id="casoInfraViu"></p></div>
+            <div class="case-box is-question"><h4>Pergunta motriz</h4><p id="casoPergunta"></p></div>
+            <div class="case-box"><h4>Dilema de War Room (volta na Etapa 7)</h4><p class="js-dilema"></p></div>
+          </div>
+          <div>
+            <div class="case-box is-green"><h4>Sinais fracos disponíveis</h4><ul id="casoSinais"></ul></div>
+            <div id="gabaritoBox" class="gabarito" hidden>
+              <h4>Gabarito do professor</h4>
+              <ul id="casoGabarito"></ul>
             </div>
           </div>
-          <div id="gabaritoBox" class="gabarito" hidden>
-            <h4>Gabarito do professor</h4>
-            <ul id="casoGabarito"></ul>
+        </div>
+      </div>
+      <div class="case-box work-area">
+        <h4>Quadro do grupo no Miro</h4>
+        <div style="display:grid; gap: var(--space-xs);">
+          <input type="url" id="miroUrl" class="bauhaus-input" placeholder="Cole aqui o link do board Miro do grupo" oninput="salvarMiroUrl(this.value)">
+          <div class="btn-row">
+            <button type="button" class="btn btn-sm btn-orange" onclick="abrirMiro()"><i data-lucide="external-link" aria-hidden="true"></i> Abrir Miro</button>
+            <button type="button" class="btn btn-sm" onclick="copiarLinkSetor()"><i data-lucide="link" aria-hidden="true"></i> Copiar link deste EC (para o F0)</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 5. WORKSPACE -->
-    <div class="workspace-grid">
-      <!-- LEFT: D1 · 5 camadas + ferramentas -->
-      <section class="block" aria-label="Dinâmica 1 — 5 camadas">
-        <div class="section-open">
-          <div>
-            <span class="section-kicker">Dinâmica 1 · Frames F1–F2 · Infra (Autoestudos 1–4)</span>
-            <h2 class="section-title" id="cenarioTitulo">—</h2>
-          </div>
-        </div>
+    <!-- ================= DINÂMICA 1 ================= -->
+    <div class="dyn-divider fase-d1">
+      <div class="dyn-big">Dinâmica 1</div>
+      <div>
+        <div class="dyn-meta">Bloco 2 · 25 min · Frames F1–F2 · Autoestudos 1–4</div>
+        <h2 class="dyn-title">Infraestrutura: o que as camadas e as ferramentas seguram</h2>
+        <p class="dyn-desc">Mapear as 5 camadas, posicionar as ferramentas e descobrir por onde o ataque passa sem disparar alarme.</p>
+      </div>
+    </div>
+
+    <section id="etapa-1" class="block etapa fase-d1" data-etapa="1" aria-labelledby="titulo-etapa-1">
+      <div class="mission" data-mission="1"></div>
+      <div class="print-zone" data-frame="F1">
         <div class="scenario-banner">
           <div>
-            <strong id="cenarioSubtitulo"></strong>
+            <strong id="cenarioTitulo"></strong>
+            <div id="cenarioSubtitulo" style="font-size:0.85rem; color: var(--on-surface-variant);"></div>
             <div id="cenarioTags" class="tags-row"></div>
           </div>
-          <div style="text-align: right;">
-            <span class="field-label" style="display:block;">Camadas suplantadas</span>
-            <strong id="breachedCountBadge" style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--error);">0 / 5</strong>
-          </div>
         </div>
-
-        <div id="layersPipeline" class="layers-pipeline" role="group" aria-label="Cinco camadas"></div>
-
-        <div class="layer-inspector">
-          <div class="inspector-header">
-            <div>
-              <span id="inspLayerTag" class="tag tag-orange">Camada</span>
-              <h3 id="inspLayerTitle" style="margin: 4px 0 0 0; font-family: var(--font-headline); font-size: 1.2rem;"></h3>
-            </div>
-            <button type="button" class="btn btn-danger" onclick="toggleBreachCamadaAtual()">
-              <i data-lucide="alert-triangle" aria-hidden="true"></i><span id="btnBreachLabel">Suplantar camada</span>
-            </button>
-          </div>
-          <div class="inspector-grid">
-            <div class="info-box"><h4>Pontos de controle, usuários &amp; fluxo</h4><ul id="inspControlesList"></ul></div>
-            <div class="info-box is-threat"><h4>Vulnerabilidades &amp; vetores</h4><ul id="inspAmeacasList"></ul></div>
-          </div>
+        <div class="layers-pipeline js-pipeline" role="group" aria-label="Cinco camadas"></div>
+        <div class="inspector-header">
           <div>
-            <span class="field-label" style="display:block; margin-bottom: var(--space-xs);">Ferramentas de infraestrutura nesta camada (clique para ligar/desligar)</span>
-            <div id="toolsGrid" class="tools-grid"></div>
-            <p class="callout-note">Ferramenta sem tática rende pouco: os sinais de IDS, Honeypot e SIEM valem só <strong>metade</strong> em Detectar se nenhuma tática de detecção atua na camada. Nenhuma ferramenta soma em Recuperar.</p>
+            <span id="inspLayerTag" class="tag tag-orange">Camada</span>
+            <h3 id="inspLayerTitle" style="margin: 4px 0 0 0; font-family: var(--font-headline); font-size: 1.2rem;"></h3>
           </div>
         </div>
-      </section>
-
-      <!-- RIGHT: D2 · Injects, Guardião, Cascata -->
-      <aside class="block guardian-panel" aria-label="Dinâmica 2 — Modéstia e escala">
-        <div class="section-open accent-red">
-          <div>
-            <span class="section-kicker">Dinâmica 2 · Modéstia &amp; War Room</span>
-            <h2 class="section-title">Injects, Decisões &amp; Cascata</h2>
-          </div>
+        <div class="inspector-grid">
+          <div class="info-box"><h4>Pontos de controle, usuários &amp; fluxo</h4><ul id="inspControlesList"></ul></div>
+          <div class="info-box is-threat"><h4>Vulnerabilidades &amp; vetores</h4><ul id="inspAmeacasList"></ul></div>
         </div>
+      </div>
+    </section>
 
-        <div>
-          <span class="field-label" style="display:block; margin-bottom: var(--space-xs);">Injects do professor (Bloco 3)</span>
-          <div id="injectList" class="inject-list"></div>
+    <section id="etapa-2" class="block etapa fase-d1" data-etapa="2" aria-labelledby="titulo-etapa-2">
+      <div class="mission" data-mission="2"></div>
+      <div class="print-zone" data-frame="F1">
+        <span class="sub-head" style="margin-top:0;">Camadas (clique para escolher onde mexer)</span>
+        <div class="layers-pipeline js-pipeline" role="group" aria-label="Cinco camadas"></div>
+        <span class="sub-head">Ferramentas na camada <span class="js-layer-name" style="background: var(--primary-container); padding: 0 6px;"></span> (clique para ligar/desligar)</span>
+        <div id="toolsGrid" class="tools-grid"></div>
+        <p class="callout-note">Ferramenta sem tática rende pouco: os sinais de IDS, Honeypot e SIEM valem só <strong>metade</strong> em Detectar se nenhuma tática de detecção atua na camada. Nenhuma ferramenta soma em Recuperar.</p>
+      </div>
+      <div class="field-group plan-box">
+        <label class="field-label" for="planoSpof">✍️ SPOF / vulnerabilidade-chave (vai para o F1 e para o resumo final)</label>
+        <textarea id="planoSpof" class="bauhaus-textarea" oninput="salvarPlano('spof', this.value)" placeholder="Onde um único ponto derruba tudo?"></textarea>
+      </div>
+    </section>
+
+    <section id="etapa-3" class="block etapa fase-d1" data-etapa="3" aria-labelledby="titulo-etapa-3">
+      <div class="mission" data-mission="3"></div>
+      <div class="breach-actions">
+        <button type="button" class="btn btn-primary" onclick="simularSuplantamentoGlobal()"><i data-lucide="zap" aria-hidden="true"></i> Simular suplantamento</button>
+        <button type="button" class="btn btn-danger" onclick="toggleBreachCamadaAtual()"><i data-lucide="alert-triangle" aria-hidden="true"></i> <span id="btnBreachLabel">Suplantar camada selecionada</span></button>
+        <button type="button" class="btn" onclick="restaurarDefesasSetor()"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Restaurar camadas</button>
+      </div>
+      <div class="print-zone" data-frame="F2">
+        <div style="display:flex; justify-content: space-between; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-sm);">
+          <span class="field-label">Camadas suplantadas · selecionada: <span class="js-layer-name"></span></span>
+          <strong id="breachedCountBadge" style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--error);">0 / 5</strong>
         </div>
-
-        <div id="guardianStatusBar" class="guardian-status-bar">
-          <div>
-            <strong id="guardianModeHeading" style="font-family: var(--font-headline); display:block;">Guardião Cibernético: desligado</strong>
-            <span id="guardianModeDesc" style="font-size: 0.8rem;">Ligar não melhora nada sozinho: libera decisões de War Room, cada uma com custo.</span>
-          </div>
-          <button type="button" id="btnGuardian" class="btn btn-sm btn-orange" onclick="toggleGuardian()">Ligar</button>
-        </div>
-        <div id="decisionList" class="decision-list"></div>
-
-        <div class="scale-controls">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm);">
-            <span class="field-label">Escala do incidente (1–4)</span>
-            <span id="escalaReadout" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.8rem;"></span>
-          </div>
-          <div class="scale-steps">
-            <button type="button" id="scaleBtn1" class="scale-btn" onclick="selecionarEscala(1)">1 · Local<br><small>Endpoint</small></button>
-            <button type="button" id="scaleBtn2" class="scale-btn" onclick="selecionarEscala(2)">2 · Rede<br><small>LAN / IHC</small></button>
-            <button type="button" id="scaleBtn3" class="scale-btn" onclick="selecionarEscala(3)">3 · Setorial<br><small>BD / Core</small></button>
-            <button type="button" id="scaleBtn4" class="scale-btn" onclick="selecionarEscala(4)">4 · Terror<br><small>Cascata</small></button>
-          </div>
-        </div>
-
-        <div class="svg-cascade-frame">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-xs);">
-            <span class="field-label">Frame F6 · Cascata intersetorial</span>
-            <span id="cascadeSeverityTag" class="tag tag-orange">—</span>
-          </div>
-          <svg id="cascadeSvg" viewBox="0 0 460 280" width="100%" height="260" role="img" aria-label="Grafo de propagação entre os 5 estudos de caso">
-            <line x1="230" y1="48" x2="380" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="230" y1="48" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="380" y1="124" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="380" y1="124" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="80" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="135" y1="229" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
-            <line x1="230" y1="48" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
-            <line x1="380" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
-            <circle id="svgBlastRing" cx="230" cy="48" r="46" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-dasharray="5 3" opacity="0.75"/>
-            <g id="node-banking" style="cursor:pointer;" onclick="handleSetorChange('banking')">
-              <rect x="165" y="24" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
-              <text x="230" y="45" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 1 · BANKING</text>
-              <text id="svgRisk-banking" x="230" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
-            </g>
-            <g id="node-saude" style="cursor:pointer;" onclick="handleSetorChange('saude')">
-              <rect x="15" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
-              <text x="80" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 2 · HOSPITAL</text>
-              <text id="svgRisk-saude" x="80" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
-            </g>
-            <g id="node-energia" style="cursor:pointer;" onclick="handleSetorChange('energia')">
-              <rect x="315" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
-              <text x="380" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 4 · ENERGIA</text>
-              <text id="svgRisk-energia" x="380" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
-            </g>
-            <g id="node-policia" style="cursor:pointer;" onclick="handleSetorChange('policia')">
-              <rect x="70" y="205" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
-              <text x="135" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 3 · POLÍCIA</text>
-              <text id="svgRisk-policia" x="135" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
-            </g>
-            <g id="node-transporte" style="cursor:pointer;" onclick="handleSetorChange('transporte')">
-              <rect x="260" y="205" width="135" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
-              <text x="327" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 5 · TRANSPORTE</text>
-              <text id="svgRisk-transporte" x="327" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
-            </g>
-          </svg>
-        </div>
-
+        <div class="layers-pipeline js-pipeline" role="group" aria-label="Cinco camadas"></div>
+        <span class="sub-head">Linha do tempo: T0 (entrada) → perceber → conter → voltar</span>
+        <div class="snap" data-snap></div>
         <div class="modesty-callout">
           <strong>Princípio da Modéstia (Assume Breach)</strong>
           <p id="modestyDiagnosis" style="margin: 6px 0 0 0;"></p>
         </div>
-      </aside>
+      </div>
+      <div class="field-group plan-box">
+        <label class="field-label" for="planoAtaque">✍️ Plano de suplantamento (F2)</label>
+        <textarea id="planoAtaque" class="bauhaus-textarea" oninput="salvarPlano('ataque', this.value)" placeholder="Como o atacante passa pelas barreiras sem disparar alarme? Em que camada?"></textarea>
+      </div>
+    </section>
+
+    <!-- ================= DINÂMICA 2 ================= -->
+    <div class="dyn-divider fase-d2">
+      <div class="dyn-big">Dinâmica 2</div>
+      <div>
+        <div class="dyn-meta">Bloco 3 · 30 min · Frames F3–F5 · Bass et al.</div>
+        <h2 class="dyn-title">Exercício da Modéstia: o perímetro já caiu</h2>
+        <p class="dyn-desc"><strong>Não restaurem as camadas.</strong> A partir daqui, o trabalho é encurtar o tempo até perceber, conter e voltar, com táticas de arquitetura que continuam funcionando quando o perímetro cai (olham comportamento, plausibilidade e tempo, não assinaturas).</p>
+      </div>
     </div>
 
-    <!-- 6. TÁTICAS ARQUITETURAIS (Frames F3–F4) -->
-    <section class="block" aria-label="Táticas arquiteturais">
-      <div class="section-open accent-green">
-        <div>
-          <span class="section-kicker">Dinâmica 2 · Frames F3–F4 · Táticas de Arquitetura (Bass et al.)</span>
-          <h2 class="section-title">Decisões de arquitetura: Resistir/Reagir · Detectar · Recuperar</h2>
+    <section id="etapa-4" class="block etapa fase-d2" data-etapa="4" aria-labelledby="titulo-etapa-4">
+      <div class="mission" data-mission="4"></div>
+      <div class="print-zone" data-frame="F3">
+        <div class="tactic-col col-det">
+          <h3>Detectar <small id="cntDet">0</small></h3>
+          <div id="tacticsDet" class="tactic-list wide"></div>
         </div>
-        <span class="tag">Camada selecionada: <span id="tacticLayerLabel" style="margin-left:4px;">—</span></span>
+        <p style="margin: var(--space-sm) 0 0 0; font-size: 0.8rem; color: var(--on-surface-variant);">Camada selecionada em destaque: <strong class="js-layer-short"></strong>. Táticas valem para o EC inteiro e atuam nas camadas indicadas.</p>
+        <div class="snap" data-snap></div>
       </div>
-      <p style="margin: 0 0 var(--space-md) 0; font-size: 0.9rem; color: var(--on-surface-variant);">
-        Táticas valem para o EC inteiro e atuam nas camadas indicadas (a camada selecionada aparece em destaque). Ao contrário das ferramentas, elas <strong>continuam funcionando quando o perímetro cai</strong>, porque olham comportamento, plausibilidade e tempo, e não assinaturas.
-      </p>
-      <div class="tactics-grid">
-        <div class="tactic-col col-rr"><h3>Resistir / Reagir <small id="cntRr">0</small></h3><div id="tacticsRr" style="display:grid; gap:var(--space-xs);"></div></div>
-        <div class="tactic-col col-det"><h3>Detectar <small id="cntDet">0</small></h3><div id="tacticsDet" style="display:grid; gap:var(--space-xs);"></div></div>
-        <div class="tactic-col col-rec"><h3>Recuperar <small id="cntRec">0</small></h3><div id="tacticsRec" style="display:grid; gap:var(--space-xs);"></div></div>
+      <div class="field-group plan-box">
+        <label class="field-label" for="planoDeteccao">✍️ Plano de detecção · MTTD (F3)</label>
+        <textarea id="planoDeteccao" class="bauhaus-textarea" oninput="salvarPlano('deteccao', this.value)" placeholder="Que sinal, em que camada, em quanto tempo?"></textarea>
       </div>
+    </section>
 
-      <div style="border-top: var(--border-medium); padding-top: var(--space-sm); margin-top: var(--space-md);">
+    <section id="etapa-5" class="block etapa fase-d2" data-etapa="5" aria-labelledby="titulo-etapa-5">
+      <div class="mission" data-mission="5"></div>
+      <div class="print-zone" data-frame="F4">
+        <div class="tactics-grid">
+          <div class="tactic-col col-rr"><h3>Resistir / Reagir <small id="cntRr">0</small></h3><div id="tacticsRr" class="tactic-list"></div></div>
+          <div class="tactic-col col-rec"><h3>Recuperar <small id="cntRec">0</small></h3><div id="tacticsRec" class="tactic-list"></div></div>
+        </div>
+        <div class="snap" data-snap></div>
+      </div>
+      <div style="border-top: var(--border-medium); padding-top: var(--space-sm); margin-top: var(--space-lg);">
         <div style="display:flex; justify-content: space-between; align-items: center; gap: var(--space-sm); flex-wrap: wrap;">
-          <span class="field-label">Notas do grupo (espelho dos stickies do Miro)</span>
+          <span class="field-label">Notas do grupo (espelho dos stickies do Miro · F3 e F4)</span>
           <span id="modestyRule" class="modesty-rule nok">Regra da Modéstia 1:2</span>
         </div>
         <div class="sticky-composer">
@@ -738,25 +719,114 @@
         </div>
         <div id="stickyBoard" class="sticky-board"></div>
       </div>
+      <div class="field-group plan-box">
+        <label class="field-label" for="planoRecuperacao">✍️ Plano de recuperação · RTO/RPO (F4)</label>
+        <textarea id="planoRecuperacao" class="bauhaus-textarea" oninput="salvarPlano('recuperacao', this.value)" placeholder="Como voltam, em quanto tempo, perdendo o quê? Qual o modo degradado?"></textarea>
+      </div>
     </section>
 
-    <!-- 7. ENTREGÁVEIS -->
-    <section class="block" aria-label="Entregáveis do grupo">
-      <div class="section-open">
+    <section id="etapa-6" class="block etapa fase-d2" data-etapa="6" aria-labelledby="titulo-etapa-6">
+      <div class="mission" data-mission="6"></div>
+      <div class="print-zone" data-frame="F3–F4">
+        <div id="injectList12" class="inject-list"></div>
+        <div class="snap" data-snap></div>
+      </div>
+    </section>
+
+    <section id="etapa-7" class="block etapa fase-d2" data-etapa="7" aria-labelledby="titulo-etapa-7">
+      <div class="mission" data-mission="7"></div>
+      <div class="print-zone" data-frame="F5">
+        <div class="case-box is-question"><h4>Dilema de War Room</h4><p class="js-dilema"></p></div>
+        <div id="guardianStatusBar" class="guardian-status-bar">
+          <div>
+            <strong id="guardianModeHeading" style="font-family: var(--font-headline); display:block;">Guardião Cibernético: desligado</strong>
+            <span id="guardianModeDesc" style="font-size: 0.8rem;"></span>
+          </div>
+          <button type="button" id="btnGuardian" class="btn btn-sm btn-orange" onclick="toggleGuardian()">Ligar</button>
+        </div>
+        <div id="decisionList" class="decision-list"></div>
+        <div class="snap" data-snap></div>
+      </div>
+    </section>
+
+    <!-- ================= FECHAMENTO ================= -->
+    <div class="dyn-divider fase-fech">
+      <div class="dyn-big">Fechamento</div>
+      <div>
+        <div class="dyn-meta">Bloco 4 · 20 min · Frame F6 + pitch de 2 min</div>
+        <h2 class="dyn-title">Cascata intersetorial e síntese</h2>
+        <p class="dyn-desc">O incidente de um EC atinge os outros. Depois, cada grupo consolida o que produziu e apresenta.</p>
+      </div>
+    </div>
+
+    <section id="etapa-8" class="block etapa fase-fech" data-etapa="8" aria-labelledby="titulo-etapa-8">
+      <div class="mission" data-mission="8"></div>
+      <div class="cascade-grid">
         <div>
-          <span class="section-kicker">Entregáveis do Grupo · para colar no Miro</span>
-          <h2 class="section-title">SPOF, suplantamento, detecção e recuperação</h2>
+          <div id="injectList3" class="inject-list"></div>
+          <div class="scale-controls">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm);">
+              <span class="field-label">Escala do incidente (1–4)</span>
+              <span id="escalaReadout" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.8rem;"></span>
+            </div>
+            <div class="scale-steps">
+              <button type="button" id="scaleBtn1" class="scale-btn" onclick="selecionarEscala(1)">1 · Local<br><small>Endpoint</small></button>
+              <button type="button" id="scaleBtn2" class="scale-btn" onclick="selecionarEscala(2)">2 · Rede<br><small>LAN / IHC</small></button>
+              <button type="button" id="scaleBtn3" class="scale-btn" onclick="selecionarEscala(3)">3 · Setorial<br><small>BD / Core</small></button>
+              <button type="button" id="scaleBtn4" class="scale-btn" onclick="selecionarEscala(4)">4 · Terror<br><small>Cascata</small></button>
+            </div>
+          </div>
+        </div>
+        <div class="print-zone" data-frame="F6" style="margin-top:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-xs);">
+            <span class="field-label">Cascata intersetorial</span>
+            <span id="cascadeSeverityTag" class="tag tag-orange">—</span>
+          </div>
+          <svg id="cascadeSvg" viewBox="0 0 460 280" width="100%" height="270" role="img" aria-label="Grafo de propagação entre os 5 estudos de caso">
+            <line x1="230" y1="48" x2="380" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="230" y1="48" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="380" y1="124" x2="80" y2="124" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="380" y1="124" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="80" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="135" y1="229" x2="327" y2="229" stroke="var(--outline-variant)" stroke-width="3" stroke-dasharray="6 4"/>
+            <line x1="230" y1="48" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+            <line x1="380" y1="124" x2="135" y2="229" stroke="var(--outline-variant)" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle id="svgBlastRing" cx="230" cy="48" r="46" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-dasharray="5 3" opacity="0.75"/>
+            <g id="node-banking">
+              <rect x="165" y="24" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="230" y="45" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 1 · BANKING</text>
+              <text id="svgRisk-banking" x="230" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-saude">
+              <rect x="15" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="80" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 2 · HOSPITAL</text>
+              <text id="svgRisk-saude" x="80" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-energia">
+              <rect x="315" y="100" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="380" y="121" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 4 · ENERGIA</text>
+              <text id="svgRisk-energia" x="380" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-policia">
+              <rect x="70" y="205" width="130" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="135" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 3 · POLÍCIA</text>
+              <text id="svgRisk-policia" x="135" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+            <g id="node-transporte">
+              <rect x="260" y="205" width="135" height="48" fill="var(--background)" stroke="var(--outline)" stroke-width="3"/>
+              <text x="327" y="226" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="12" fill="var(--on-surface)">EC 5 · TRANSPORTE</text>
+              <text id="svgRisk-transporte" x="327" y="243" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="10" fill="var(--on-surface-variant)"></text>
+            </g>
+          </svg>
         </div>
       </div>
-      <div class="deliv-grid">
-        <div class="field-group"><label class="field-label" for="planoSpof">SPOF / vulnerabilidade-chave</label><textarea id="planoSpof" class="bauhaus-textarea" oninput="salvarPlano('spof', this.value)" placeholder="Onde um único ponto derruba tudo?"></textarea></div>
-        <div class="field-group"><label class="field-label" for="planoAtaque">Plano de suplantamento</label><textarea id="planoAtaque" class="bauhaus-textarea" oninput="salvarPlano('ataque', this.value)" placeholder="Como o atacante passa pelas barreiras sem disparar alarme?"></textarea></div>
-        <div class="field-group"><label class="field-label" for="planoDeteccao">Plano de detecção (MTTD)</label><textarea id="planoDeteccao" class="bauhaus-textarea" oninput="salvarPlano('deteccao', this.value)" placeholder="Que sinal, em que camada, em quanto tempo?"></textarea></div>
-        <div class="field-group"><label class="field-label" for="planoRecuperacao">Plano de recuperação (RTO/RPO)</label><textarea id="planoRecuperacao" class="bauhaus-textarea" oninput="salvarPlano('recuperacao', this.value)" placeholder="Como voltam, em quanto tempo, perdendo o quê? Qual o modo degradado?"></textarea></div>
-      </div>
+    </section>
+
+    <section id="etapa-9" class="block etapa fase-fech" data-etapa="9" aria-labelledby="titulo-etapa-9">
+      <div class="mission" data-mission="9"></div>
       <div class="summary-wrap">
         <div class="field-group">
-          <label class="field-label" for="resumoMiro">Resumo para o frame do grupo (atualiza sozinho)</label>
+          <label class="field-label" for="resumoMiro">Resumo para o board do grupo (junta tudo o que vocês fizeram; atualiza sozinho)</label>
           <textarea id="resumoMiro" class="bauhaus-textarea" readonly></textarea>
         </div>
         <div class="summary-actions">
@@ -764,48 +834,7 @@
           <button type="button" class="btn" onclick="baixarResumo()"><i data-lucide="file-text" aria-hidden="true"></i> Baixar TXT</button>
         </div>
       </div>
-    </section>
-
-    <!-- 8. GRÁFICOS -->
-    <section aria-label="Visualizações">
-      <div class="section-open accent-orange">
-        <div>
-          <span class="section-kicker">Telemetria Arquitetural</span>
-          <h2 class="section-title">Táticas, camadas, tempo e raio de impacto</h2>
-        </div>
-      </div>
-      <div class="charts-grid">
-        <article class="chart-card">
-          <h3 class="chart-title">1. Perfil de táticas do EC</h3>
-          <p class="chart-caption">Postura atual contra a meta de referência Guardião Cibernético.</p>
-          <div class="chart-box"><canvas id="radarChart"></canvas></div>
-        </article>
-        <article class="chart-card">
-          <h3 class="chart-title">2. Táticas por camada</h3>
-          <p class="chart-caption">Resistir/Reagir (azul), Detectar (laranja) e Recuperar (verde) em cada uma das 5 camadas.</p>
-          <div class="chart-box"><canvas id="layerBarChart"></canvas></div>
-        </article>
-        <article class="chart-card">
-          <h3 class="chart-title">3. Linha do tempo do incidente (horas)</h3>
-          <p class="chart-caption">Até perceber (MTTD) + até conter (MTTR) + até voltar (RTO), nos 5 ECs. Barras longas = dano longo.</p>
-          <div class="chart-box"><canvas id="timeChart"></canvas></div>
-        </article>
-        <article class="chart-card">
-          <h3 class="chart-title">4. Raio de impacto por EC</h3>
-          <p class="chart-caption">Exposição estimada (%) na escala atual. EC selecionado em vermelho.</p>
-          <div class="chart-box"><canvas id="blastChart"></canvas></div>
-        </article>
-      </div>
-    </section>
-
-    <!-- 9. MATRIZ -->
-    <section class="block" aria-label="Matriz dos 5 estudos de caso">
-      <div class="section-open">
-        <div>
-          <span class="section-kicker">Síntese intersetorial · Bloco 4</span>
-          <h2 class="section-title">Matriz dos 5 Estudos de Caso</h2>
-        </div>
-      </div>
+      <span class="sub-head">Matriz dos 5 estudos de caso (clique numa linha para ver outro EC)</span>
       <div class="table-wrap">
         <table class="bauhaus-table">
           <thead>
@@ -826,11 +855,75 @@
       </div>
     </section>
 
+    <!-- ================= ANEXO: GRÁFICOS ================= -->
+    <details id="anexoGraficos" class="annex">
+      <summary>Anexo · Telemetria arquitetural (gráficos)</summary>
+      <div class="annex-body">
+        <div class="charts-grid">
+          <article class="chart-card">
+            <h3 class="chart-title">1. Perfil de táticas do EC</h3>
+            <p class="chart-caption">Postura atual contra a meta de referência Guardião Cibernético.</p>
+            <div class="chart-box"><canvas id="radarChart"></canvas></div>
+          </article>
+          <article class="chart-card">
+            <h3 class="chart-title">2. Táticas por camada</h3>
+            <p class="chart-caption">Resistir/Reagir (azul), Detectar (laranja) e Recuperar (verde) em cada uma das 5 camadas.</p>
+            <div class="chart-box"><canvas id="layerBarChart"></canvas></div>
+          </article>
+          <article class="chart-card">
+            <h3 class="chart-title">3. Linha do tempo do incidente (horas)</h3>
+            <p class="chart-caption">Até perceber (MTTD) + até conter (MTTR) + até voltar (RTO), nos 5 ECs.</p>
+            <div class="chart-box"><canvas id="timeChart"></canvas></div>
+          </article>
+          <article class="chart-card">
+            <h3 class="chart-title">4. Raio de impacto por EC</h3>
+            <p class="chart-caption">Exposição estimada (%) na escala atual. EC selecionado em vermelho.</p>
+            <div class="chart-box"><canvas id="blastChart"></canvas></div>
+          </article>
+        </div>
+      </div>
+    </details>
+
     <footer class="footer-sources">
       <span><strong>Fontes:</strong> Autoestudos 1–4 (Prof. Reginaldo Arakaki) · Bass, Clements &amp; Kazman, <em>Software Architecture in Practice</em>, 4ª ed., 2021 (táticas de Segurança e de Disponibilidade) · Machado, <em>Segurança da Informação</em> (Criptografia e Password Cracking) · ISO/IEC 27001 · IEC 62443.</span>
-      <span>Turma T35 · Inteli · 26/11/2026 · v2</span>
+      <span>Turma T35 · Inteli · 26/11/2026 · v3</span>
     </footer>
   </div>
+
+  <!-- Onde estou? -->
+  <dialog id="ondeEstou" class="where-dialog" aria-labelledby="whereTitle">
+    <div class="where-head">
+      <h2 id="whereTitle">Onde estou? · Mapa da aula</h2>
+      <div class="btn-row">
+        <span id="whereProgress" class="tag"></span>
+        <button type="button" class="btn btn-sm" onclick="copiarMapa()"><i data-lucide="copy" aria-hidden="true"></i> Copiar mapa</button>
+        <button type="button" class="btn btn-sm btn-prof-on" onclick="fecharOndeEstou()">Fechar</button>
+      </div>
+    </div>
+    <div class="where-body">
+      <p id="whereHint" class="where-hint"></p>
+      <div class="table-wrap">
+        <table class="bauhaus-table where-table">
+          <thead>
+            <tr>
+              <th>Feito</th>
+              <th>Fase</th>
+              <th>#</th>
+              <th>Atividade</th>
+              <th>Frame</th>
+              <th>📸 Print para o Miro</th>
+              <th>Entrega</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="whereBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </dialog>
+
+  <button type="button" class="btn btn-orange fab-where" onclick="abrirOndeEstou()"><i data-lucide="map-pin" aria-hidden="true"></i> Onde estou?</button>
+  <div id="feedback" class="inline-feedback" role="status" aria-live="polite"></div>
 
   <api-shim></api-shim>
   <script>
@@ -850,6 +943,46 @@
       det: { label: 'Detectar', curto: 'Detectar' },
       rec: { label: 'Recuperar', curto: 'Recuperar' }
     };
+
+    // Etapas da aula: fonte única para os cartões de missão, a trilha e o "Onde estou?"
+    const FASES = {
+      abertura: { nome: 'Abertura', bloco: 'Bloco 1' },
+      d1: { nome: 'Dinâmica 1', bloco: 'Bloco 2' },
+      d2: { nome: 'Dinâmica 2', bloco: 'Bloco 3' },
+      fech: { nome: 'Fechamento', bloco: 'Bloco 4' }
+    };
+    const ETAPAS = [
+      { id: 0, fase: 'abertura', titulo: 'Briefing do estudo de caso', curto: 'Briefing', frame: 'F0', tempo: '~10 min',
+        passos: ['Confiram se o EC do grupo está selecionado no topo da página.', 'Leiam a narrativa, o que a infraestrutura viu e a pergunta motriz.', 'Colem o link do board Miro do grupo no campo abaixo e copiem o link deste EC para o F0.'],
+        miro: 'área tracejada do briefing', entrega: 'Caso e pergunta motriz visíveis no F0, com o link do EC.' },
+      { id: 1, fase: 'd1', titulo: 'Mapear as 5 camadas', curto: 'Camadas', frame: 'F1', tempo: '~8 min',
+        passos: ['Cliquem em cada uma das 5 camadas (C01 a C05).', 'Em cada uma, leiam pontos de controle e vulnerabilidades.', 'Escolham a camada mais frágil do EC e deixem-na selecionada (fica laranja).'],
+        miro: 'pipeline das 5 camadas + inspetor da camada escolhida', entrega: 'Topologia das 5 camadas com a camada crítica destacada.' },
+      { id: 2, fase: 'd1', titulo: 'Ferramentas por camada', curto: 'Ferramentas', frame: 'F1', tempo: '~10 min',
+        passos: ['Escolham uma camada no pipeline.', 'Liguem e desliguem ferramentas e vejam as barras R/R (azul) e Detectar (laranja) mudarem.', 'Repitam nas camadas que importam para o caso.', 'Escrevam o SPOF no campo abaixo.'],
+        miro: 'pipeline com barras + grade de ferramentas', entrega: 'Stickies 🟦 com as ferramentas por camada + SPOF.' },
+      { id: 3, fase: 'd1', titulo: 'Linha do tempo do ataque', curto: 'Linha do tempo', frame: 'F2', tempo: '~7 min',
+        passos: ['Cliquem em "Simular suplantamento" (ou suplantem camada a camada).', 'Leiam a linha do tempo: MTTD (perceber), MTTR (conter), RTO (voltar), RPO (dado perdido).', 'Escrevam como o atacante passa sem disparar alarme.', 'Não restaurem: a Dinâmica 2 parte deste cenário.'],
+        miro: 'camadas suplantadas + linha do tempo + diagnóstico da Modéstia', entrega: 'T0 → percepção → contenção → volta: onde o ataque passa sem alarme.' },
+      { id: 4, fase: 'd2', titulo: 'Detectar: o que o firewall não vê', curto: 'Detectar', frame: 'F3', tempo: '~8 min',
+        passos: ['Partam do cenário suplantado da etapa 3.', 'Ativem táticas de Detectar que atuam nas camadas atingidas e vejam o MTTD cair.', 'Escrevam o plano de detecção: que sinal, em que camada, em quanto tempo.'],
+        miro: 'coluna Detectar + linha do tempo', entrega: '≥3 stickies 🟨 com tática arquitetural + MTTD estimado.' },
+      { id: 5, fase: 'd2', titulo: 'Reagir e Recuperar', curto: 'Reagir/Recuperar', frame: 'F4', tempo: '~8 min',
+        passos: ['Ativem táticas de Resistir/Reagir e de Recuperar.', 'Observem MTTR, RTO e RPO na barra do topo.', 'Fixem notas respeitando a Regra da Modéstia (1 azul : 2 amarelos/verdes).', 'Escrevam o plano de recuperação, com o modo degradado.'],
+        miro: 'colunas Resistir/Reagir e Recuperar + linha do tempo', entrega: 'Stickies 🟦 (reagir) e 🟩 + RTO/RPO + modo degradado.' },
+      { id: 6, fase: 'd2', titulo: 'Injects 1 e 2', curto: 'Injects', frame: 'F3–F4', tempo: '~8 min',
+        passos: ['Quando o professor anunciar, cliquem em "Aplicar" no Inject 1 e vejam o que acontece com Detectar.', 'Quando o professor anunciar, apliquem o Inject 2 e olhem o RPO.', 'Voltem às etapas 4 e 5 se precisarem trocar táticas.'],
+        miro: 'cards dos injects + linha do tempo depois deles', entrega: 'Atualizar F3 e F4: quais 🟦 continuam valendo? A cópia de vocês sobreviveu?' },
+      { id: 7, fase: 'd2', titulo: 'Decisão de War Room', curto: 'War Room', frame: 'F5', tempo: '~6 min',
+        passos: ['Releiam o dilema do caso.', 'Liguem o Guardião Cibernético e escolham decisões, comparando efeito e custo.', 'Justifiquem a escolha em 3 linhas no F5.'],
+        miro: 'dilema + decisões escolhidas + linha do tempo', entrega: 'Decisão + justificativa em 3 linhas.' },
+      { id: 8, fase: 'fech', titulo: 'Cascata intersetorial', curto: 'Cascata', frame: 'F6', tempo: '~8 min',
+        passos: ['Quando o professor anunciar, apliquem o Inject 3 (sorteia outro setor).', 'Vejam no grafo quais ECs são atingidos e com que intensidade.', 'Proponham a cascata que começa no setor de vocês e por qual camada ela passa.'],
+        miro: 'grafo da cascata', entrega: 'Seta para o board de outro grupo, indicando a camada.' },
+      { id: 9, fase: 'fech', titulo: 'Síntese e pitch', curto: 'Pitch', frame: 'Síntese', tempo: '~12 min',
+        passos: ['Confiram se os 4 planos foram preenchidos (etapas 2, 3, 4 e 5).', 'Copiem o resumo e colem no board do grupo.', 'Usem a matriz para comparar o EC de vocês com os outros no pitch de 2 min.'],
+        miro: 'texto do resumo (botão Copiar)', entrega: 'Pitch de 2 min.' }
+    ];
 
     // Ferramentas de infraestrutura (por camada). Nenhuma soma em Recuperar.
     const TOOLS_CATALOG = [
@@ -895,10 +1028,11 @@
       { id: 'killswitch', nome: 'Desconectar o EC (kill switch)', efeito: 'Blast −25 pts · MTTR ≤ 1 h', custo: 'Serviço parado · RTO +24 h' }
     ];
 
+    // Injects: aplicados pelos próprios grupos quando o professor anunciar
     const INJECTS = [
-      { n: 1, min: 42, titulo: 'Credencial legítima', texto: 'O atacante não quebrou nada: entrou com usuário e senha válidos. Frontend e IHC ficam suplantados, e assinaturas (IDS/AV/SIEM) perdem força.' },
-      { n: 2, min: 52, titulo: 'A rede de segurança furou', texto: 'O BD foi corrompido. A réplica e o failover de que vocês dependiam também foram comprometidos?' },
-      { n: 3, min: 62, titulo: 'Cascata', texto: 'Outro setor caiu (sorteado). Escala sobe para Terror. Que dependência vocês não mapearam?' }
+      { n: 1, titulo: 'Credencial legítima', texto: 'O atacante não quebrou nada: entrou com usuário e senha válidos. Frontend e IHC ficam suplantados, e assinaturas (IDS/AV/SIEM) perdem força.' },
+      { n: 2, titulo: 'A rede de segurança furou', texto: 'O BD foi corrompido. A réplica e o failover de que vocês dependiam também foram comprometidos?' },
+      { n: 3, titulo: 'Cascata', texto: 'Outro setor caiu (sorteado). Escala sobe para Terror. Que dependência vocês não mapearam?' }
     ];
 
     // =========================================================================
@@ -1035,13 +1169,7 @@
     // =========================================================================
     // 3. ESTADO
     // =========================================================================
-    const BLOCOS_TIMER = {
-      1: { nome: 'Bloco 1 · Provocação & Conceitos', duracaoSeg: 15 * 60 },
-      2: { nome: 'Bloco 2 · D1 Mapeamento PBL', duracaoSeg: 25 * 60 },
-      3: { nome: 'Bloco 3 · D2 Modéstia + Injects', duracaoSeg: 30 * 60 },
-      4: { nome: 'Bloco 4 · Cascata & Fechamento', duracaoSeg: 20 * 60 }
-    };
-    const STORAGE_KEY = 't35-cyber-v2';
+    const STORAGE_KEY = 't35-cyber-v3';
 
     let appState = {
       setorAtual: 'banking',
@@ -1056,11 +1184,11 @@
       notas: [],
       planos: {},      // setor -> { spof, ataque, deteccao, recuperacao }
       miro: {},        // setor -> url
-      timer: { blocoAtivo: 1, restante: { 1: 900, 2: 1500, 3: 1800, 4: 1200 }, rodando: false }
+      progresso: {}    // setor -> { etapaId: true }
     };
 
-    let timerIntervalId = null;
     const charts = {};
+    let etapaVisivel = 0;
 
     function mapearParametroSetor(raw) {
       if (!raw) return null;
@@ -1075,7 +1203,7 @@
     }
 
     // =========================================================================
-    // 4. MODELO DE CÁLCULO
+    // 4. MODELO DE CÁLCULO (inalterado em relação à v2)
     // =========================================================================
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -1093,9 +1221,9 @@
     }
     function getTaticas(setor) { return Object.assign({}, TACTICAS_PADRAO, appState.taticas[setor] || {}); }
     function getInjects(setor) { return Object.assign({ 1: false, 2: false, 3: false }, appState.injects[setor] || {}); }
+    function getProgresso(setor) { return appState.progresso[setor || appState.setorAtual] || {}; }
     function decisao(id) { return appState.guardiao && Boolean(appState.decisoes[id]); }
 
-    // Tática de redundância é neutralizada quando a camada em que atua foi suplantada
     function taticaNeutralizada(setor, t) {
       if (!t.neutralizavel) return false;
       return t.camadas.some(l => getLayerState(setor, l).breached);
@@ -1144,7 +1272,6 @@
       });
       const rr = Math.round(sR / 5), det = Math.round(sD / 5), rec = Math.round(sC / 5);
 
-      // Capacidade de reagir (não cai quando o perímetro é suplantado)
       let pesoReagir = 0;
       TACTICS_CATALOG.forEach(t => { if (t.sub === 'reagir' && tat[t.id]) pesoReagir += t.peso; });
       const reagir = clamp(15 + pesoReagir * 2, 0, 95);
@@ -1155,7 +1282,6 @@
       if (decisao('csirt')) { mttd *= 0.8; mttr *= 0.7; }
       if (decisao('killswitch')) { mttr = Math.min(mttr, 1); rto += 24; }
 
-      // RPO: depende do que existe para restaurar e se o BD foi atingido
       const bdBreached = porCamada.bd.breached;
       let rpo, rpoMotivo;
       if (tat.rollback) { rpo = 0.25; rpoMotivo = 'reconstrução por eventos'; }
@@ -1184,6 +1310,7 @@
       if (h < 48) return `${h.toFixed(1).replace('.', ',')} h`;
       return `${(h / 24).toFixed(1).replace('.', ',')} dias`;
     }
+    function fmtDano(d) { return d.toFixed(1).replace('.', ','); }
 
     // =========================================================================
     // 5. RENDERIZAÇÃO
@@ -1198,40 +1325,62 @@
       setText('breachedCountBadge', `${m.breachedCount} / 5`);
       document.getElementById('cenarioTags').innerHTML = c.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
 
-      // KPIs
+      // Barra de métricas (fixa no topo)
       setText('kpiRrVal', `${m.rr}%`);
       setText('kpiDetVal', `${m.det}%`);
       setText('kpiRecVal', `${m.rec}%`);
       setText('kpiBlastVal', `${m.blast}%`);
-      setText('kpiRrCap', `Barreiras + contenção · Reagir ${m.reagir}%`);
-      let sev = 'Controlado (contenção local)';
-      if (m.blast >= 75) sev = 'Catastrófico (cascata intersetorial)';
-      else if (m.blast >= 55) sev = 'Crítico (risco sistêmico)';
-      else if (m.blast >= 35) sev = 'Elevado (impacto setorial)';
-      setText('kpiBlastCap', sev);
-
-      // Tempo
+      setText('kpiRrCap', `Reagir ${m.reagir}%`);
+      setText('kpiBlastCap', severidade(m.blast));
       setText('tMTTD', fmtHoras(m.mttd));
       setText('tMTTR', fmtHoras(m.mttr));
       setText('tRTO', fmtHoras(m.rto));
       setText('tRPO', fmtHoras(m.rpo));
       setText('tRPOhint', m.rpoMotivo);
       document.getElementById('cellRPO').classList.toggle('is-alarm', m.rpo === Infinity);
-      setText('tDano', `${(m.dano).toFixed(1).replace('.', ',')}`);
+      setText('tDano', fmtDano(m.dano));
 
+      renderSnaps(m);
       renderCaso(c);
-      renderPipeline(m);
+      renderPipelines(m);
       renderInspector();
       renderTaticas();
       renderNotas();
       renderInjects();
       renderGuardian(m);
       renderPlanos();
-      atualizarGraficos(m);
       renderTabela();
       renderResumo(m);
+      renderMissoes();
+      renderTrilha();
+      atualizarRotulosPrint(c);
+      if (document.getElementById('ondeEstou').open) renderOndeEstou();
+      if (document.getElementById('anexoGraficos').open) atualizarGraficos(m);
 
       if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    }
+
+    function severidade(blast) {
+      if (blast >= 75) return 'Catastrófico';
+      if (blast >= 55) return 'Crítico';
+      if (blast >= 35) return 'Elevado';
+      return 'Controlado';
+    }
+
+    function renderSnaps(m) {
+      const cells = [
+        ['Resist./Reag.', `${m.rr}%`], ['Detectar', `${m.det}%`], ['Recuperar', `${m.rec}%`], ['Blast', `${m.blast}%`],
+        ['MTTD · perceber', fmtHoras(m.mttd)], ['MTTR · conter', fmtHoras(m.mttr)], ['RTO · voltar', fmtHoras(m.rto)],
+        ['RPO · perda', fmtHoras(m.rpo)], ['Dano', fmtDano(m.dano)]
+      ];
+      const html = cells.map(([l, v]) => `<div class="snap-cell${l.startsWith('RPO') && m.rpo === Infinity ? ' is-alarm' : ''}"><span>${escapeHtml(l)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
+      document.querySelectorAll('[data-snap]').forEach(el => { el.innerHTML = html; });
+    }
+
+    function atualizarRotulosPrint(c) {
+      document.querySelectorAll('.print-zone').forEach(z => {
+        z.setAttribute('data-label', `📸 PRINT → Frame ${z.dataset.frame} · ${c.codigo} · ${c.caso.titulo}`);
+      });
     }
 
     function renderCaso(c) {
@@ -1240,7 +1389,7 @@
       setText('casoNarrativa', c.caso.narrativa);
       setText('casoInfraViu', c.caso.infraViu);
       setText('casoPergunta', c.caso.pergunta);
-      setText('casoDilema', c.caso.dilema);
+      document.querySelectorAll('.js-dilema').forEach(el => { el.textContent = c.caso.dilema; });
       document.getElementById('casoSinais').innerHTML = c.caso.sinais.map(s => `<li>${escapeHtml(s)}</li>`).join('');
       const gab = profUnlocked() ? (PROF_DATA.gabaritos[c.key] || []) : [];
       document.getElementById('casoGabarito').innerHTML = gab.map(s => `<li>${escapeHtml(s)}</li>`).join('');
@@ -1252,12 +1401,13 @@
       setText('btnProfessorTxt', profUnlocked() ? 'Professor: ON · Bloquear' : 'Modo Professor');
     }
 
-    function renderPipeline(m) {
-      document.getElementById('layersPipeline').innerHTML = LAYER_META.map((layer, idx) => {
+    function renderPipelines(m) {
+      const html = LAYER_META.map((layer, idx) => {
         const lm = m.porCamada[layer.id];
-        const cls = ['layer-node', appState.camadaAtual === layer.id ? 'is-selected' : '', lm.breached ? 'is-breached' : ''].filter(Boolean).join(' ');
+        const sel = appState.camadaAtual === layer.id;
+        const cls = ['layer-node', sel ? 'is-selected' : '', lm.breached ? 'is-breached' : ''].filter(Boolean).join(' ');
         return `
-          <button type="button" class="${cls}" onclick="selecionarCamada('${layer.id}')">
+          <button type="button" class="${cls}" onclick="selecionarCamada('${layer.id}')" aria-pressed="${sel}">
             <div class="layer-num"><span>C0${idx + 1}</span><span style="color:var(--error);">${lm.breached ? 'SUPLANTADA' : ''}</span></div>
             <div class="layer-name">${escapeHtml(layer.short)}</div>
             <div class="layer-status-text">R/R:${lm.rr} · D:${lm.det} · Rec:${lm.rec}</div>
@@ -1268,6 +1418,10 @@
             </div>
           </button>`;
       }).join('');
+      document.querySelectorAll('.js-pipeline').forEach(el => { el.innerHTML = html; });
+      const meta = LAYER_META.find(l => l.id === appState.camadaAtual) || LAYER_META[0];
+      document.querySelectorAll('.js-layer-name').forEach(el => { el.textContent = meta.full; });
+      document.querySelectorAll('.js-layer-short').forEach(el => { el.textContent = meta.short; });
     }
 
     function renderInspector() {
@@ -1276,10 +1430,10 @@
       const data = c.camadas[meta.id];
       const st = getLayerState(appState.setorAtual, meta.id);
       const tag = document.getElementById('inspLayerTag');
-      tag.textContent = st.breached ? 'CAMADA SUPLANTADA · ASSUME BREACH' : `ATIVA · ${c.codigo}`;
+      tag.textContent = st.breached ? 'CAMADA SUPLANTADA · ASSUME BREACH' : `CAMADA SELECIONADA · ${c.codigo}`;
       tag.className = st.breached ? 'tag tag-red' : 'tag tag-orange';
       setText('inspLayerTitle', meta.full);
-      setText('btnBreachLabel', st.breached ? 'Restaurar camada' : 'Suplantar camada');
+      setText('btnBreachLabel', st.breached ? `Restaurar ${meta.short}` : `Suplantar ${meta.short}`);
       document.getElementById('inspControlesList').innerHTML = data.controles.map(x => `<li>${escapeHtml(x)}</li>`).join('');
       document.getElementById('inspAmeacasList').innerHTML = data.ameacas.map(x => `<li>${escapeHtml(x)}</li>`).join('');
       document.getElementById('toolsGrid').innerHTML = TOOLS_CATALOG.map(t => {
@@ -1297,8 +1451,6 @@
     function renderTaticas() {
       const setor = appState.setorAtual;
       const tat = getTaticas(setor);
-      const layerShort = (LAYER_META.find(l => l.id === appState.camadaAtual) || {}).short || '';
-      setText('tacticLayerLabel', layerShort);
       const cont = { rr: 0, det: 0, rec: 0 };
       const html = { rr: '', det: '', rec: '' };
       TACTICS_CATALOG.forEach(t => {
@@ -1330,27 +1482,26 @@
       setText('cntRec', `${cont.rec} ativas`);
     }
 
+    function injectCardHtml(i, inj) {
+      const aplicado = inj[i.n];
+      let extra = '';
+      if (i.n === 3 && aplicado && appState.cascataAlvo[appState.setorAtual]) {
+        extra = ` → caiu: ${escapeHtml(CENARIOS_DATA[appState.cascataAlvo[appState.setorAtual]].codigo)}`;
+      }
+      return `
+        <div class="inject-card ${aplicado ? 'is-applied' : ''}">
+          <div>
+            <span class="i-meta">INJECT ${i.n} · ${aplicado ? 'APLICADO' + extra : 'aguardem o anúncio do professor'}</span>
+            <strong>${escapeHtml(i.titulo)}</strong>
+            <p>${escapeHtml(i.texto)}</p>
+          </div>
+          <button type="button" class="btn btn-sm ${aplicado ? '' : 'btn-danger'}" onclick="toggleInject(${i.n})">${aplicado ? 'Desfazer' : 'Aplicar'}</button>
+        </div>`;
+    }
     function renderInjects() {
       const inj = getInjects(appState.setorAtual);
-      const minAula = minutosDecorridos();
-      document.getElementById('injectList').innerHTML = INJECTS.map(i => {
-        const aplicado = inj[i.n];
-        const due = minAula >= i.min;
-        const cls = ['inject-card', aplicado ? 'is-applied' : (due ? 'is-due' : '')].filter(Boolean).join(' ');
-        let extra = '';
-        if (i.n === 3 && aplicado && appState.cascataAlvo[appState.setorAtual]) {
-          extra = ` → caiu: ${escapeHtml(CENARIOS_DATA[appState.cascataAlvo[appState.setorAtual]].codigo)}`;
-        }
-        return `
-          <div class="${cls}">
-            <div>
-              <span class="i-meta">INJECT ${i.n} · MIN ${i.min}${due && !aplicado ? ' · LIBERADO' : ''}${aplicado ? ' · APLICADO' + extra : ''}</span>
-              <strong>${escapeHtml(i.titulo)}</strong>
-              <p>${escapeHtml(i.texto)}</p>
-            </div>
-            <button type="button" class="btn btn-sm ${aplicado ? '' : 'btn-danger'}" onclick="toggleInject(${i.n})">${aplicado ? 'Desfazer' : 'Aplicar'}</button>
-          </div>`;
-      }).join('');
+      document.getElementById('injectList12').innerHTML = INJECTS.filter(i => i.n !== 3).map(i => injectCardHtml(i, inj)).join('');
+      document.getElementById('injectList3').innerHTML = INJECTS.filter(i => i.n === 3).map(i => injectCardHtml(i, inj)).join('');
     }
 
     function renderGuardian(m) {
@@ -1481,8 +1632,10 @@
       const tat = getTaticas(setor);
       const p = appState.planos[setor] || {};
       const inj = getInjects(setor);
+      const prog = getProgresso(setor);
       const linhas = [];
       linhas.push(`T35 · ${c.nome} · "${c.caso.titulo}"`);
+      linhas.push(`Etapas concluídas: ${ETAPAS.filter(e => prog[e.id]).length} de ${ETAPAS.length}`);
       linhas.push(`Resistir/Reagir ${m.rr}% · Detectar ${m.det}% · Recuperar ${m.rec}% · Blast ${m.blast}%`);
       linhas.push(`MTTD ${fmtHoras(m.mttd)} · MTTR ${fmtHoras(m.mttr)} · RTO ${fmtHoras(m.rto)} · RPO ${fmtHoras(m.rpo)} (${m.rpoMotivo})`);
       linhas.push(`Camadas suplantadas: ${LAYER_META.filter(l => m.porCamada[l.id].breached).map(l => l.short).join(', ') || 'nenhuma'}`);
@@ -1495,10 +1648,10 @@
         const ds = DECISOES_GUARDIAO.filter(d => decisao(d.id)).map(d => `${d.nome} (custo: ${d.custo})`);
         linhas.push(`Decisões de War Room: ${ds.join('; ') || '—'}`);
       }
-      linhas.push(`SPOF: ${p.spof || '—'}`);
-      linhas.push(`Suplantamento: ${p.ataque || '—'}`);
-      linhas.push(`Detecção: ${p.deteccao || '—'}`);
-      linhas.push(`Recuperação: ${p.recuperacao || '—'}`);
+      linhas.push(`SPOF (F1): ${p.spof || '—'}`);
+      linhas.push(`Suplantamento (F2): ${p.ataque || '—'}`);
+      linhas.push(`Detecção (F3): ${p.deteccao || '—'}`);
+      linhas.push(`Recuperação (F4): ${p.recuperacao || '—'}`);
       const notas = appState.notas.filter(n => n.setor === setor);
       if (notas.length) {
         linhas.push('Notas:');
@@ -1508,8 +1661,142 @@
     }
     function renderResumo(m) { document.getElementById('resumoMiro').value = gerarResumo(m); }
 
+    // ----- Cartões de missão, trilha e "Onde estou?" -----
+    function renderMissoes() {
+      const prog = getProgresso();
+      const total = ETAPAS.length - 1;
+      document.querySelectorAll('[data-mission]').forEach(el => {
+        const e = ETAPAS[Number(el.dataset.mission)];
+        const done = Boolean(prog[e.id]);
+        const f = FASES[e.fase];
+        el.innerHTML = `
+          <div class="mission-top">
+            <div class="mission-num" aria-hidden="true">${e.id}</div>
+            <div>
+              <span class="mission-kicker">${escapeHtml(f.nome)} · ${escapeHtml(f.bloco)} · Etapa ${e.id} de ${total} · ${escapeHtml(e.tempo)}</span>
+              <h2 class="section-title" id="titulo-etapa-${e.id}">${escapeHtml(e.titulo)}</h2>
+            </div>
+            <button type="button" class="btn btn-sm ${done ? 'btn-done' : ''}" onclick="toggleEtapaConcluida(${e.id})" aria-pressed="${done}">${done ? '✓ Concluída' : 'Marcar como concluída'}</button>
+          </div>
+          <div class="mission-body">
+            <div><h4>O que fazer</h4><ol>${e.passos.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ol></div>
+            <div class="mission-miro">
+              <h4>📸 Para o Miro · Frame ${escapeHtml(e.frame)}</h4>
+              <p><strong>Print:</strong> ${escapeHtml(e.miro)} (moldura tracejada abaixo).</p>
+              <p><strong>Entrega:</strong> ${escapeHtml(e.entrega)}</p>
+            </div>
+          </div>`;
+      });
+    }
+
+    function renderTrilha() {
+      const prog = getProgresso();
+      let faseAnterior = null;
+      const partes = [];
+      ETAPAS.forEach(e => {
+        if (e.fase !== faseAnterior) {
+          partes.push(`<span class="pill-sep fase-${e.fase}">${escapeHtml(FASES[e.fase].nome)}</span>`);
+          faseAnterior = e.fase;
+        }
+        const done = Boolean(prog[e.id]);
+        partes.push(`<button type="button" class="pill fase-${e.fase} ${done ? 'is-done' : ''} ${e.id === etapaVisivel ? 'is-current' : ''}" data-pill="${e.id}" onclick="irParaEtapa(${e.id})" title="${escapeHtml(e.titulo)}"><b>${done ? '✓' : e.id}</b>${escapeHtml(e.curto)}</button>`);
+      });
+      document.getElementById('trailPills').innerHTML = partes.join('');
+    }
+
+    function marcarEtapaVisivel(id) {
+      if (id === etapaVisivel) return;
+      etapaVisivel = id;
+      document.querySelectorAll('[data-pill]').forEach(p => p.classList.toggle('is-current', Number(p.dataset.pill) === id));
+      const atual = document.querySelector(`[data-pill="${id}"]`);
+      const trilha = document.getElementById('trailPills');
+      if (atual && trilha) {
+        const l = atual.offsetLeft - trilha.offsetLeft, r = l + atual.offsetWidth;
+        if (l < trilha.scrollLeft) trilha.scrollLeft = l - 8;
+        else if (r > trilha.scrollLeft + trilha.clientWidth) trilha.scrollLeft = r - trilha.clientWidth + 8;
+      }
+    }
+
+    function detectarEtapaVisivel() {
+      const trail = document.querySelector('.trail');
+      const offset = (getComputedStyle(trail).position === 'sticky' ? trail.getBoundingClientRect().height : 0) + 80;
+      let atual = 0;
+      document.querySelectorAll('.etapa').forEach(sec => {
+        if (sec.getBoundingClientRect().top <= offset) atual = Number(sec.dataset.etapa);
+      });
+      marcarEtapaVisivel(atual);
+    }
+
+    function irParaEtapa(id) {
+      fecharOndeEstou();
+      const sec = document.getElementById(`etapa-${id}`);
+      if (sec) sec.scrollIntoView({ block: 'start' });
+    }
+
+    function toggleEtapaConcluida(id) {
+      const s = appState.setorAtual;
+      const prog = Object.assign({}, getProgresso(s));
+      prog[id] = !prog[id];
+      appState.progresso[s] = prog;
+      if (prog[id]) {
+        const prox = ETAPAS.find(e => e.id > id && !prog[e.id]);
+        mostrarFeedback(prox ? `Etapa ${id} concluída. Próxima: Etapa ${prox.id} · ${prox.titulo}.` : `Etapa ${id} concluída.`);
+      }
+      commit();
+    }
+
+    function abrirOndeEstou() {
+      detectarEtapaVisivel();
+      renderOndeEstou();
+      const dlg = document.getElementById('ondeEstou');
+      if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); }
+      else dlg.setAttribute('open', '');
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    }
+    function fecharOndeEstou() {
+      const dlg = document.getElementById('ondeEstou');
+      if (!dlg.open) return;
+      if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+    }
+
+    function renderOndeEstou() {
+      const c = CENARIOS_DATA[appState.setorAtual];
+      const prog = getProgresso();
+      const feitas = ETAPAS.filter(e => prog[e.id]).length;
+      setText('whereProgress', `${c.codigo} · ${feitas} de ${ETAPAS.length} etapas`);
+      const aqui = ETAPAS[etapaVisivel];
+      const prox = ETAPAS.find(e => !prog[e.id]);
+      let dica = `Vocês estão vendo a <strong>Etapa ${aqui.id} · ${escapeHtml(aqui.titulo)}</strong> (${escapeHtml(FASES[aqui.fase].nome)}, Frame ${escapeHtml(aqui.frame)}).`;
+      if (prox && prox.id !== aqui.id) dica += ` A primeira etapa ainda não concluída é a <strong>${prox.id} · ${escapeHtml(prox.titulo)}</strong>.`;
+      if (!prox) dica += ' Todas as etapas estão marcadas como concluídas.';
+      document.getElementById('whereHint').innerHTML = dica;
+      document.getElementById('whereBody').innerHTML = ETAPAS.map(e => {
+        const done = Boolean(prog[e.id]);
+        const here = e.id === aqui.id;
+        return `
+          <tr class="${here ? 'is-here' : ''} ${done ? 'is-done' : ''}">
+            <td><input type="checkbox" ${done ? 'checked' : ''} onchange="toggleEtapaConcluida(${e.id})" aria-label="Etapa ${e.id} concluída"></td>
+            <td class="fase-cell fase-${e.fase}">${escapeHtml(FASES[e.fase].nome)}<br>${escapeHtml(FASES[e.fase].bloco)}</td>
+            <td class="num-col"><strong>${e.id}</strong></td>
+            <td><strong>${escapeHtml(e.titulo)}</strong>${here ? '<span class="here-badge">VOCÊS ESTÃO AQUI</span>' : ''}<br><small>${escapeHtml(e.tempo)}</small></td>
+            <td><strong>${escapeHtml(e.frame)}</strong></td>
+            <td>${escapeHtml(e.miro)}</td>
+            <td>${escapeHtml(e.entrega)}</td>
+            <td><button type="button" class="btn btn-sm" onclick="irParaEtapa(${e.id})">Ir</button></td>
+          </tr>`;
+      }).join('');
+    }
+
+    function copiarMapa() {
+      const c = CENARIOS_DATA[appState.setorAtual];
+      const prog = getProgresso();
+      const L = [`Mapa da aula T35 · ${c.nome}`];
+      ETAPAS.forEach(e => L.push(`[${prog[e.id] ? 'x' : ' '}] ${e.id}. ${FASES[e.fase].nome} · ${e.titulo} → Frame ${e.frame} · Print: ${e.miro} · Entrega: ${e.entrega}`));
+      copiarTexto(L.join('\n'), 'Mapa da aula copiado: cole num frame do Miro.');
+    }
+
     // =========================================================================
-    // 6. GRÁFICOS
+    // 6. GRÁFICOS (anexo; só desenhados quando o anexo está aberto)
     // =========================================================================
     function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
@@ -1616,7 +1903,7 @@
     function simularSuplantamentoGlobal() {
       const alvos = appState.escala >= 3 ? ['frontend', 'telecom', 'lan'] : ['frontend', 'ihc'];
       alvos.forEach(l => setLayerState(appState.setorAtual, l, st => ({ tools: st.tools, breached: true })));
-      mostrarFeedback(`Suplantamento em ${alvos.length} camadas de ${CENARIOS_DATA[appState.setorAtual].codigo}. Observem MTTD, RTO e RPO.`);
+      mostrarFeedback(`Suplantamento em ${alvos.length} camadas de ${CENARIOS_DATA[appState.setorAtual].codigo}. Leiam a linha do tempo: MTTD, MTTR, RTO e RPO.`);
       commit();
     }
     function restaurarDefesasSetor() {
@@ -1624,7 +1911,7 @@
       delete appState.overrides[s];
       delete appState.injects[s];
       delete appState.cascataAlvo[s];
-      mostrarFeedback(`Camadas, ferramentas e injects de ${CENARIOS_DATA[s].codigo} restaurados. As táticas escolhidas pelo grupo foram mantidas.`);
+      mostrarFeedback(`Camadas, ferramentas e injects de ${CENARIOS_DATA[s].codigo} restaurados. Táticas, notas e planos foram mantidos.`);
       commit();
     }
 
@@ -1663,6 +1950,7 @@
     function toggleGuardian() { appState.guardiao = !appState.guardiao; commit(); }
     function toggleDecisao(id) { if (!appState.guardiao) return; appState.decisoes[id] = !appState.decisoes[id]; commit(); }
     function selecionarEscala(n) { appState.escala = clamp(Number(n) || 1, 1, 4); commit(); }
+
     // ----- Modo Professor: gabarito criptografado (AES-256-GCM, chave PBKDF2-SHA256 da senha) -----
     // O bloco PROF_LOCK é gerado por gerar_trava_professor.py. Sem a senha, o gabarito não pode ser lido.
     /*PROF_LOCK_START*/const PROF_LOCK = {"salt": "D8trsjgg+gBuGAIHyIL7fQ==", "iv": "jGCugegwODSJH8Gc", "iter": 600000, "ct": "NLJh79YsOXpPFFdO8UfGjdRSP/catSTXIAlfJCl2NWMcUkg09J57OshFKGYCqOTC1p2tuBA1BpX139XmjzWl96E2fvFNPb7sM+uYiB0hJtPcM52BVEb4ibqMi9Y28QE3Uy/5Sot0JQBGXqbNOsAuG/93WzzAuxe6yLqP9IYPCeQSuq+yM3M96XGGo8Huzr+YES5NVsejKxW3fHA8db8JzNJEiA5WfmHXmROjY6cDkbCMaxDZ1hObE1H1K9aelpWJiQDJzMmdaV4L9TIO+UtEOuQBSXWeN84V+ejEtUWYx2gP1XbdRIkkqXSO8IMtf+wDhmZDtqB5Dh/339kAvePN6Dy6SAyFX9I5boAuTFrfPISak3I3d0ZdFsPCQ4FNkmAm39SHmO97FYsT2+LCMad4/WayfsqBsysITIV69Pca5tDQvrxwgp0Qu6gPdlj6DiB8l8bnOv/v4tR4dDZa5SjPG8Bjn9ok9Eo+QmlV8t2NIy5fUzGcSn1DjgrpbRR/meOHrr/DIjM5muTInes7LEvWVtpydtEsBObIMMl7yNDKBIhxXWN5g1XwzFAIhRg4p/Mqlk302lzcegZGDq1bBe39XmrVbmCN8Durf173ajEIOEOVyOMzMltPk4UoF0VrtVkfmGWexhjXx9+NRDIIKvsud25ZT2EF6HujiYFzlyEOtfqffFVRx6NAf7PJQ2Wym14TCH/m8UIsUzJDHreoRGH6CBBvSEGBUF5bFOpLOb6QyWMSWHxl0c6u6Rq3aReNEm/oO8Uc0vTjK8HYMvxZ4LCGax5qtOgzXeyB5LVyaV+ffyorfayodUh528rAovgNg7kkmL1AFd6lYjA2hXHE22WmSYm7k7W0WQDQhtfsdbbPfXJvY1uhAbsh/FKx7/9LzOoFiB0pzu2dp4Ip24C8/Dqz03oY8kToVA276aKM2laofY8tJsSgq8gcYVqmE5nm4Ct5VFdiGPw5Pnl7bjZHUozv0xpzD9mPz5gC3xpPlTPwM31Vad6kqqEGHJwk8J6wtqxT3NzAr4T7MBkD7mOx77M9gwKeO+SRFDyUtjC1W6Qn2WVD6jpllhl4w5niYo6t/XlLnYVRmOjl01XYdoh8GDjI4OjbAEnzqY8t6oVrVup6YAjkxEYVrXfBeniPiqKkHD94npCeby68lwxNpJ6OmI8nd4ys74JtpIdgb+Q31gvveosbDmT26TsuVeoQi7j1Kj1DaWw28+lVXVZ+ADdi0vvBPw/afhq7+YytKwZ3y83BfSI1ECSTEk8cxMaBloOWhRg/nG9To4MsTCmOt8TVtVvlL6BLXo+KbkZJ225eqvJfKMBnulAviyxh5S+oFA7zS715yYmqTL7zUwd4deW2zxzcoNbaBI8yP29mmOpShkm4E/Mach36TMrst1AJkKZRcnD8WiSJ/PFTX7IyeXseENeSytlNOHWGtg2pzbPq+royhsaYOD2RAYLScWvr7tWGqdwvhSV9mQaKyRjq0DbfZt1/Qz6CxmVcV8xnGb09TFhCH5eFfv8GQQpntCbFHNRWg/jStj/VuTvzvlHtglloDxyfWkjMUF5cDhi+W4XwoazBvz7nzBaOuZfdFpM46wRZumqu9opSwr8QpmoL7SNLIql79MMwEq/wlSCdneXDFHVIWK1cHF+lt8S9C0YfysBOhnItIDw1qrsnbV/TexFDZH7TPAZrT51zsATWBB1cslYOYvHuTOk7vdbIrxvCnlBAc2UWwcN98+KP4oBCxFX6M4MIHIn/XVRAa3V08YzWVrDrJmsIFSalWcocazltokAjQi/7SVsiGfCsM4O37HloU0YyxNDC78nx36sTEr0g06Lhgbeuazbbdw4rzpqNJN2ju/VXjQW8iACzv0k2l9W7qx0V+b3KD76Dozf7gU0U1h6NHF23+wbnxlLHXvHkln3b5PyNN5tFNXzkMoZ4lZoxam8/76TBFrxDm6FgkhL3aqH3309t/+h0FkgVFFthwoEkyLNoo59HWBFaEMRAkIw5IMk0T31siQ2EKxMl6addWP8HlE7cCn80WCuWdnS1x+my42ZvkMIJsUsmcbtg7n/685TYqqM4pdNhZK/OK/c4NCOtYSFQUAJwhXBi63+yBeBCOWsYlMW+CMXysRjCsqm2nzbxG9+WhHhZHA/NPyKbsjUPDPQFrCCi8axFVmj/TbhGV/i3zHj3ms/x1fH1PJwtWf1SRUfrLMl4R8l+6xrfY+5d0i0JdXn+36jpv1iS1omXzyMl3CRg2DmzLQmJhTRzTPzGSfcVGjvoDMGGcOEc++GI1YFMKIHw9Y2Eftsa5xG4EBOddT1OFd1OTZ8kEaYjcWf6Kn3yD1ZjUXt0ZdFxMaZ68pw9pyQMa096K2Dx9PKJ6CVcS3ddxVG1LXaQkKWRan8cgfvUHkxNiM7iWZ50yKEpartX348wFTWw3LZm7+GjthDZqiXPpg6C2uUxPMTJxwMGWt4EzQ5BurEw/vbYo+5OPdI/V0KZnm8Jj4fGhiljFSD0Mk5I3d7O+slJUDm55Kpb3Zp7n31hozKJUdZ0qUBBmNWUm/cpz3TEOMHY3gs8lY9cuLWIkiQppAj5N7LeFwDh9RF8eVaazPH9bjKDk+9X6DFL+FHzC5SkVri+X9O9yf7gyz3RSbNIF6YWD2IwQWgbrWEy7+r/CVlYG0VdUaAleUZ/24NDVYeHj0F9h5Z/bvyYyaA4tLXvMts0I39XrSnKXVJmOgVvWNj4Ok6qqW4Imb2yM5fwZKcfRsbvssjpngus8ZiaSLTIzxdFZ+ZHdigjZ4ltVE6ga6Q39ENbfx5htvmEJnJjdQ/4fs7pS4UuTBSxjqSPkKKV6UNehvmVc6KS99CvGUuoEWTlmpwU8l2Pmr3drF/zOk8ztND1XtF42WGW8j+9v9sIbTR1VlzqfUx2/3v5GA6gh36zpvmvUM5JPGlkoKXPemkwOAQTuFD+R7gkXlnE2v785F721k+pYbzDKa8MjxYxOpau2Vpw61JfEeqYrTJVtW1YXa7qDmMQZ1UsdFYKY5nNZniNJ4Nh9E0NcHrEBLkYPNsmARtN67EvL8Y5ACwaTQvIiUUNhHIcGPqQSgD1UlkX/m0O+DafZNdGMDYrKWkOduYGn2ojfcIFI8O58yqblWSGT7WiWSjjmnW2KtilR+HdMW5v/FFCdASYy787EtiY/vv/29YFf1OT0OxxaTsob8UtAQjbaViwUoISg6/omqYFs6fvBZ3bHwcW0gwUjTmmsI08qyPnP3ji/ejuf20/VTADDalXO98G42+N1z9pBUKoqT8FMdRd6wz8meesnfEq5uYAaGyK9pN2mh7nHnrH4Du9957MW6tp8yj95EufW0k+Kxc+u07vMdruYVfLNfAu6J4GOEK7TFFPW8ovS2bmSp8rumow9+XpJ2vX1gc2vN+SNALK8wQgKU542badO0fq+99L4XmNiC4K5Iu2bMI="};/*PROF_LOCK_END*/
@@ -1753,13 +2041,14 @@
     }
     function copiarLinkSetor() {
       const url = new URL(window.location.href);
+      url.hash = '';
       url.searchParams.set('setor', appState.setorAtual);
       copiarTexto(url.toString(), `Link do ${CENARIOS_DATA[appState.setorAtual].codigo} copiado: cole no frame F0 do Miro.`);
     }
     function copiarResumo() {
       const ta = document.getElementById('resumoMiro');
       ta.select();
-      copiarTexto(ta.value, 'Resumo copiado: cole no frame do grupo no Miro.');
+      copiarTexto(ta.value, 'Resumo copiado: cole no board do grupo no Miro.');
     }
 
     function baixarArquivo(conteudo, nome, tipo) {
@@ -1797,78 +2086,10 @@
     }
 
     // =========================================================================
-    // 8. CRONÔMETRO (4 blocos: 15 · 25 · 30 · 20)
+    // 8. PERSISTÊNCIA (notebookAppApi → localStorage)
     // =========================================================================
-    function formatarMMSS(seg) {
-      const s = Math.max(0, Math.floor(seg));
-      return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    }
-    function minutosDecorridos() {
-      let dec = 0;
-      for (let i = 1; i <= 4; i++) dec += BLOCOS_TIMER[i].duracaoSeg - appState.timer.restante[i];
-      return Math.floor(dec / 60);
-    }
-    function atualizarUITimer() {
-      const b = appState.timer.blocoAtivo;
-      const rest = appState.timer.restante[b];
-      const dur = BLOCOS_TIMER[b].duracaoSeg;
-      setText('timerDisplay', formatarMMSS(rest));
-      setText('timerBlockTitle', BLOCOS_TIMER[b].nome);
-      setText('timerStatusText', `AULA 90 MIN · ${appState.timer.rodando ? 'EM ANDAMENTO' : 'PAUSADO'}`);
-      setText('blockProgressLabel', `Bloco ${b}: ${Math.round(((dur - rest) / dur) * 100)}%`);
-      setText('globalProgressLabel', `Aula: min ${minutosDecorridos()} de 90`);
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById(`tabBloco${i}`).classList.toggle('is-active', i === b);
-        const pct = ((BLOCOS_TIMER[i].duracaoSeg - appState.timer.restante[i]) / BLOCOS_TIMER[i].duracaoSeg) * 100;
-        document.getElementById(`progSeg${i}`).style.width = `${clamp(pct, 0, 100)}%`;
-      }
-      document.getElementById('btnTimerStart').disabled = appState.timer.rodando;
-      document.getElementById('btnTimerPause').disabled = !appState.timer.rodando;
-    }
-    let ultimoMinutoInjects = -1;
-    function iniciarTimer() {
-      if (appState.timer.rodando) return;
-      appState.timer.rodando = true;
-      atualizarUITimer();
-      clearInterval(timerIntervalId);
-      timerIntervalId = setInterval(() => {
-        const b = appState.timer.blocoAtivo;
-        if (appState.timer.restante[b] > 0) appState.timer.restante[b]--;
-        else if (b < 4) { appState.timer.blocoAtivo = b + 1; mostrarFeedback(`Bloco ${b} concluído. Avançando para o Bloco ${b + 1}.`); }
-        else { pausarTimer(); mostrarFeedback('Aula de 90 minutos concluída.'); }
-        atualizarUITimer();
-        const min = minutosDecorridos();
-        if (min !== ultimoMinutoInjects) {
-          ultimoMinutoInjects = min;
-          const novo = INJECTS.find(i => i.min === min);
-          if (novo) mostrarFeedback(`Inject ${novo.n} liberado: ${novo.titulo}.`);
-          renderInjects();
-        }
-        if (appState.timer.restante[appState.timer.blocoAtivo] % 15 === 0) persistirEstado();
-      }, 1000);
-    }
-    function pausarTimer() {
-      appState.timer.rodando = false;
-      clearInterval(timerIntervalId); timerIntervalId = null;
-      atualizarUITimer(); persistirEstado();
-    }
-    function resetarTimer() {
-      pausarTimer();
-      appState.timer.blocoAtivo = 1;
-      appState.timer.restante = { 1: 900, 2: 1500, 3: 1800, 4: 1200 };
-      atualizarUITimer(); renderInjects(); persistirEstado();
-    }
-    function selecionarBlocoTimer(n) { appState.timer.blocoAtivo = n; atualizarUITimer(); persistirEstado(); }
-
-    // =========================================================================
-    // 9. PERSISTÊNCIA (notebookAppApi → localStorage)
-    // =========================================================================
-    function snapshot() {
-      const { timer, ...resto } = appState;
-      return Object.assign({}, resto, { timer: { blocoAtivo: timer.blocoAtivo, restante: timer.restante } });
-    }
     async function persistirEstado() {
-      const data = snapshot();
+      const data = Object.assign({}, appState);
       if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === 'function') {
         try { await window.notebookAppApi.setAppState(data); return; } catch (e) { /* segue */ }
       }
@@ -1881,25 +2102,27 @@
       }
       if (!saved) { try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { saved = null; } }
       if (!saved || typeof saved !== 'object') return;
-      ['camadaAtual', 'escala', 'guardiao', 'decisoes', 'overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro'].forEach(k => {
-        if (saved[k] !== undefined) appState[k] = saved[k];
+      ['camadaAtual', 'escala', 'guardiao', 'decisoes', 'overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro', 'progresso'].forEach(k => {
+        if (saved[k] !== undefined && saved[k] !== null) appState[k] = saved[k];
       });
       if (saved.setorAtual && CENARIOS_DATA[saved.setorAtual]) appState.setorAtual = saved.setorAtual;
       if (Array.isArray(saved.notas)) appState.notas = saved.notas;
-      if (saved.timer && saved.timer.restante && saved.timer.restante[4] !== undefined) {
-        appState.timer.blocoAtivo = saved.timer.blocoAtivo || 1;
-        appState.timer.restante = Object.assign(appState.timer.restante, saved.timer.restante);
-      }
     }
 
     // =========================================================================
-    // 10. HELPERS & INIT
+    // 9. HELPERS & INIT
     // =========================================================================
     function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
     function escapeHtml(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
-    function mostrarFeedback(msg) { const el = document.getElementById('feedback'); el.textContent = msg; el.classList.add('is-visible'); }
+    let feedbackTimer = null;
+    function mostrarFeedback(msg) {
+      const el = document.getElementById('feedback');
+      el.textContent = msg; el.classList.add('is-visible');
+      clearTimeout(feedbackTimer);
+      feedbackTimer = setTimeout(() => el.classList.remove('is-visible'), 7000);
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarEstado();
@@ -1910,12 +2133,26 @@
       if (doUrl) { appState.setorAtual = doUrl; mostrarFeedback(`Parâmetro ?setor=${raw} → ${CENARIOS_DATA[doUrl].nome}.`); }
       if (!LAYER_META.some(l => l.id === appState.camadaAtual)) appState.camadaAtual = 'frontend';
       document.getElementById('setorSelect').value = appState.setorAtual;
-      atualizarUITimer();
       commit();
+
+      let agendado = false;
+      window.addEventListener('scroll', () => {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(() => { agendado = false; detectarEtapaVisivel(); });
+      }, { passive: true });
+      window.addEventListener('resize', detectarEtapaVisivel);
+      detectarEtapaVisivel();
+
+      document.getElementById('anexoGraficos').addEventListener('toggle', e => {
+        if (e.target.open) atualizarGraficos(calcularSetor(appState.setorAtual));
+      });
+      document.getElementById('ondeEstou').addEventListener('click', e => {
+        if (e.target.id === 'ondeEstou') fecharOndeEstou(); // clique fora do conteúdo
+      });
+
       if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') window.notebookAppApi.notifyAppReady();
     });
   </script>
 </body>
 </html>
-
-
