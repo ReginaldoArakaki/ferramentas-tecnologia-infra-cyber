@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="artifact-type" content="dashboard">
   <meta name="design-style" content="bauhaus">
-  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura · v3</title>
+  <title>Turma T35 — Quadro Interativo de Cibersegurança &amp; Arquitetura · v3.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -115,6 +115,7 @@
 
     .controls-cluster { display: grid; gap: var(--space-sm); background: var(--surface-container-low); border: var(--border-medium); padding: var(--space-md); }
     .control-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: end; }
+    .control-row[hidden] { display: none; } /* sem isso o display:flex anula o atributo hidden do formulário de senha */
     .field-group { display: flex; flex-direction: column; gap: var(--space-xs); flex: 1 1 220px; }
     .field-label { font-family: var(--font-label); font-size: var(--label-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 
@@ -436,6 +437,20 @@
     .here-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; background: var(--secondary); color: #fff; padding: 1px 6px; margin-left: 4px; }
     .where-table input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--positive); }
 
+    /* Zerar quadro */
+    .reset-dialog { border: var(--border-thick); box-shadow: var(--offset-shadow); padding: 0; width: min(560px, 94vw); }
+    .reset-dialog::backdrop { background: rgba(15, 23, 42, 0.55); }
+    .reset-head { padding: var(--space-md) var(--space-lg); border-bottom: var(--border-thick); background: var(--error); color: var(--on-error); }
+    .reset-head h2 { margin: 0; font-family: var(--font-headline); font-size: var(--headline-size); }
+    .reset-body { padding: var(--space-md) var(--space-lg) var(--space-lg); display: grid; gap: var(--space-sm); }
+    .reset-opt { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-sm); align-items: start; border: var(--border-medium); padding: var(--space-sm) var(--space-md); cursor: pointer; background: var(--background); }
+    .reset-opt:has(input:checked) { background: var(--note-red); border-color: var(--error); }
+    .reset-opt input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--error); }
+    .reset-opt strong { font-family: var(--font-label); display: block; }
+    .reset-opt span { font-size: 0.82rem; color: var(--on-surface-variant); }
+    .reset-confirm { font-size: 0.85rem; }
+    .reset-confirm input { font-family: var(--font-mono); text-transform: uppercase; }
+
     .footer-sources { border-top: var(--rule-heavy); padding-top: var(--space-md); font-size: 0.8125rem; color: var(--on-surface-variant); display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-md); }
 
     @media (max-width: 1100px) {
@@ -467,7 +482,7 @@
     <!-- ================= MASTHEAD ================= -->
     <header class="masthead">
       <div>
-        <span class="kicker">Turma T35 · 26/11/2026 · Ferramentas e Tecnologia Cyber · v3</span>
+        <span class="kicker">Turma T35 · 26/11/2026 · Ferramentas e Tecnologia Cyber · v3.1</span>
         <h1 class="title">Quadro Interativo de <mark>Cibersegurança</mark> &amp; Arquitetura</h1>
         <p class="subtitle">
           Continuação do War Room. Dinâmica 1: mapear as 5 camadas e as ferramentas. Dinâmica 2: Exercício da Modéstia, que parte do princípio de que o perímetro <em>será</em> suplantado e pergunta quais decisões de arquitetura reduzem o estrago.
@@ -507,6 +522,9 @@
           <button type="button" id="btnProfessor" class="btn" onclick="toggleProfessor()">
             <i data-lucide="lock" aria-hidden="true"></i>
             <span id="btnProfessorTxt">Modo Professor</span>
+          </button>
+          <button type="button" id="btnZerar" class="btn btn-danger" onclick="abrirZerar()">
+            <i data-lucide="trash-2" aria-hidden="true"></i> Zerar quadro
           </button>
         </div>
         <form id="profUnlock" class="control-row" hidden onsubmit="event.preventDefault(); desbloquearProfessor();">
@@ -886,7 +904,7 @@
 
     <footer class="footer-sources">
       <span><strong>Fontes:</strong> Autoestudos 1–4 (Prof. Reginaldo Arakaki) · Bass, Clements &amp; Kazman, <em>Software Architecture in Practice</em>, 4ª ed., 2021 (táticas de Segurança e de Disponibilidade) · Machado, <em>Segurança da Informação</em> (Criptografia e Password Cracking) · ISO/IEC 27001 · IEC 62443.</span>
-      <span>Turma T35 · Inteli · 26/11/2026 · v3</span>
+      <span>Turma T35 · Inteli · 26/11/2026 · v3.1</span>
     </footer>
   </div>
 
@@ -920,6 +938,32 @@
         </table>
       </div>
     </div>
+  </dialog>
+
+  <!-- Zerar quadro -->
+  <dialog id="zerarDialog" class="reset-dialog" aria-labelledby="zerarTitle">
+    <form method="dialog" onsubmit="event.preventDefault(); confirmarZerar();">
+      <div class="reset-head"><h2 id="zerarTitle">Zerar quadro</h2></div>
+      <div class="reset-body">
+        <p style="margin:0; font-size:0.9rem;">O que estiver salvo neste navegador será apagado. <strong>Não dá para desfazer.</strong> Se quiserem guardar o trabalho, copiem o resumo da Etapa 9 antes.</p>
+        <label class="reset-opt">
+          <input type="radio" name="escopoZerar" value="ec" checked onchange="atualizarZerar()">
+          <div><strong id="zerarEcLabel">Só este EC</strong><span>Camadas, ferramentas, táticas, injects, notas, planos, link do Miro e etapas concluídas deste EC. Os outros ECs ficam intactos.</span></div>
+        </label>
+        <label class="reset-opt">
+          <input type="radio" name="escopoZerar" value="tudo" onchange="atualizarZerar()">
+          <div><strong>Todos os ECs (quadro novo)</strong><span>Volta tudo ao estado inicial, incluindo escala, Guardião e decisões de War Room. Use entre turmas.</span></div>
+        </label>
+        <div class="field-group reset-confirm">
+          <label class="field-label" for="zerarConfirma">Para confirmar, digite ZERAR</label>
+          <input type="text" id="zerarConfirma" class="bauhaus-input" autocomplete="off" placeholder="ZERAR" oninput="atualizarZerar()">
+        </div>
+        <div class="btn-row" style="justify-content:flex-end;">
+          <button type="button" class="btn" onclick="fecharZerar()">Cancelar</button>
+          <button type="submit" id="btnZerarOk" class="btn btn-danger" disabled><i data-lucide="trash-2" aria-hidden="true"></i> Zerar</button>
+        </div>
+      </div>
+    </form>
   </dialog>
 
   <button type="button" class="btn btn-orange fab-where" onclick="abrirOndeEstou()"><i data-lucide="map-pin" aria-hidden="true"></i> Onde estou?</button>
@@ -1171,21 +1215,25 @@
     // =========================================================================
     const STORAGE_KEY = 't35-cyber-v3';
 
-    let appState = {
-      setorAtual: 'banking',
-      camadaAtual: 'frontend',
-      escala: 2,
-      guardiao: false,
-      decisoes: {},
-      overrides: {},   // setor -> camada -> { tools, breached }
-      taticas: {},     // setor -> { id: bool }
-      injects: {},     // setor -> { 1: bool, 2: bool, 3: bool }
-      cascataAlvo: {}, // setor -> setorKey sorteado no inject 3
-      notas: [],
-      planos: {},      // setor -> { spof, ataque, deteccao, recuperacao }
-      miro: {},        // setor -> url
-      progresso: {}    // setor -> { etapaId: true }
-    };
+    // Estado inicial: fonte única, usada na carga da página e no "Zerar quadro"
+    function estadoInicial() {
+      return {
+        setorAtual: 'banking',
+        camadaAtual: 'frontend',
+        escala: 2,
+        guardiao: false,
+        decisoes: {},
+        overrides: {},   // setor -> camada -> { tools, breached }
+        taticas: {},     // setor -> { id: bool }
+        injects: {},     // setor -> { 1: bool, 2: bool, 3: bool }
+        cascataAlvo: {}, // setor -> setorKey sorteado no inject 3
+        notas: [],
+        planos: {},      // setor -> { spof, ataque, deteccao, recuperacao }
+        miro: {},        // setor -> url
+        progresso: {}    // setor -> { etapaId: true }
+      };
+    }
+    let appState = estadoInicial();
 
     const charts = {};
     let etapaVisivel = 0;
@@ -1950,6 +1998,53 @@
     function toggleGuardian() { appState.guardiao = !appState.guardiao; commit(); }
     function toggleDecisao(id) { if (!appState.guardiao) return; appState.decisoes[id] = !appState.decisoes[id]; commit(); }
     function selecionarEscala(n) { appState.escala = clamp(Number(n) || 1, 1, 4); commit(); }
+
+    // ----- Zerar quadro (só este EC ou todos) -----
+    function escopoZerar() {
+      const el = document.querySelector('input[name="escopoZerar"]:checked');
+      return el ? el.value : 'ec';
+    }
+    function abrirZerar() {
+      const dlg = document.getElementById('zerarDialog');
+      document.querySelector('input[name="escopoZerar"][value="ec"]').checked = true;
+      document.getElementById('zerarConfirma').value = '';
+      setText('zerarEcLabel', `Só este EC (${CENARIOS_DATA[appState.setorAtual].nome})`);
+      atualizarZerar();
+      if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute('open', '');
+      document.getElementById('zerarConfirma').focus();
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    }
+    function fecharZerar() {
+      const dlg = document.getElementById('zerarDialog');
+      if (!dlg.open) return;
+      if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+    }
+    function atualizarZerar() {
+      const ok = document.getElementById('zerarConfirma').value.trim().toUpperCase() === 'ZERAR';
+      document.getElementById('btnZerarOk').disabled = !ok;
+    }
+    function zerarEC(s) {
+      const tinhaInject3 = Boolean((appState.injects[s] || {})[3]);
+      ['overrides', 'taticas', 'injects', 'cascataAlvo', 'planos', 'miro', 'progresso'].forEach(k => { delete appState[k][s]; });
+      appState.notas = appState.notas.filter(n => n.setor !== s);
+      if (tinhaInject3) appState.escala = 2; // mesmo efeito de "Desfazer" no Inject 3
+    }
+    function zerarTudo() {
+      const setor = appState.setorAtual;
+      appState = estadoInicial();
+      appState.setorAtual = setor; // mantém o EC do grupo selecionado
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* sem storage */ }
+    }
+    function confirmarZerar() {
+      if (document.getElementById('btnZerarOk').disabled) return;
+      const escopo = escopoZerar();
+      const c = CENARIOS_DATA[appState.setorAtual];
+      if (escopo === 'tudo') zerarTudo(); else zerarEC(appState.setorAtual);
+      document.getElementById('stickyInput').value = '';
+      fecharZerar();
+      commit();
+      mostrarFeedback(escopo === 'tudo' ? 'Quadro zerado: todos os ECs voltaram ao estado inicial.' : `${c.codigo} zerado. Os outros ECs foram mantidos.`);
+    }
 
     // ----- Modo Professor: gabarito criptografado (AES-256-GCM, chave PBKDF2-SHA256 da senha) -----
     // O bloco PROF_LOCK é gerado por gerar_trava_professor.py. Sem a senha, o gabarito não pode ser lido.
